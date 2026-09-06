@@ -1,0 +1,32 @@
+{
+  "name": "Chhkwa - तरक्की को चाहिए नया नज़रिया",
+  "short_name": "Chhkwa",
+  "description": "Progress Needs a New Perspective - Thoughtful analysis, fresh perspectives, and meaningful conversations",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["news", "magazines"],
+  "lang": "en-US",
+  "dir": "ltr"
+}
