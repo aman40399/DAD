@@ -25,6 +25,8 @@ export interface MediaItem {
   size?: number
 }
 
+const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=800&auto=format&fit=crop&q=80'
+
 function formatBytes(bytes?: number): string {
   if (!bytes || bytes === 0) return '—'
   const k = 1024
@@ -340,10 +342,9 @@ export default function AdminMediaVaultPage() {
                       loading="lazy"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                       onError={(e) => {
-                        const target = e.target as HTMLElement
-                        target.style.display = 'none'
-                        target.parentElement!.classList.add('flex', 'items-center', 'justify-center')
-                        target.parentElement!.innerHTML = '<span class="text-[9px] font-mono text-ink-mute">Broken Image</span>'
+                        const target = e.currentTarget
+                        target.onerror = null
+                        target.src = FALLBACK_IMAGE
                       }}
                     />
                     <a
@@ -427,8 +428,9 @@ export default function AdminMediaVaultPage() {
                               alt=""
                               className="w-10 h-10 rounded-lg object-cover border border-rule/60 dark:border-white/10 shrink-0"
                               onError={(e) => {
-                                const target = e.target as HTMLElement
-                                target.style.display = 'none'
+                                const target = e.currentTarget
+                                target.onerror = null
+                                target.src = FALLBACK_IMAGE
                               }}
                             />
                             <span className="font-medium text-ink dark:text-dark-ink truncate max-w-xs sm:max-w-md">
@@ -526,6 +528,11 @@ export default function AdminMediaVaultPage() {
                 src={selectedItem.url}
                 alt={selectedItem.title || ''}
                 className="w-full h-full object-contain"
+                onError={(e) => {
+                  const target = e.currentTarget
+                  target.onerror = null
+                  target.src = FALLBACK_IMAGE
+                }}
               />
               <a
                 href={selectedItem.url}

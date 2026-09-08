@@ -27,7 +27,7 @@ const DEFAULT_SECONDARY: ArticleData[] = [
     title: 'U.S. Navy Destroys Three Iranian Oil Tankers in Escalating Gulf Confrontation',
     category: 'World',
     excerpt: 'The U.S. military confirmed the destruction of three Iranian oil tankers in the Persian Gulf, marking a significant escalation in the ongoing conflict between Washington and Tehran.',
-    image: 'https://images.unsplash.com/photo-1580309237429-661ea0e18e62?w=400&auto=format&fit=crop&q=80',
+    image: 'https://images.unsplash.com/photo-1509299349698-dd22323b5963?w=400&auto=format&fit=crop&q=80',
     slug: 'us-navy-destroys-iranian-oil-tankers-gulf',
   },
   {

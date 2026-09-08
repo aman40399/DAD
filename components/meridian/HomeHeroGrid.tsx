@@ -58,7 +58,7 @@ const DEFAULT_LEFT_STORIES: ArticleData[] = [
     author: 'Rahul Verma',
     date: 'Sep 6, 2026',
     isVideo: false,
-    image: 'https://images.unsplash.com/photo-1580309237429-661ea0e18e62?w=600&auto=format&fit=crop&q=80',
+    image: 'https://images.unsplash.com/photo-1509299349698-dd22323b5963?w=600&auto=format&fit=crop&q=80',
     slug: 'us-navy-destroys-iranian-oil-tankers-gulf',
   },
   {
