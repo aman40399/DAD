@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import {
   getAllArticles,
   createArticle,
   generateUniqueArticleSlug,
   isSlugTaken,
+  invalidateArticleCache,
 } from '@/lib/articles'
 import { generateSlug, resolveSlugCollision } from '@/lib/utils'
 import {
@@ -103,7 +105,7 @@ export async function GET(request: NextRequest) {
       totalPages: Math.ceil(total / limit) || 1,
     }, {
       headers: {
-        'Cache-Control': 'public, s-maxage=15, stale-while-revalidate=45',
+        'Cache-Control': 'no-store, max-age=0, must-revalidate',
       },
     })
   } catch (error: any) {
@@ -191,6 +193,16 @@ export async function POST(request: NextRequest) {
     }
 
     const formatted = formatArticleResponse(created)
+
+    // Revalidate public pages and feeds
+    try {
+      invalidateArticleCache()
+      revalidatePath('/', 'page')
+      if (created.slug) revalidatePath(`/article/${created.slug}`, 'page')
+      if (created.category) revalidatePath(`/section/${created.category.toLowerCase()}`, 'page')
+      revalidatePath('/admin', 'page')
+      revalidatePath('/admin/slots', 'page')
+    } catch {}
 
     return NextResponse.json(
       {

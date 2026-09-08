@@ -32,8 +32,9 @@ export async function generateMetadata({
 }: {
   params: { slug: string }
 }): Promise<Metadata> {
-  const sectionSlug = params.slug.toLowerCase()
-  const sectionTitle = KNOWN_SECTIONS[sectionSlug] || sectionSlug.charAt(0).toUpperCase() + sectionSlug.slice(1)
+  const resolvedParams = await Promise.resolve(params)
+  const rawSlug = (Array.isArray(resolvedParams?.slug) ? resolvedParams.slug[0] : resolvedParams?.slug || '').toLowerCase().trim()
+  const sectionTitle = KNOWN_SECTIONS[rawSlug] || rawSlug.charAt(0).toUpperCase() + rawSlug.slice(1)
 
   return {
     title: `${sectionTitle} — Singh Monster`,
@@ -46,7 +47,8 @@ export default async function SectionPage({
 }: {
   params: { slug: string }
 }) {
-  const rawSlug = params.slug.toLowerCase()
+  const resolvedParams = await Promise.resolve(params)
+  const rawSlug = (Array.isArray(resolvedParams?.slug) ? resolvedParams.slug[0] : resolvedParams?.slug || '').toLowerCase().trim()
   const sectionName = KNOWN_SECTIONS[rawSlug] || rawSlug.charAt(0).toUpperCase() + rawSlug.slice(1)
 
   // Fetch articles matching category

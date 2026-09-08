@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import {
   getArticleById,
   getArticleBySlug,
@@ -6,6 +7,7 @@ import {
   deleteArticle,
   isSlugTaken,
   generateUniqueArticleSlug,
+  invalidateArticleCache,
 } from '@/lib/articles'
 import { generateSlug, resolveSlugCollision } from '@/lib/utils'
 import {
@@ -208,6 +210,18 @@ async function handleUpdate(
     }
 
     const formatted = formatArticleResponse(updated)
+
+    // Revalidate public pages and feeds
+    try {
+      invalidateArticleCache()
+      revalidatePath('/', 'page')
+      if (existing.slug) revalidatePath(`/article/${existing.slug}`, 'page')
+      if (updated.slug) revalidatePath(`/article/${updated.slug}`, 'page')
+      if (updated.category) revalidatePath(`/section/${updated.category.toLowerCase()}`, 'page')
+      revalidatePath('/admin', 'page')
+      revalidatePath('/admin/slots', 'page')
+    } catch {}
+
     return NextResponse.json({
       success: true,
       article: formatted,
@@ -257,6 +271,15 @@ export async function DELETE(
         { status: 500 }
       )
     }
+
+    try {
+      invalidateArticleCache()
+      revalidatePath('/', 'page')
+      if (existing.slug) revalidatePath(`/article/${existing.slug}`, 'page')
+      if (existing.category) revalidatePath(`/section/${existing.category.toLowerCase()}`, 'page')
+      revalidatePath('/admin', 'page')
+      revalidatePath('/admin/slots', 'page')
+    } catch {}
 
     return NextResponse.json({
       success: true,

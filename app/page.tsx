@@ -37,6 +37,9 @@ export default async function HomePage() {
     console.error('Error loading articles in HomePage:', error)
   }
 
+  // Helper to distinguish dummy seed placeholder articles from real user-published articles
+  const isSeed = (a?: Article) => Boolean(a?.id && String(a.id).startsWith('n-'))
+
   // Helper to find pinned article for a slot
   const getPinned = (pos: number): Article | undefined => {
     return (
@@ -49,43 +52,65 @@ export default async function HomePage() {
   const pinnedIds = new Set<string>()
   for (let i = 1; i <= 15; i++) {
     const p = getPinned(i)
-    if (p?.id) pinnedIds.add(String(p.id))
+    if (p?.id && !isSeed(p)) pinnedIds.add(String(p.id))
   }
 
-  // Auto-flow pool: published articles that are not pinned to any slot
-  const unpinnedPool = recentArticles.filter((a) => !pinnedIds.has(String(a.id)))
-  let poolIndex = 0
-  const getNextUnpinned = (): Article | undefined => {
-    return unpinnedPool[poolIndex++]
+  // Real published articles that are unpinned or fresh
+  const realUnpinned = recentArticles.filter((a) => !isSeed(a) && !pinnedIds.has(String(a.id)))
+  // Remaining pool of all unpinned articles
+  const genericUnpinned = recentArticles.filter((a) => isSeed(a) && !pinnedIds.has(String(a.id)))
+
+  let realIndex = 0
+  let genericIndex = 0
+
+  const getNextStory = (slotPos: number): Article | undefined => {
+    const pinned = getPinned(slotPos)
+    // If pinned story is a real user article, always prioritize it
+    if (pinned && !isSeed(pinned)) return pinned
+    // If we have an unpinned real user article, let it take precedence over dummy seed pins
+    if (realIndex < realUnpinned.length) {
+      return realUnpinned[realIndex++]
+    }
+    // Otherwise keep the seed pinned article if available
+    if (pinned) return pinned
+    // Fallback to next generic unpinned story
+    return genericUnpinned[genericIndex++]
   }
 
-  // 1. Ticker (Slot 1 or breaking stories)
-  const slot1 = getPinned(1) || recentArticles.find((a) => a.is_breaking || a.isBreaking)
-  const tickerItems = slot1
+  // 1. Ticker (Slot 1 or breaking stories or newest real story)
+  const slot1 =
+    recentArticles.find((a) => a.is_breaking || a.isBreaking) ||
+    (realUnpinned[0] ? realUnpinned[0] : getPinned(1)) ||
+    recentArticles[0]
+
+  const tickerItems = recentArticles.length > 0
     ? [
-        { id: String(slot1.id), title: slot1.title, url: `/article/${slot1.slug}` },
-        ...recentArticles.slice(0, 4).map((a) => ({ id: String(a.id), title: a.title, url: `/article/${a.slug}` })),
+        ...(slot1 ? [{ id: String(slot1.id), title: slot1.title, url: `/article/${slot1.slug}` }] : []),
+        ...recentArticles
+          .filter((a) => a.id !== slot1?.id)
+          .slice(0, 5)
+          .map((a) => ({ id: String(a.id), title: a.title, url: `/article/${a.slug}` })),
       ]
     : undefined
 
-  // 2. Main Hero Story (Slot 2 or next unpinned)
-  const heroArticle = getPinned(2) || getNextUnpinned() || recentArticles[0]
+  // 2. Main Hero Story (Slot 2 or fresh story)
+  const heroArticle = getNextStory(2) || recentArticles[0]
   const heroStory = heroArticle ? mapArticleToPostCard(heroArticle) : undefined
 
   // 3. Left Rail Stories (Slot 3 and 4)
-  const left1 = getPinned(3) || getNextUnpinned() || recentArticles[1]
-  const left2 = getPinned(4) || getNextUnpinned() || recentArticles[2]
+  const left1 = getNextStory(3) || recentArticles[1]
+  const left2 = getNextStory(4) || recentArticles[2]
   const leftStories = [left1, left2].filter(Boolean).map((a) => mapArticleToPostCard(a!))
 
   // 4. Center Sub-Leads (Slot 5 and 6)
-  const sub1 = getPinned(5) || getNextUnpinned() || recentArticles[3]
-  const sub2 = getPinned(6) || getNextUnpinned() || recentArticles[4]
+  const sub1 = getNextStory(5) || recentArticles[3]
+  const sub2 = getNextStory(6) || recentArticles[4]
   const subLeads = [sub1, sub2].filter(Boolean).map((a) => mapArticleToPostCard(a!))
 
   // 5. Ranked Stories (Slots 7 to 11)
   const rankedSource: Article[] = []
   for (let s = 7; s <= 11; s++) {
-    const art = getPinned(s) || getNextUnpinned()
+    const art = getNextStory(s)
     if (art) rankedSource.push(art)
   }
 
@@ -100,7 +125,7 @@ export default async function HomePage() {
   // 6. Editor's Picks (Slots 12 to 15)
   const picksSource: Article[] = []
   for (let s = 12; s <= 15; s++) {
-    const art = getPinned(s) || getNextUnpinned()
+    const art = getNextStory(s)
     if (art) picksSource.push(art)
   }
   const editorPicks = picksSource.length > 0 ? picksSource.map((a) => mapArticleToPostCard(a)) : undefined

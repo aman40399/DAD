@@ -4,7 +4,7 @@ import Masthead from '@/components/meridian/Masthead'
 import Footer from '@/components/meridian/Footer'
 import PostCard from '@/components/meridian/PostCard'
 import ArticleHeroImage from '@/components/meridian/ArticleHeroImage'
-import { getArticleBySlug, getRecentArticles } from '@/lib/articles'
+import { getArticleBySlug, getArticleById, getRecentArticles } from '@/lib/articles'
 import { mapArticleToPostCard } from '@/lib/meridianData'
 import ReadingProgressBar from '@/components/meridian/ReadingProgressBar'
 import BreakingTicker from '@/components/meridian/BreakingTicker'
@@ -19,7 +19,14 @@ export async function generateMetadata({
   params: { slug: string }
   searchParams?: { preview?: string }
 }): Promise<Metadata> {
-  const article = await getArticleBySlug(params.slug)
+  const resolvedParams = await Promise.resolve(params)
+  const rawSlug = Array.isArray(resolvedParams?.slug) ? resolvedParams.slug[0] : resolvedParams?.slug
+  const cleanSlug = rawSlug ? decodeURIComponent(rawSlug).trim() : ''
+
+  const article = cleanSlug
+    ? (await getArticleBySlug(cleanSlug)) || (await getArticleById(cleanSlug))
+    : null
+
   if (!article || (article.status !== 'published' && searchParams?.preview !== 'true')) {
     return { title: 'Story Not Found — Singh Monster' }
   }
@@ -101,7 +108,14 @@ export default async function ArticlePage({
   params: { slug: string }
   searchParams?: { preview?: string }
 }) {
-  const article = await getArticleBySlug(params.slug)
+  const resolvedParams = await Promise.resolve(params)
+  const rawSlug = Array.isArray(resolvedParams?.slug) ? resolvedParams.slug[0] : resolvedParams?.slug
+  const cleanSlug = rawSlug ? decodeURIComponent(rawSlug).trim() : ''
+
+  let article = cleanSlug ? await getArticleBySlug(cleanSlug) : null
+  if (!article && cleanSlug) {
+    article = await getArticleById(cleanSlug)
+  }
 
   if (!article || (article.status !== 'published' && searchParams?.preview !== 'true')) {
     notFound()

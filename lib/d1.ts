@@ -79,6 +79,9 @@ export async function queryD1<T = any>(sql: string, params: any[] = []): Promise
 
   const endpoint = `https://api.cloudflare.com/client/v4/accounts/${accountId}/d1/database/${databaseId}/query`
 
+  // Normalize numbered parameters like ?1, ?2 to standard positional ? for Cloudflare D1 REST API
+  const normalizedSql = sql.replace(/\?\d+/g, '?')
+
   let res = await fetch(endpoint, {
     method: 'POST',
     headers: {
@@ -86,7 +89,7 @@ export async function queryD1<T = any>(sql: string, params: any[] = []): Promise
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      sql,
+      sql: normalizedSql,
       params,
     }),
     cache: 'no-store',
@@ -102,7 +105,7 @@ export async function queryD1<T = any>(sql: string, params: any[] = []): Promise
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        sql,
+        sql: normalizedSql,
         params,
       }),
       cache: 'no-store',
@@ -137,6 +140,9 @@ export async function executeD1(sql: string, params: any[] = []): Promise<{ succ
 
   const endpoint = `https://api.cloudflare.com/client/v4/accounts/${accountId}/d1/database/${databaseId}/query`
 
+  // Normalize numbered parameters like ?1, ?2 to standard positional ? for Cloudflare D1 REST API
+  const normalizedSql = sql.replace(/\?\d+/g, '?')
+
   let res = await fetch(endpoint, {
     method: 'POST',
     headers: {
@@ -144,7 +150,7 @@ export async function executeD1(sql: string, params: any[] = []): Promise<{ succ
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      sql,
+      sql: normalizedSql,
       params,
     }),
     cache: 'no-store',
@@ -160,7 +166,7 @@ export async function executeD1(sql: string, params: any[] = []): Promise<{ succ
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        sql,
+        sql: normalizedSql,
         params,
       }),
       cache: 'no-store',

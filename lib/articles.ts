@@ -146,92 +146,140 @@ export async function getAllArticles(): Promise<Article[]> {
   return result
 }
 
-// Get article by ID - Cached
+// Get article by ID - Cached with multi-tier lookup
 export async function getArticleById(id: string): Promise<Article | null> {
-  const cacheKey = `article_id_${id}`
+  const cleanId = (id || '').trim()
+  if (!cleanId) return null
+
+  const cacheKey = `article_id_${cleanId}`
   const cached = getCached<Article | null>(cacheKey)
-  if (cached !== null) return cached
-
-  // Quick check in all_articles cache
-  const allCached = getCached<Article[]>('all_articles')
-  if (allCached) {
-    const found = allCached.find(a => a.id === id)
-    if (found) {
-      setCached(cacheKey, found)
-      return found
-    }
-  }
-
-  let result: Article | null = null
-  if (isD1Configured()) {
-    try {
-      const rows = await queryD1('SELECT * FROM articles WHERE id = ?1 LIMIT 1', [id])
-      result = rows[0] ? transformArticle(rows[0]) : null
-    } catch (error) {
-      console.warn(`⚠️ Cloudflare D1 error fetching article id=${id}, falling back to local store:`, error)
-      result = localStore.getById(id)
-    }
-  } else {
-    result = localStore.getById(id)
-  }
-
-  setCached(cacheKey, result)
-  return result
-}
-
-// Get article by slug - Cached
-export async function getArticleBySlug(slug: string): Promise<Article | null> {
-  const cacheKey = `article_slug_${slug}`
-  const cached = getCached<Article | null>(cacheKey)
-  if (cached !== null) return cached
-
-  // Quick check in all_articles cache
-  const allCached = getCached<Article[]>('all_articles')
-  if (allCached) {
-    const found = allCached.find(a => a.slug === slug)
-    if (found) {
-      setCached(cacheKey, found)
-      return found
-    }
-  }
-
-  let result: Article | null = null
-  if (isD1Configured()) {
-    try {
-      const rows = await queryD1('SELECT * FROM articles WHERE slug = ?1 LIMIT 1', [slug])
-      result = rows[0] ? transformArticle(rows[0]) : null
-    } catch (error) {
-      console.warn(`⚠️ Cloudflare D1 error fetching article slug=${slug}, falling back to local store:`, error)
-      result = localStore.getBySlug(slug)
-    }
-  } else {
-    result = localStore.getBySlug(slug)
-  }
-
-  setCached(cacheKey, result)
-  return result
-}
-
-// Get articles by category - Cached
-export async function getArticlesByCategory(category: string): Promise<Article[]> {
-  const cacheKey = `category_${category.toLowerCase()}`
-  const cached = getCached<Article[]>(cacheKey)
   if (cached) return cached
 
-  let result: Article[]
+  // 1. Quick check in all_articles cache
+  const allCached = getCached<Article[]>('all_articles')
+  if (allCached) {
+    const found = allCached.find(a => a.id === cleanId || a.slug.toLowerCase() === cleanId.toLowerCase())
+    if (found) {
+      setCached(cacheKey, found)
+      return found
+    }
+  }
+
+  let result: Article | null = null
+  if (isD1Configured()) {
+    try {
+      const rows = await queryD1('SELECT * FROM articles WHERE id = ? OR LOWER(slug) = ? LIMIT 1', [cleanId, cleanId.toLowerCase()])
+      result = rows[0] ? transformArticle(rows[0]) : null
+    } catch (error) {
+      console.warn(`⚠️ Cloudflare D1 error fetching article id=${cleanId}:`, error)
+    }
+  }
+
+  // 2. Fallback to fresh getAllArticles() if single query returned null
+  if (!result) {
+    try {
+      const all = await getAllArticles()
+      const found = all.find(a => a.id === cleanId || a.slug.toLowerCase() === cleanId.toLowerCase())
+      if (found) result = found
+    } catch {}
+  }
+
+  // 3. Fallback to local store
+  if (!result) {
+    result = localStore.getById(cleanId) || localStore.getBySlug(cleanId)
+  }
+
+  if (result) {
+    setCached(cacheKey, result)
+  }
+  return result
+}
+
+// Get article by slug - Cached with multi-tier lookup
+export async function getArticleBySlug(slug: string): Promise<Article | null> {
+  const cleanSlug = (slug || '').trim()
+  if (!cleanSlug) return null
+
+  const cacheKey = `article_slug_${cleanSlug.toLowerCase()}`
+  const cached = getCached<Article | null>(cacheKey)
+  if (cached) return cached
+
+  // 1. Quick check in all_articles cache
+  const allCached = getCached<Article[]>('all_articles')
+  if (allCached) {
+    const found = allCached.find(a => a.slug.toLowerCase() === cleanSlug.toLowerCase() || a.id === cleanSlug)
+    if (found) {
+      setCached(cacheKey, found)
+      return found
+    }
+  }
+
+  let result: Article | null = null
+  if (isD1Configured()) {
+    try {
+      const rows = await queryD1('SELECT * FROM articles WHERE LOWER(slug) = ? OR id = ? LIMIT 1', [cleanSlug.toLowerCase(), cleanSlug])
+      result = rows[0] ? transformArticle(rows[0]) : null
+    } catch (error) {
+      console.warn(`⚠️ Cloudflare D1 error fetching article slug=${cleanSlug}:`, error)
+    }
+  }
+
+  // 2. Fallback to fresh getAllArticles() if single query returned null
+  if (!result) {
+    try {
+      const all = await getAllArticles()
+      const found = all.find(a => a.slug.toLowerCase() === cleanSlug.toLowerCase() || a.id === cleanSlug)
+      if (found) result = found
+    } catch {}
+  }
+
+  // 3. Fallback to local store
+  if (!result) {
+    result = localStore.getBySlug(cleanSlug) || localStore.getById(cleanSlug)
+  }
+
+  if (result) {
+    setCached(cacheKey, result)
+  }
+  return result
+}
+
+// Get articles by category - Cached with case-insensitivity
+export async function getArticlesByCategory(category: string): Promise<Article[]> {
+  const catClean = (category || '').trim().toLowerCase()
+  if (!catClean) return []
+
+  const cacheKey = `category_${catClean}`
+  const cached = getCached<Article[]>(cacheKey)
+  if (cached && cached.length > 0) return cached
+
+  let result: Article[] = []
   if (isD1Configured()) {
     try {
       const rows = await queryD1(
-        "SELECT * FROM articles WHERE category = ?1 AND status = 'published' ORDER BY published_at DESC",
-        [category]
+        "SELECT * FROM articles WHERE LOWER(category) = ? AND status = 'published' ORDER BY published_at DESC",
+        [catClean]
       )
       result = rows.map(transformArticle)
     } catch (error) {
-      console.warn(`⚠️ Cloudflare D1 error fetching category=${category}, falling back to local store:`, error)
-      result = localStore.getByCategory(category)
+      console.warn(`⚠️ Cloudflare D1 error fetching category=${category}:`, error)
     }
-  } else {
+  }
+
+  // Fallback to getAllArticles() filtering if query returned empty
+  if (result.length === 0) {
+    try {
+      const all = await getAllArticles()
+      const filtered = all.filter(a => a.category?.toLowerCase() === catClean && a.status === 'published')
+      if (filtered.length > 0) result = filtered
+    } catch {}
+  }
+
+  if (result.length === 0) {
     result = localStore.getByCategory(category)
+    if (result.length === 0 && catClean !== category) {
+      result = localStore.getByCategory(catClean)
+    }
   }
 
   setCached(cacheKey, result)
@@ -245,12 +293,17 @@ export async function getFeaturedArticles(): Promise<Article[]> {
       const rows = await queryD1(
         "SELECT * FROM articles WHERE (featured = 1 OR featured = true) AND status = 'published' ORDER BY published_at DESC"
       )
-      return rows.map(transformArticle)
+      if (rows.length > 0) return rows.map(transformArticle)
     } catch (error) {
-      console.warn('⚠️ Cloudflare D1 error fetching featured articles, falling back to local store:', error)
-      return localStore.getFeatured()
+      console.warn('⚠️ Cloudflare D1 error fetching featured articles:', error)
     }
   }
+
+  try {
+    const all = await getAllArticles()
+    const feat = all.filter(a => Boolean(a.featured) && a.status === 'published')
+    if (feat.length > 0) return feat
+  } catch {}
 
   return localStore.getFeatured()
 }
@@ -259,21 +312,31 @@ export async function getFeaturedArticles(): Promise<Article[]> {
 export async function getRecentArticles(limit: number = 10): Promise<Article[]> {
   const cacheKey = `recent_articles_${limit}`
   const cached = getCached<Article[]>(cacheKey)
-  if (cached) return cached
+  if (cached && cached.length > 0) return cached
 
-  let result: Article[]
+  let result: Article[] = []
   if (isD1Configured()) {
     try {
       const rows = await queryD1(
-        "SELECT * FROM articles WHERE status = 'published' ORDER BY published_at DESC LIMIT ?1",
+        "SELECT * FROM articles WHERE status = 'published' ORDER BY published_at DESC LIMIT ?",
         [limit]
       )
       result = rows.map(transformArticle)
     } catch (error) {
-      console.warn('⚠️ Cloudflare D1 error fetching recent articles, falling back to local store:', error)
-      result = localStore.getRecent(limit)
+      console.warn('⚠️ Cloudflare D1 error fetching recent articles:', error)
     }
-  } else {
+  }
+
+  // Fallback to getAllArticles() slice if query returned empty or failed
+  if (result.length === 0) {
+    try {
+      const all = await getAllArticles()
+      const published = all.filter(a => a.status === 'published').slice(0, limit)
+      if (published.length > 0) result = published
+    } catch {}
+  }
+
+  if (result.length === 0) {
     result = localStore.getRecent(limit)
   }
 
@@ -285,9 +348,9 @@ export async function getRecentArticles(limit: number = 10): Promise<Article[]> 
 export async function getHomepageArticles(): Promise<Article[]> {
   const cacheKey = 'homepage_articles'
   const cached = getCached<Article[]>(cacheKey)
-  if (cached) return cached
+  if (cached && cached.length > 0) return cached
 
-  let result: Article[]
+  let result: Article[] = []
   if (isD1Configured()) {
     try {
       const rows = await queryD1(
@@ -295,10 +358,20 @@ export async function getHomepageArticles(): Promise<Article[]> {
       )
       result = rows.map(transformArticle)
     } catch (error) {
-      console.warn('⚠️ Cloudflare D1 error fetching homepage articles, falling back to local store:', error)
-      result = localStore.getHomepage()
+      console.warn('⚠️ Cloudflare D1 error fetching homepage articles:', error)
     }
-  } else {
+  }
+
+  // Fallback to getAllArticles() if query returned empty or failed
+  if (result.length === 0) {
+    try {
+      const all = await getAllArticles()
+      const pinned = all.filter(a => a.status === 'published' && typeof a.homepage_position === 'number' && a.homepage_position >= 1 && a.homepage_position <= 15)
+      if (pinned.length > 0) result = pinned
+    } catch {}
+  }
+
+  if (result.length === 0) {
     result = localStore.getHomepage()
   }
 
