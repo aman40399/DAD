@@ -40,7 +40,7 @@ export interface AdminUser {
   created_at: string
 }
 
-// Database types (Supabase naming convention)
+// Database types (Canonical schema)
 export interface DbArticle {
   id: string
   title: string
