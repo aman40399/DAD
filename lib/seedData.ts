@@ -76,7 +76,7 @@ export const SEED_ARTICLES: Article[] = [
     `.trim(),
     author: 'Dhananjay Singh',
     category: 'World',
-    image_url: 'https://images.unsplash.com/photo-1509299349698-dd22323b5963?w=1200&h=750&fit=crop',
+    image_url: 'https://pub-f105b5c2551040e1b44a90da84ffa541.r2.dev/news/1788848336699-us-navy-destroyer-patrol-b112sx.jpg',
     image_caption: 'U.S. Navy destroyer on patrol in the Persian Gulf during heightened security operations | Photo: U.S. Navy / Released',
     video_url: null,
     featured: false,
@@ -86,7 +86,7 @@ export const SEED_ARTICLES: Article[] = [
     tags: ['Iran', 'United States', 'Military', 'Oil'],
     language: 'english',
     created_at: d(6), updated_at: d(3), published_at: d(3),
-    imageUrl: 'https://images.unsplash.com/photo-1509299349698-dd22323b5963?w=1200&h=750&fit=crop',
+    imageUrl: 'https://pub-f105b5c2551040e1b44a90da84ffa541.r2.dev/news/1788848336699-us-navy-destroyer-patrol-b112sx.jpg',
     homepagePosition: 3, createdAt: d(6), updatedAt: d(3), publishedAt: d(3),
   },
   {
