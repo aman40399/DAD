@@ -1,41 +1,24 @@
 import { MetadataRoute } from 'next'
 import { getAllArticles } from '@/lib/articles'
 
-export const revalidate = 3600 // Revalidate every hour
+export const revalidate = 1800 // Revalidate every 30 minutes
+
+const SECTIONS = [
+  'world',
+  'india',
+  'politics',
+  'business',
+  'tech',
+  'sports',
+  'opinion',
+  'economy',
+  'science',
+]
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://chhkwa.com'
+  const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000').replace(/\/$/, '')
 
-  // Fetch all published articles
-  const articles = await getAllArticles()
-
-  const articleUrls: MetadataRoute.Sitemap = articles.map((article) => ({
-    url: `${baseUrl}/article/${article.slug}`,
-    lastModified: new Date(article.updatedAt || article.publishedAt),
-    changeFrequency: 'weekly',
-    priority: 0.8,
-  }))
-
-  // Static sections
-  const sections = ['world', 'technology', 'business', 'local', 'sports', 'opinion', 'arts', 'science', 'health', 'politics']
-  const sectionUrls: MetadataRoute.Sitemap = sections.map((section) => ({
-    url: `${baseUrl}/section/${section}`,
-    lastModified: new Date(),
-    changeFrequency: 'daily',
-    priority: 0.9,
-  }))
-
-  // Get unique authors from articles
-  const uniqueAuthors = Array.from(new Set(articles.map(a => a.author).filter(Boolean)))
-  const authorUrls: MetadataRoute.Sitemap = uniqueAuthors.map((author) => ({
-    url: `${baseUrl}/author/${author.toLowerCase().replace(/\s+/g, '-')}`,
-    lastModified: new Date(),
-    changeFrequency: 'weekly',
-    priority: 0.6,
-  }))
-
-  // Main pages
-  const staticPages: MetadataRoute.Sitemap = [
+  const entries: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
       lastModified: new Date(),
@@ -43,24 +26,47 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1.0,
     },
     {
-      url: `${baseUrl}/about`,
+      url: `${baseUrl}/bookmarks`,
       lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/search`,
-      lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 0.5,
+      changeFrequency: 'weekly',
+      priority: 0.4,
     },
   ]
 
-  return [
-    ...staticPages,
-    ...sectionUrls,
-    ...authorUrls,
-    ...articleUrls,
-  ]
+  // Add category sections
+  for (const section of SECTIONS) {
+    entries.push({
+      url: `${baseUrl}/section/${section}`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.8,
+    })
+  }
+
+  // Add all published articles
+  try {
+    const articles = await getAllArticles()
+    const published = articles.filter((a) => a.status === 'published' && a.slug)
+
+    for (const article of published) {
+      const rawDate = article.updated_at || article.published_at || article.created_at || (article as any).updatedAt || (article as any).publishedAt
+      let lastMod = new Date()
+      if (rawDate) {
+        const d = new Date(rawDate)
+        if (!isNaN(d.getTime())) lastMod = d
+      }
+
+      entries.push({
+        url: `${baseUrl}/article/${encodeURIComponent(article.slug)}`,
+        lastModified: lastMod,
+        changeFrequency: article.is_breaking ? 'hourly' : 'daily',
+        priority: article.is_breaking ? 0.95 : 0.85,
+      })
+    }
+  } catch (err) {
+    console.error('Error generating dynamic sitemap articles:', err)
+  }
+
+  return entries
 }
 

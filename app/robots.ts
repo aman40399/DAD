@@ -1,52 +1,24 @@
 import { MetadataRoute } from 'next'
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://chhkwa.com'
+  const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000').replace(/\/$/, '')
 
   return {
     rules: [
       {
+        userAgent: ['Googlebot', 'Googlebot-News', 'Googlebot-Image', 'Bingbot'],
+        allow: '/',
+        disallow: ['/admin/', '/api/notifications/'],
+      },
+      {
         userAgent: '*',
         allow: '/',
-        disallow: ['/admin/', '/api/', '/login'],
-      },
-      {
-        userAgent: 'Googlebot',
-        allow: '/',
-        disallow: ['/admin/', '/api/', '/login'],
-      },
-      {
-        userAgent: 'Googlebot-News',
-        allow: '/',
-        disallow: ['/admin/', '/api/', '/login'],
-      },
-      {
-        userAgent: 'Googlebot-Image',
-        allow: '/',
-        disallow: ['/admin/', '/api/'],
-      },
-      {
-        userAgent: 'Googlebot-Mobile',
-        allow: '/',
-        disallow: ['/admin/', '/api/', '/login'],
-      },
-      {
-        userAgent: 'Googlebot-Video',
-        allow: '/',
-        disallow: ['/admin/', '/api/'],
-      },
-      {
-        userAgent: 'Bingbot',
-        allow: '/',
-        disallow: ['/admin/', '/api/', '/login'],
-        crawlDelay: 1,
+        disallow: ['/admin/', '/api/notifications/'],
       },
     ],
     sitemap: [
       `${baseUrl}/sitemap.xml`,
-      `${baseUrl}/news-sitemap.xml`,
-      `${baseUrl}/mobile-sitemap.xml`,
+      `${baseUrl}/sitemap-news.xml`,
     ],
-    host: baseUrl,
   }
 }

@@ -1,62 +1,52 @@
 import { notFound } from 'next/navigation'
-import Link from 'next/link'
-import Image from 'next/image'
-import { Metadata } from 'next'
+import type { Metadata } from 'next'
+import Masthead from '@/components/meridian/Masthead'
+import Footer from '@/components/meridian/Footer'
+import PostCard from '@/components/meridian/PostCard'
+import ArticleHeroImage from '@/components/meridian/ArticleHeroImage'
 import { getArticleBySlug, getRecentArticles } from '@/lib/articles'
-import { formatDate, extractYouTubeVideoId } from '@/lib/utils'
-import YouTubeEmbed from '@/components/YouTubeEmbed'
-import { ArticleSchema, BreadcrumbSchema } from '@/components/StructuredData'
+import { mapArticleToPostCard } from '@/lib/meridianData'
+import ReadingProgressBar from '@/components/meridian/ReadingProgressBar'
+import BreakingTicker from '@/components/meridian/BreakingTicker'
+import StockTicker from '@/components/meridian/StockTicker'
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+export const dynamic = 'force-dynamic'
+
+export async function generateMetadata({
+  params,
+  searchParams,
+}: {
+  params: { slug: string }
+  searchParams?: { preview?: string }
+}): Promise<Metadata> {
   const article = await getArticleBySlug(params.slug)
-  
-  if (!article) {
-    return {
-      title: 'Article Not Found',
-    }
+  if (!article || (article.status !== 'published' && searchParams?.preview !== 'true')) {
+    return { title: 'Story Not Found — Singh Monster' }
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
-  const articleUrl = `${baseUrl}/article/${article.slug}`
+  const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000').replace(/\/$/, '')
+  const pageUrl = `${baseUrl}/article/${article.slug}`
+  const heroImage = article.image_url || article.imageUrl || `${baseUrl}/authr.png`
+  const rawPub = article.published_at || article.created_at || (article as any).publishedAt || (article as any).createdAt
+  const rawMod = article.updated_at || article.updatedAt || rawPub
+  const pubDate = rawPub ? new Date(rawPub).toISOString() : new Date().toISOString()
+  const modDate = rawMod ? new Date(rawMod).toISOString() : pubDate
+  const description = article.excerpt || article.subtitle || article.content.replace(/<[^>]*>/g, '').slice(0, 160)
+  const tags = article.tags && article.tags.length > 0 ? article.tags : [article.category, 'India', 'World News', 'Singh Monster']
 
   return {
-    title: article.title,
-    description: article.excerpt || article.content.substring(0, 160).replace(/<[^>]*>/g, ''),
-    keywords: article.tags || [],
-    authors: [{ name: article.author }],
-    openGraph: {
-      type: 'article',
-      url: articleUrl,
-      title: article.title,
-      description: article.excerpt || article.content.substring(0, 160).replace(/<[^>]*>/g, ''),
-      images: article.imageUrl ? [
-        {
-          url: article.imageUrl,
-          width: 1200,
-          height: 630,
-          alt: article.title,
-        },
-      ] : [],
-      publishedTime: article.publishedAt,
-      modifiedTime: article.updatedAt,
-      authors: [article.author],
-      section: article.category,
-      tags: article.tags || [],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: article.title,
-      description: article.excerpt || article.content.substring(0, 160).replace(/<[^>]*>/g, ''),
-      images: article.imageUrl ? [article.imageUrl] : [],
-      creator: '@chhkwa',
-    },
+    title: `${article.title} | Singh Monster`,
+    description,
+    keywords: [...tags, 'Singh Monster', 'Dhananjay Singh', article.category, 'Breaking News', 'Investigative Journalism'],
+    authors: [{ name: article.author || 'Dhananjay Singh', url: baseUrl }],
+    creator: article.author || 'Dhananjay Singh',
+    publisher: 'Singh Monster',
     alternates: {
-      canonical: articleUrl,
+      canonical: pageUrl,
     },
     robots: {
       index: true,
       follow: true,
-      nocache: false,
       googleBot: {
         index: true,
         follow: true,
@@ -65,230 +55,425 @@ export async function generateMetadata({ params }: { params: { slug: string } })
         'max-snippet': -1,
       },
     },
+    openGraph: {
+      type: 'article',
+      url: pageUrl,
+      title: article.title,
+      description,
+      siteName: 'Singh Monster',
+      publishedTime: pubDate,
+      modifiedTime: modDate,
+      authors: [article.author || 'Dhananjay Singh'],
+      section: article.category,
+      tags,
+      images: [
+        {
+          url: heroImage,
+          width: 1200,
+          height: 630,
+          alt: article.title,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: article.title,
+      description,
+      creator: '@SinghMonster',
+      site: '@SinghMonster',
+      images: [heroImage],
+    },
     other: {
-      'article:published_time': article.publishedAt,
-      'article:modified_time': article.updatedAt,
-      'article:author': article.author,
+      'news_keywords': tags.join(', '),
+      'article:author': article.author || 'Dhananjay Singh',
       'article:section': article.category,
-      'article:tag': article.tags?.join(', ') || '',
-      'og:type': 'article',
-      'og:site_name': 'Chhkwa',
-      'news_keywords': article.tags?.join(', ') || article.category,
-      'mobile-web-app-capable': 'yes',
+      'article:published_time': pubDate,
+      'article:modified_time': modDate,
     },
   }
 }
 
-export default async function ArticlePage({ params }: { params: { slug: string } }) {
+
+export default async function ArticlePage({
+  params,
+  searchParams,
+}: {
+  params: { slug: string }
+  searchParams?: { preview?: string }
+}) {
   const article = await getArticleBySlug(params.slug)
-  
-  if (!article) {
+
+  if (!article || (article.status !== 'published' && searchParams?.preview !== 'true')) {
     notFound()
   }
 
-  const relatedArticles = await getRecentArticles(4)
-  const filteredRelated = relatedArticles.filter(a => a.id !== article.id).slice(0, 3)
+  const recent = await getRecentArticles(8)
+  const relatedStories = recent
+    .filter((a) => a.slug !== article.slug)
+    .slice(0, 3)
+    .map((a) => mapArticleToPostCard(a))
 
-  // Breadcrumb data
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
-  const breadcrumbItems = [
-    { name: 'Home', url: baseUrl },
-    { name: article.category, url: `${baseUrl}/section/${article.category.toLowerCase()}` },
-    { name: article.title, url: `${baseUrl}/article/${article.slug}` }
-  ]
+  const breakingSlot = recent.find(
+    (a) =>
+      (a.homepage_position ?? (a as any).homepagePosition) === 1 ||
+      a.is_breaking ||
+      (a as any).isBreaking
+  )
+  const tickerItems = breakingSlot
+    ? [
+        { id: String(breakingSlot.id), title: breakingSlot.title, url: `/article/${breakingSlot.slug}` },
+        ...recent
+          .filter((a) => a.id !== breakingSlot.id)
+          .slice(0, 4)
+          .map((a) => ({ id: String(a.id), title: a.title, url: `/article/${a.slug}` })),
+      ]
+    : recent.slice(0, 5).map((a) => ({ id: String(a.id), title: a.title, url: `/article/${a.slug}` }))
+
+  const heroImage = article.image_url || article.imageUrl
+  const heroCaption = article.image_caption || article.imageCaption
+
+  const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000').replace(/\/$/, '')
+  const pageUrl = `${baseUrl}/article/${article.slug}`
+  const rawPub = article.published_at || article.created_at || (article as any).publishedAt || (article as any).createdAt
+  const rawMod = article.updated_at || article.updatedAt || rawPub
+  const pubDate = rawPub ? new Date(rawPub).toISOString() : new Date().toISOString()
+  const modDate = rawMod ? new Date(rawMod).toISOString() : pubDate
+  const description = article.excerpt || article.subtitle || article.content.replace(/<[^>]*>/g, '').slice(0, 160)
+  const tags = article.tags && article.tags.length > 0 ? article.tags : [article.category, 'Singh Monster']
+
+  // Schema.org NewsArticle & Breadcrumbs structured data
+  const jsonLdNewsArticle = {
+    '@context': 'https://schema.org',
+    '@type': 'NewsArticle',
+    'mainEntityOfPage': {
+      '@type': 'WebPage',
+      '@id': pageUrl,
+    },
+    'headline': article.title,
+    'alternativeHeadline': article.subtitle || undefined,
+    'image': [heroImage || `${baseUrl}/authr.png`],
+    'datePublished': pubDate,
+    'dateModified': modDate,
+    'author': {
+      '@type': 'Person',
+      'name': 'Dhananjay Singh',
+      'jobTitle': 'Admin & Editor-in-Chief',
+      'image': `${baseUrl}/authr.png`,
+      'url': `${baseUrl}`,
+    },
+    'publisher': {
+      '@type': 'NewsMediaOrganization',
+      'name': 'Singh Monster',
+      'url': baseUrl,
+      'logo': {
+        '@type': 'ImageObject',
+        'url': `${baseUrl}/logo.png`,
+        'width': 512,
+        'height': 512,
+      },
+    },
+    'description': description,
+    'articleBody': article.content.replace(/<[^>]*>/g, ' ').slice(0, 5000),
+    'articleSection': article.category,
+    'keywords': tags.join(', '),
+    'inLanguage': 'en-US',
+  }
+
+  const jsonLdBreadcrumbs = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    'itemListElement': [
+      {
+        '@type': 'ListItem',
+        'position': 1,
+        'name': 'Home',
+        'item': baseUrl,
+      },
+      {
+        '@type': 'ListItem',
+        'position': 2,
+        'name': article.category,
+        'item': `${baseUrl}/section/${article.category.toLowerCase()}`,
+      },
+      {
+        '@type': 'ListItem',
+        'position': 3,
+        'name': article.title,
+        'item': pageUrl,
+      },
+    ],
+  }
 
   return (
-    <>
-      <ArticleSchema article={article} url={baseUrl} />
-      <BreadcrumbSchema items={breadcrumbItems} />
-      <main className="min-h-screen bg-white dark:bg-neutral-900">
-      <article className="max-w-4xl mx-auto px-4 py-8">
-        {/* Breadcrumb */}
-        <nav className="mb-6">
-          <ol className="flex items-center space-x-2 text-sm text-neutral-600 dark:text-neutral-400">
-            <li>
-              <Link href="/" className="hover:text-neutral-900 dark:hover:text-white">
-                Home
-              </Link>
-            </li>
-            <li>/</li>
-            <li>
-              <Link href={`/section/${article.category.toLowerCase()}`} className="hover:text-neutral-900 dark:hover:text-white">
-                {article.category}
-              </Link>
-            </li>
-            <li>/</li>
-            <li className="text-neutral-900 dark:text-white font-semibold truncate">
-              {article.title}
-            </li>
-          </ol>
-        </nav>
+    <div className="min-h-screen bg-paper dark:bg-dark-paper text-ink dark:text-dark-ink transition-colors duration-200 flex flex-col font-sans">
+      {/* Schema.org NewsArticle & BreadcrumbList structured data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdNewsArticle) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdBreadcrumbs) }}
+      />
 
-        {/* Category Badge */}
-        <div className="mb-4">
-          <Link
-            href={`/section/${article.category.toLowerCase()}`}
-            className="inline-block text-xs font-bold uppercase tracking-wider text-blue-600 hover:text-blue-700 dark:text-blue-400"
-          >
-            {article.category}
-          </Link>
-        </div>
+      <ReadingProgressBar />
+      <BreakingTicker items={tickerItems} />
+      <StockTicker />
+      <Masthead brandName="Singh Monster" tagline="Sharp reporting. Deep analysis. No agenda but the truth." />
 
-        {/* Title */}
-        <h1 className="text-4xl md:text-5xl font-black font-playfair mb-4 text-neutral-900 dark:text-white leading-tight">
-          {article.title}
-        </h1>
 
-        {/* Excerpt */}
-        {article.excerpt && (
-          <p className="text-xl text-neutral-700 dark:text-neutral-300 font-body mb-6 leading-relaxed">
-            {article.excerpt}
-          </p>
-        )}
+      <main className="flex-1 max-w-[980px] mx-auto px-4 sm:px-6 py-8 sm:py-12 w-full">
+        <article className="space-y-6">
+          {/* Category & Kicker */}
+          <div className="flex items-center gap-2">
+            <a
+              href={`/section/${article.category.toLowerCase()}`}
+              className="text-xs font-bold uppercase tracking-[0.16em] text-accent hover:underline"
+            >
+              {article.category}
+            </a>
+            {article.is_breaking && (
+              <span className="px-2 py-0.5 text-[10px] font-mono font-bold bg-red-600 text-white uppercase tracking-wider rounded-xs">
+                Breaking
+              </span>
+            )}
+          </div>
 
-        {/* Meta Information */}
-        <div className="flex items-center gap-4 pb-6 mb-6 border-b border-neutral-200 dark:border-neutral-700">
-          <Link
-            href={`/author/${article.author.toLowerCase().replace(/\s+/g, '-')}`}
-            className="text-sm font-semibold text-neutral-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400"
-          >
-            By {article.author}
-          </Link>
-          <span className="text-neutral-400">•</span>
-          <time className="text-sm text-neutral-600 dark:text-neutral-400">
-            {formatDate(article.publishedAt)}
-          </time>
-        </div>
+          {/* Headline */}
+          <h1 className="font-serif font-black text-3xl sm:text-4xl md:text-5xl leading-[1.08] tracking-tight text-ink dark:text-dark-ink">
+            {article.title}
+          </h1>
 
-        {/* Featured Image */}
-        {article.imageUrl && (
-          <div className="mb-8 -mx-4 md:mx-0">
-            <div className="relative w-full aspect-video md:aspect-[16/9] overflow-hidden">
-              <Image
-                src={article.imageUrl}
-                alt={article.title}
-                fill
-                className="object-cover"
-                priority
-              />
+          {/* Deck / Subtitle */}
+          {(article.subtitle || article.excerpt) && (
+            <p className="font-serif italic text-lg sm:text-2xl leading-relaxed text-ink-mute dark:text-dark-mute">
+              {article.subtitle || article.excerpt}
+            </p>
+          )}
+
+          {/* Byline & Metadata Bar */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 pb-4 border-y border-rule dark:border-dark-rule text-xs text-ink-mute dark:text-dark-mute">
+            <div className="flex items-center gap-3.5">
+              <div className="relative w-11 h-11 rounded-full overflow-hidden border-2 border-accent/40 dark:border-dark-accent/40 shrink-0 shadow-xs bg-paper-subtle dark:bg-dark-subtle">
+                <img
+                  src="/authr.png"
+                  alt={article.author}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-sans text-ink dark:text-dark-ink font-bold text-[13px]">
+                    {article.author || 'Dhananjay Singh'}
+                  </span>
+                  <span className="px-2 py-0.5 bg-accent text-white dark:bg-dark-accent text-[9.5px] font-mono uppercase tracking-wider rounded-xs font-bold shadow-xs">
+                    Admin
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-[11px] text-ink-mute dark:text-dark-mute">
+                  <time>
+                    {(() => {
+                      try {
+                        const raw = article.published_at || article.created_at || (article as any).publishedAt || (article as any).createdAt
+                        const d = raw ? new Date(raw) : new Date()
+                        return isNaN(d.getTime())
+                          ? 'Recent'
+                          : d.toLocaleDateString('en-US', {
+                              month: 'long',
+                              day: 'numeric',
+                              year: 'numeric',
+                            })
+                      } catch {
+                        return 'Recent'
+                      }
+                    })()}
+                  </time>
+                  <span className="opacity-40">·</span>
+                  <span>{(() => {
+                    const plainText = (article.content || '').replace(/<[^>]*>/g, ' ').replace(/[#*_`~>-]/g, ' ')
+                    const words = plainText.trim().split(/\s+/).filter((w) => w.length > 0)
+                    const minutes = words.length === 0 ? 1 : Math.max(1, Math.ceil(words.length / 200))
+                    return `${minutes} min read`
+                  })()}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Share & Bookmark Actions */}
+            <div className="flex items-center gap-3">
+              <span className="text-[11px] uppercase tracking-wider font-semibold">Share:</span>
+              <a
+                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(article.title)}&url=`}
+                target="_blank"
+                rel="noreferrer"
+                className="hover:text-accent transition"
+                title="Share on X"
+              >
+                𝕏
+              </a>
+              <a
+                href={`https://www.linkedin.com/sharing/share-offsite/?url=`}
+                target="_blank"
+                rel="noreferrer"
+                className="hover:text-accent transition"
+                title="Share on LinkedIn"
+              >
+                in
+              </a>
             </div>
           </div>
-        )}
 
-        {/* YouTube Video */}
-        {article.videoUrl && extractYouTubeVideoId(article.videoUrl) && (
-          <div className="mb-8">
-            <YouTubeEmbed 
-              videoId={extractYouTubeVideoId(article.videoUrl)!} 
-              title={article.title}
+          {/* Main Cropped Featured Hero Image */}
+          {heroImage && (
+            <ArticleHeroImage
+              src={heroImage}
+              alt={article.title}
+              caption={heroCaption}
             />
-          </div>
-        )}
+          )}
 
-        {/* Article Content */}
-        <div 
-          className="mb-12 quill-content"
-          dangerouslySetInnerHTML={{ __html: article.content }}
-        />
+          {/* Article Long-form Body with Full Word/HTML/Markdown Support */}
+          {(() => {
+            const rawContent = article.content || ''
+            // Sanitize raw scripts and executable handlers for security
+            const sanitized = rawContent
+              .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+              .replace(/\son\w+="[^"]*"/gi, '')
+              .replace(/\son\w+='[^']*'/gi, '')
 
-        {/* Tags */}
-        {article.tags && article.tags.length > 0 && (
-          <div className="mb-12 pb-8 border-b border-neutral-200 dark:border-neutral-700">
-            <div className="flex flex-wrap gap-2">
-              {article.tags.map((tag) => (
+            const isHtml = /<[a-z][\s\S]*>/i.test(sanitized)
+
+            if (isHtml) {
+              // Ensure lead paragraph contains drop-cap styling
+              let formattedHtml = sanitized
+              if (!formattedHtml.includes('drop-cap') && !formattedHtml.includes('first-letter:')) {
+                formattedHtml = formattedHtml.replace(
+                  /<p\b([^>]*)>/i,
+                  '<p$1 class="drop-cap first-letter:text-5xl first-letter:font-serif first-letter:font-bold first-letter:float-left first-letter:mr-3 first-letter:leading-none first-letter:text-ink dark:first-letter:text-dark-ink">'
+                )
+              }
+              return (
+                <div
+                  className="article-content-body max-w-none pt-4 text-ink dark:text-dark-ink"
+                  dangerouslySetInnerHTML={{ __html: formattedHtml }}
+                />
+              )
+            }
+
+            // Fallback for markdown-authored content
+            let leadRendered = false
+            const paragraphs = sanitized.split(/\n\s*\n/)
+
+            return (
+              <div className="article-content-body max-w-none pt-4 text-ink dark:text-dark-ink space-y-6">
+                {paragraphs.map((p, index) => {
+                  const trimmed = p.trim()
+                  if (!trimmed) return null
+
+                  if (trimmed.startsWith('## ')) {
+                    return <h2 key={index}>{trimmed.replace(/^##\s+/, '')}</h2>
+                  }
+                  if (trimmed.startsWith('### ')) {
+                    return <h3 key={index}>{trimmed.replace(/^###\s+/, '')}</h3>
+                  }
+                  if (trimmed.startsWith('#### ')) {
+                    return <h4 key={index}>{trimmed.replace(/^####\s+/, '')}</h4>
+                  }
+                  if (trimmed.startsWith('> ')) {
+                    return <blockquote key={index}>"{trimmed.replace(/^>\s*/, '')}"</blockquote>
+                  }
+
+                  const imgMatch = trimmed.match(/!\[(.*?)\]\((.*?)\)/)
+                  if (imgMatch) {
+                    const alt = imgMatch[1]
+                    const src = imgMatch[2]
+                    return (
+                      <figure key={index}>
+                        <img src={src} alt={alt || 'Illustration'} />
+                        {alt && <figcaption>{alt}</figcaption>}
+                      </figure>
+                    )
+                  }
+
+                  const formattedHtml = trimmed
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+
+                  const isLead = !leadRendered
+                  leadRendered = true
+
+                  return (
+                    <p
+                      key={index}
+                      className={
+                        isLead
+                          ? 'drop-cap first-letter:text-5xl first-letter:font-serif first-letter:font-bold first-letter:float-left first-letter:mr-3 first-letter:leading-none first-letter:text-ink dark:first-letter:text-dark-ink leading-relaxed'
+                          : 'leading-relaxed'
+                      }
+                      dangerouslySetInnerHTML={{ __html: formattedHtml }}
+                    />
+                  )
+                })}
+              </div>
+            )
+          })()}
+
+          {/* Tags */}
+          {article.tags && article.tags.length > 0 && (
+            <div className="pt-6 border-t border-rule dark:border-dark-rule flex flex-wrap items-center gap-2">
+              <span className="text-xs uppercase tracking-wider font-bold text-ink-mute mr-1">Filed Under:</span>
+              {article.tags.map((tag, idx) => (
                 <span
-                  key={tag}
-                  className="px-3 py-1 text-sm bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-full"
+                  key={idx}
+                  className="px-2.5 py-1 text-xs font-sans bg-paper-subtle dark:bg-dark-subtle border border-rule dark:border-dark-rule text-ink dark:text-dark-ink rounded-xs uppercase tracking-wider"
                 >
                   #{tag}
                 </span>
               ))}
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Author Info */}
-        <div className="mb-12 p-6 bg-neutral-50 dark:bg-neutral-800 border-l-4 border-blue-600">
-          <div className="flex items-start gap-4">
-            <div className="flex-shrink-0">
-              <div className="w-16 h-16 bg-neutral-300 dark:bg-neutral-600 rounded-full flex items-center justify-center">
-                <span className="text-2xl font-bold text-neutral-600 dark:text-neutral-300">
-                  {article.author.charAt(0)}
-                </span>
-              </div>
+          {/* Author Box */}
+          <div className="p-6 bg-paper-subtle dark:bg-dark-subtle border border-rule dark:border-dark-rule rounded-sm mt-10 flex flex-col sm:flex-row gap-5 items-start sm:items-center">
+            <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-accent shrink-0 shadow-md bg-paper-subtle dark:bg-dark-subtle">
+              <img
+                src="/authr.png"
+                alt={article.author}
+                className="w-full h-full object-cover"
+              />
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-bold font-playfair mb-2">
-                <Link
-                  href={`/author/${article.author.toLowerCase().replace(/\s+/g, '-')}`}
-                  className="text-neutral-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400"
-                >
-                  {article.author}
-                </Link>
-              </h3>
-              <p className="text-sm text-neutral-600 dark:text-neutral-400 font-sans italic mb-2">
-                Professional Content Writer, Researcher & Visionary Storyteller
+              <div className="flex items-center gap-2">
+                <p className="text-[10px] uppercase tracking-widest font-bold text-accent">Reported by</p>
+                <span className="w-1 h-1 rounded-full bg-accent" />
+                <span className="text-[10px] font-mono text-ink-mute dark:text-dark-mute uppercase tracking-wider">Singh Monster Newsroom</span>
+                <span className="px-1.5 py-0.2 bg-accent/20 text-accent text-[9px] font-mono font-bold uppercase tracking-wider rounded-xs">Admin</span>
+              </div>
+              <h4 className="font-serif font-bold text-xl text-ink dark:text-dark-ink mt-0.5">{article.author || 'Dhananjay Singh'}</h4>
+              <p className="text-xs text-ink-mute dark:text-dark-mute mt-1.5 leading-relaxed">
+                Admin & Lead Investigative Reporter at Singh Monster, directing global security dispatches, macroeconomic analysis, and investigative journalism.
               </p>
-              <p className="text-xs text-neutral-600 dark:text-neutral-400 font-sans mb-3">
-                "तरक्की को चाहिए नया नज़रिया—और यह नज़रिया शब्दों से शुरू होता है।"
-              </p>
-              <Link
-                href={`/author/${article.author.toLowerCase().replace(/\s+/g, '-')}`}
-                className="inline-block mt-2 text-sm font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400"
-              >
-                More from {article.author} →
-              </Link>
             </div>
           </div>
-        </div>
-      </article>
+        </article>
 
-      {/* Related Articles */}
-      {filteredRelated.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 py-12 border-t-4 border-black dark:border-white">
-          <h2 className="text-3xl font-black font-playfair mb-8">More Stories</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {filteredRelated.map((relatedArticle) => (
-              <article key={relatedArticle.id} className="group">
-                {relatedArticle.imageUrl && (
-                  <Link href={`/article/${relatedArticle.slug}`}>
-                    <div className="relative w-full aspect-video mb-4 overflow-hidden">
-                      <Image
-                        src={relatedArticle.imageUrl}
-                        alt={relatedArticle.title}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                  </Link>
-                )}
-                <div className="mb-2">
-                  <Link
-                    href={`/section/${relatedArticle.category.toLowerCase()}`}
-                    className="text-xs font-bold uppercase tracking-wider text-blue-600 hover:text-blue-700"
-                  >
-                    {relatedArticle.category}
-                  </Link>
-                </div>
-                <h3 className="text-xl font-bold font-playfair mb-2">
-                  <Link
-                    href={`/article/${relatedArticle.slug}`}
-                    className="text-neutral-900 dark:text-white hover:text-neutral-600 dark:hover:text-neutral-300"
-                  >
-                    {relatedArticle.title}
-                  </Link>
-                </h3>
-                {relatedArticle.excerpt && (
-                  <p className="text-sm text-neutral-600 dark:text-neutral-400 font-sans line-clamp-3">
-                    {relatedArticle.excerpt}
-                  </p>
-                )}
-              </article>
-            ))}
-          </div>
-        </section>
-      )}
-    </main>
-    </>
+        {/* Related Stories */}
+        {relatedStories.length > 0 && (
+          <section className="mt-16 pt-8 border-t-2 border-ink dark:border-dark-ink">
+            <h3 className="font-serif font-black text-2xl text-ink dark:text-dark-ink mb-6">
+              More In {article.category}
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              {relatedStories.map((story) => (
+                <PostCard key={story.id} article={story} variant="feed" />
+              ))}
+            </div>
+          </section>
+        )}
+      </main>
+
+      <Footer brandName="Singh Monster" />
+    </div>
   )
 }

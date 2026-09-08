@@ -1,176 +1,195 @@
-import Header from '@/components/Header'
-import Footer from '@/components/Footer'
-import { Metadata } from 'next'
+import type { Metadata } from 'next'
+import Masthead from '@/components/meridian/Masthead'
+import Footer from '@/components/meridian/Footer'
+import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'About Chhkwa - तरक्की को चाहिए नया नज़रिया | Our Mission & Story',
-  description: 'Chhkwa is a digital news platform committed to delivering thoughtful journalism, in-depth analysis, and diverse perspectives. Learn about our mission, values, editorial policy, and meet our team of dedicated journalists.',
-  keywords: [
-    'about chhkwa', 'about us', 'mission statement', 'journalism ethics', 
-    'editorial policy', 'news platform', 'media company', 'Dhananjay Singh',
-    'professional journalism', 'credible news source', 'fact-based reporting',
-    'transparency in media', 'news values', 'journalistic integrity'
-  ],
-  openGraph: {
-    title: 'About Chhkwa - Progress Needs a New Perspective',
-    description: 'Learn about Chhkwa\'s mission to deliver quality journalism, meaningful conversations, and diverse perspectives on the stories that shape our world.',
-    type: 'website',
-    images: [
-      {
-        url: '/og-image.jpg',
-        width: 1200,
-        height: 630,
-        alt: 'About Chhkwa',
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'About Chhkwa - तरक्की को चाहिए नया नज़रिया',
-    description: 'Thoughtful journalism, diverse perspectives, meaningful conversations.',
-  },
-  alternates: {
-    canonical: '/about',
-  },
+  title: 'About Us — Editorial Mission & Standards',
+  description:
+    'The editorial philosophy, journalistic standards, and independent mission of Singh Monster, led by Dhananjay Singh.',
 }
 
 export default function AboutPage() {
   return (
-    <div className="relative flex min-h-screen w-full flex-col">
-      <div className="layout-container flex h-full grow flex-col">
-        <div className="px-4 md:px-10 lg:px-20 flex flex-1 justify-center py-5">
-          <div className="layout-content-container flex flex-col max-w-[1200px] flex-1">
-            <Header />
+    <div className="min-h-screen flex flex-col bg-paper dark:bg-dark-paper text-ink dark:text-dark-ink transition-colors">
+      <Masthead />
 
-            <main className="mt-8 mb-16">
-              {/* Hero Section */}
-              <div className="border-b-4 border-black dark:border-white pb-8 mb-8">
-                <h1 className="text-primary dark:text-neutral-50 text-5xl md:text-6xl font-black font-body leading-tight mb-4">
-                  About Chhkwa.com
-                </h1>
-                <p className="text-neutral-700 dark:text-neutral-300 text-2xl font-bold leading-relaxed font-body italic">
-                  तरक्की को चाहिए नया नज़रिया | Progress Needs a New Perspective
-                </p>
-              </div>
+      <main className="flex-1 max-w-[1080px] w-full mx-auto px-4 sm:px-6 py-10 sm:py-14">
+        {/* Breadcrumb & Section Dateline */}
+        <div className="flex items-center justify-between border-b border-rule dark:border-dark-rule pb-3 mb-8 font-mono text-[11px] uppercase tracking-widest text-ink-mute dark:text-dark-mute">
+          <div className="flex items-center gap-2">
+            <Link href="/" className="hover:text-accent transition">
+              Home
+            </Link>
+            <span>/</span>
+            <span className="text-ink dark:text-dark-ink font-semibold">About Us</span>
+          </div>
+          <span className="hidden sm:inline">Journal of Record • Est. 2026</span>
+        </div>
 
-              {/* English Section */}
-              <div className="prose prose-lg max-w-none mb-12">
-                <div className="flex items-center gap-2 mb-6">
-                  <span className="text-4xl">🇬🇧</span>
-                  <h2 className="text-primary dark:text-neutral-50 text-3xl font-bold font-body m-0">
-                    English
-                  </h2>
-                </div>
-                
-                <p className="text-neutral-700 dark:text-neutral-300 text-lg font-body leading-relaxed mb-6">
-                  <strong>Chhkwa.com</strong> is a digital platform dedicated to bringing thoughtful analysis, fresh perspectives, and meaningful conversations on topics that shape our world. We believe that progress requires a new lens—one that challenges conventional narratives and amplifies diverse voices.
-                </p>
+        {/* Hero Header */}
+        <header className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
+          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-accent dark:text-dark-accent font-semibold mb-3">
+            Institutional Charter & Editorial Creed
+          </p>
+          <h1 className="font-serif font-black text-3xl sm:text-5xl md:text-6xl tracking-tight leading-[1.1] mb-6">
+            Sharp reporting. Deep analysis. No agenda but the truth.
+          </h1>
+          <p className="font-serif italic text-base sm:text-lg text-ink-mute dark:text-dark-mute leading-relaxed">
+            Singh Monster is an independent broadsheet chronicle devoted to fearless investigative journalism,
+            dispassionate market analysis, and unvarnished public affairs reporting.
+          </p>
+          <div className="w-24 h-0.5 bg-accent mx-auto mt-8 opacity-80" />
+        </header>
 
-                <p className="text-neutral-700 dark:text-neutral-300 text-lg font-body leading-relaxed mb-6">
-                  Our mission is to inform, inspire, and ignite change through content that matters. Whether it's politics, culture, technology, or social issues, we strive to present stories with depth, clarity, and integrity.
-                </p>
-
-                <h3 className="text-primary dark:text-neutral-50 text-2xl font-bold font-body mt-8 mb-4">
-                  What We Stand For:
-                </h3>
-                <ul className="text-neutral-700 dark:text-neutral-300 text-lg font-body leading-relaxed space-y-3 mb-6">
-                  <li><strong>Truth & Transparency:</strong> We prioritize facts, context, and accountability.</li>
-                  <li><strong>Diversity of Thought:</strong> We celebrate different perspectives and encourage open dialogue.</li>
-                  <li><strong>Empowerment:</strong> We aim to equip readers with knowledge to make informed decisions.</li>
-                  <li><strong>Innovation:</strong> We embrace new ideas and approaches to storytelling.</li>
-                </ul>
-
-                <p className="text-neutral-700 dark:text-neutral-300 text-lg font-body leading-relaxed mb-6">
-                  At <strong>Chhkwa.com</strong>, we don't just report the news—we explore the "why" and "what's next." Join us on this journey to reimagine progress, one story at a time.
-                </p>
-              </div>
-
-              {/* Hindi Section */}
-              <div className="prose prose-lg max-w-none mb-12 border-t-2 border-neutral-300 dark:border-neutral-700 pt-8">
-                <div className="flex items-center gap-2 mb-6">
-                  <span className="text-4xl">🇮🇳</span>
-                  <h2 className="text-primary dark:text-neutral-50 text-3xl font-bold font-body m-0">
-                    हिंदी
-                  </h2>
-                </div>
-                
-                <p className="text-neutral-700 dark:text-neutral-300 text-lg font-body leading-relaxed mb-6">
-                  <strong>Chhkwa.com</strong> एक डिजिटल मंच है जो विचारशील विश्लेषण, नए दृष्टिकोण और उन विषयों पर सार्थक बातचीत लाने के लिए समर्पित है जो हमारी दुनिया को आकार देते हैं। हम मानते हैं कि तरक्की के लिए एक नया नज़रिया चाहिए—जो पारंपरिक कथाओं को चुनौती दे और विविध आवाज़ों को बुलंद करे।
-                </p>
-
-                <p className="text-neutral-700 dark:text-neutral-300 text-lg font-body leading-relaxed mb-6">
-                  हमारा उद्देश्य ऐसी सामग्री के माध्यम से सूचित करना, प्रेरित करना और बदलाव लाना है जो मायने रखती है। चाहे वह राजनीति हो, संस्कृति, तकनीक या सामाजिक मुद्दे—हम गहराई, स्पष्टता और ईमानदारी के साथ कहानियाँ प्रस्तुत करने का प्रयास करते हैं।
-                </p>
-
-                <h3 className="text-primary dark:text-neutral-50 text-2xl font-bold font-body mt-8 mb-4">
-                  हम किसके लिए खड़े हैं:
-                </h3>
-                <ul className="text-neutral-700 dark:text-neutral-300 text-lg font-body leading-relaxed space-y-3 mb-6">
-                  <li><strong>सच्चाई और पारदर्शिता:</strong> हम तथ्यों, संदर्भ और जवाबदेही को प्राथमिकता देते हैं।</li>
-                  <li><strong>विचारों की विविधता:</strong> हम अलग-अलग दृष्टिकोणों का सम्मान करते हैं और खुली बातचीत को प्रोत्साहित करते हैं।</li>
-                  <li><strong>सशक्तिकरण:</strong> हम पाठकों को सूचित निर्णय लेने के लिए ज्ञान से लैस करने का लक्ष्य रखते हैं।</li>
-                  <li><strong>नवाचार:</strong> हम कहानी सुनाने के लिए नए विचारों और दृष्टिकोणों को अपनाते हैं।</li>
-                </ul>
-
-                <p className="text-neutral-700 dark:text-neutral-300 text-lg font-body leading-relaxed mb-6">
-                  <strong>Chhkwa.com</strong> पर, हम सिर्फ खबरें नहीं बताते—हम "क्यों" और "आगे क्या" को समझते हैं। इस यात्रा में हमारे साथ जुड़ें और तरक्की को नए सिरे से परिभाषित करें, एक कहानी के साथ।
-                </p>
-              </div>
-
-              {/* Writer Section */}
-              <div className="border-t-4 border-black dark:border-white pt-8">
-                <h2 className="text-primary dark:text-neutral-50 text-3xl font-bold font-body mb-6">
-                  About the Writer
+        {/* Lead Correspondent Box */}
+        <div className="bg-paper-subtle dark:bg-dark-subtle border border-rule dark:border-dark-rule rounded-2xl p-6 sm:p-8 mb-14 shadow-xs">
+          <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-accent/10 dark:bg-accent/20 border border-accent/20 flex items-center justify-center shrink-0">
+              <span className="font-serif font-black text-2xl sm:text-3xl text-accent dark:text-dark-accent">
+                DS
+              </span>
+            </div>
+            <div className="space-y-3">
+              <div className="flex flex-wrap items-baseline gap-3">
+                <h2 className="font-serif font-bold text-2xl sm:text-3xl text-ink dark:text-dark-ink">
+                  Dhananjay Singh
                 </h2>
-                
-                <div className="bg-neutral-50 dark:bg-neutral-900 p-8 rounded-sm border-l-4 border-blue-600">
-                  <h3 className="text-primary dark:text-neutral-50 text-2xl font-bold font-body mb-3">
-                    Dhananjay Singh
-                  </h3>
-                  <p className="text-neutral-600 dark:text-neutral-400 text-sm font-sans font-semibold mb-4 italic">
-                    Professional Content Writer, Researcher & Visionary Storyteller
-                  </p>
-                  
-                  <div className="space-y-4 text-neutral-700 dark:text-neutral-300 text-base font-body leading-relaxed">
-                    <p>
-                      <strong>Dhananjay Singh</strong> is a professional content writer with a passion for exploring complex ideas and transforming them into compelling narratives. With a keen eye for detail and a commitment to authenticity, Dhananjay specializes in crafting content that resonates, informs, and inspires action.
-                    </p>
-                    
-                    <p>
-                      As a researcher and storyteller, Dhananjay brings a unique blend of analytical rigor and creative flair to every piece. Whether it's investigative journalism, thought leadership articles, or cultural commentary, the goal remains the same: to challenge perspectives and spark meaningful conversations.
-                    </p>
-                    
-                    <p>
-                      With experience spanning multiple domains—including politics, technology, social issues, and philosophy—Dhananjay believes in the power of words to shape reality. Every story is an opportunity to question the status quo and imagine new possibilities.
-                    </p>
-                    
-                    <p className="font-semibold italic">
-                      "तरक्की को चाहिए नया नज़रिया—और यह नज़रिया शब्दों से शुरू होता है।"<br />
-                      <span className="text-sm">"Progress needs a new perspective—and that perspective begins with words."</span>
-                    </p>
-                  </div>
-                </div>
+                <span className="font-mono text-xs uppercase tracking-widest text-accent dark:text-dark-accent font-semibold">
+                  Founder • Lead Correspondent • Editor
+                </span>
               </div>
-
-              {/* Contact Section */}
-              <div className="border-t border-neutral-300 dark:border-neutral-700 pt-8 mt-12">
-                <h2 className="text-primary dark:text-neutral-50 text-3xl font-bold font-body mb-6">
-                  Get in Touch
-                </h2>
-                <p className="text-neutral-700 dark:text-neutral-300 text-lg font-body leading-relaxed mb-4">
-                  Have a story idea? Want to collaborate? Reach out to us at:
-                </p>
-                <p className="text-neutral-600 dark:text-neutral-400 font-sans text-base">
-                  <strong>Email:</strong> contact@chhkwa.com<br />
-                  <strong>Follow us on social media</strong> for the latest updates and insights.
-                </p>
+              <p className="font-serif text-sm sm:text-base leading-relaxed text-ink/85 dark:text-dark-ink/85">
+                Dhananjay Singh directs all investigative research, reporting dispatches, and editorial curation for
+                Singh Monster. Operating without corporate patronage, party allegiance, or advertising conglomerate
+                entanglements, the publication was created to deliver an unsparing mirror to power, finance, and global
+                developments.
+              </p>
+              <div className="flex items-center gap-4 pt-2 font-mono text-xs text-ink-mute dark:text-dark-mute">
+                <span>Location: India / Global Coverage</span>
+                <span>•</span>
+                <span>Direct Inquiries: <a href="mailto:editorial@singhmonster.com" className="text-accent hover:underline">editorial@singhmonster.com</a></span>
               </div>
-            </main>
-
-            <Footer />
+            </div>
           </div>
         </div>
-      </div>
+
+        {/* Main Content Articles / Pillars */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12 mb-16">
+          {/* Pillar 1 */}
+          <section className="bg-paper dark:bg-dark-paper border border-rule dark:border-dark-rule rounded-2xl p-6 sm:p-8 transition-shadow hover:shadow-xs">
+            <div className="font-mono text-[11px] font-bold text-accent uppercase tracking-widest mb-2">
+              Tenet 01
+            </div>
+            <h3 className="font-serif font-bold text-xl sm:text-2xl mb-3 text-ink dark:text-dark-ink">
+              Fearless Independence
+            </h3>
+            <p className="font-serif text-sm sm:text-base text-ink/80 dark:text-dark-ink/80 leading-relaxed">
+              We accept no venture backing, no government grants, and no partisan contributions that could compromise
+              editorial autonomy. Our dispatches are produced under a strict commitment to report events exactly as facts
+              dictate, without softening conclusions for political or financial convenience.
+            </p>
+          </section>
+
+          {/* Pillar 2 */}
+          <section className="bg-paper dark:bg-dark-paper border border-rule dark:border-dark-rule rounded-2xl p-6 sm:p-8 transition-shadow hover:shadow-xs">
+            <div className="font-mono text-[11px] font-bold text-accent uppercase tracking-widest mb-2">
+              Tenet 02
+            </div>
+            <h3 className="font-serif font-bold text-xl sm:text-2xl mb-3 text-ink dark:text-dark-ink">
+              Primary Source Verification
+            </h3>
+            <p className="font-serif text-sm sm:text-base text-ink/80 dark:text-dark-ink/80 leading-relaxed">
+              Every investigative report published under the Singh Monster masthead is rooted in primary source documents:
+              regulatory filings, judicial dockets, verified field records, and corroborative technical datasets. We do not
+              recycle press releases or speculate without documented evidence.
+            </p>
+          </section>
+
+          {/* Pillar 3 */}
+          <section className="bg-paper dark:bg-dark-paper border border-rule dark:border-dark-rule rounded-2xl p-6 sm:p-8 transition-shadow hover:shadow-xs">
+            <div className="font-mono text-[11px] font-bold text-accent uppercase tracking-widest mb-2">
+              Tenet 03
+            </div>
+            <h3 className="font-serif font-bold text-xl sm:text-2xl mb-3 text-ink dark:text-dark-ink">
+              Deep Structural Analysis
+            </h3>
+            <p className="font-serif text-sm sm:text-base text-ink/80 dark:text-dark-ink/80 leading-relaxed">
+              While digital news cycles accelerate towards ephemeral sensationalism, our mission is structural clarity. We
+              trace macroeconomic flows, algorithmic disruptions, geopolitical treaties, and constitutional precedents to
+              explain why events happen and what lies ahead.
+            </p>
+          </section>
+
+          {/* Pillar 4 */}
+          <section className="bg-paper dark:bg-dark-paper border border-rule dark:border-dark-rule rounded-2xl p-6 sm:p-8 transition-shadow hover:shadow-xs">
+            <div className="font-mono text-[11px] font-bold text-accent uppercase tracking-widest mb-2">
+              Tenet 04
+            </div>
+            <h3 className="font-serif font-bold text-xl sm:text-2xl mb-3 text-ink dark:text-dark-ink">
+              Transparent Corrections
+            </h3>
+            <p className="font-serif text-sm sm:text-base text-ink/80 dark:text-dark-ink/80 leading-relaxed">
+              Integrity is measured by how an editor addresses errors. When factual inaccuracies occur, we correct them
+              swiftly and visibly. An errata note is appended to the dispatch detailing the date, nature of correction,
+              and original text, ensuring complete archival transparency.
+            </p>
+          </section>
+        </div>
+
+        {/* Colophon & Digital Craft */}
+        <section className="border-t border-b border-rule dark:border-dark-rule py-10 my-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+              <h4 className="font-mono text-xs uppercase tracking-widest text-accent font-semibold mb-2">
+                Typography
+              </h4>
+              <p className="font-serif text-sm text-ink/75 dark:text-dark-ink/75 leading-relaxed">
+                Typeset in Source Serif 4 for broadsheet elegance, paired with Inter for clean reading ergonomics and
+                JetBrains Mono for precise financial ticker figures and datelines.
+              </p>
+            </div>
+            <div>
+              <h4 className="font-mono text-xs uppercase tracking-widest text-accent font-semibold mb-2">
+                Infrastructure
+              </h4>
+              <p className="font-serif text-sm text-ink/75 dark:text-dark-ink/75 leading-relaxed">
+                Engineered with Next.js 14 App Router, React Server Components, Tailwind CSS, and Cloudflare distributed
+                media storage for sub-second global dispatch delivery.
+              </p>
+            </div>
+            <div>
+              <h4 className="font-mono text-xs uppercase tracking-widest text-accent font-semibold mb-2">
+                Archival Record
+              </h4>
+              <p className="font-serif text-sm text-ink/75 dark:text-dark-ink/75 leading-relaxed">
+                Every published dispatch receives an immutable cryptographic timestamp and slug-indexed identifier to
+                guarantee historical permanence across our public archive.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Newsroom Ethics & Legal Notice Prompt */}
+        <div className="bg-paper-subtle dark:bg-dark-subtle rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 border border-rule dark:border-dark-rule">
+          <div>
+            <h3 className="font-serif font-bold text-lg sm:text-xl text-ink dark:text-dark-ink mb-1">
+              Legal Disclaimers & Fair Dealing
+            </h3>
+            <p className="font-serif text-xs sm:text-sm text-ink-mute dark:text-dark-mute">
+              Read our full statutory disclosures under Section 79 IT Act, Article 19(1)(a), and fair dealing terms.
+            </p>
+          </div>
+          <Link
+            href="/privacy"
+            className="px-6 py-2.5 rounded-full border border-ink/30 dark:border-dark-ink/30 text-xs font-mono font-bold uppercase tracking-wider hover:bg-ink hover:text-white dark:hover:bg-white dark:hover:text-neutral-900 transition shrink-0"
+          >
+            Review Disclaimers →
+          </Link>
+        </div>
+      </main>
+
+      <Footer />
     </div>
   )
 }

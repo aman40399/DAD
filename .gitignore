@@ -39,3 +39,8 @@ next-env.d.ts
 /data
 *.db
 *.sqlite
+
+# user uploads & test fixtures
+/public/uploads/*
+!/public/uploads/.gitkeep
+/scratch

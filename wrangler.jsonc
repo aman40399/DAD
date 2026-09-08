@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "singh-monster",
+  "compatibility_date": "2026-09-07",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "singh-monster-db",
+      "database_id": "9f866cf2-45ef-473f-b1b9-658343ec6ec8"
+    }
+  ]
+}

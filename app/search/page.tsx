@@ -1,147 +1,230 @@
-import Header from '@/components/Header'
-import Footer from '@/components/Footer'
-import Link from 'next/link'
-import Image from 'next/image'
-import { getAllArticles } from '@/lib/articles'
-import { getTimeAgo } from '@/lib/utils'
+'use client'
 
-export const revalidate = 60
+import { useState, useEffect, useMemo, Suspense } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
+import Masthead from '@/components/meridian/Masthead'
+import Footer from '@/components/meridian/Footer'
+import PostCard from '@/components/meridian/PostCard'
+import { Article } from '@/types'
+import { mapArticleToPostCard } from '@/lib/meridianData'
 
-export default async function SearchPage({ searchParams }: { searchParams: { q?: string } }) {
-  const query = searchParams.q?.toLowerCase() || ''
-  const allArticles = await getAllArticles()
-  
-  // Filter articles based on search query
-  const filteredArticles = query
-    ? allArticles.filter(
-        (article) =>
-          article.title.toLowerCase().includes(query) ||
-          article.excerpt?.toLowerCase().includes(query) ||
-          article.content.toLowerCase().includes(query) ||
-          article.author.toLowerCase().includes(query) ||
-          article.category.toLowerCase().includes(query)
-      )
-    : []
+const CATEGORIES = [
+  'All',
+  'Politics',
+  'World',
+  'Business',
+  'Technology',
+  'Sports',
+  'Opinion',
+  'Arts',
+]
+
+function SearchContent() {
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const initialQuery = searchParams.get('q') || ''
+
+  const [query, setQuery] = useState(initialQuery)
+  const [selectedCategory, setSelectedCategory] = useState('All')
+  const [articles, setArticles] = useState<Article[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function loadArticles() {
+      try {
+        setLoading(true)
+        const res = await fetch('/api/articles?limit=50')
+        if (res.ok) {
+          const data = await res.json()
+          setArticles(data.articles || [])
+        }
+      } catch (err) {
+        console.error('Failed to load articles for search:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadArticles()
+  }, [])
+
+  // Keep query in sync with URL search param
+  useEffect(() => {
+    const currentQ = searchParams.get('q')
+    if (currentQ !== null && currentQ !== query) {
+      setQuery(currentQ)
+    }
+  }, [searchParams])
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (query.trim()) {
+      router.push(`/search?q=${encodeURIComponent(query.trim())}`)
+    } else {
+      router.push('/search')
+    }
+  }
+
+  // Filtered stories
+  const filteredArticles = useMemo(() => {
+    const q = query.toLowerCase().trim()
+
+    return articles.filter((article) => {
+      if (article.status !== 'published') return false
+
+      if (selectedCategory !== 'All') {
+        if (article.category.toLowerCase() !== selectedCategory.toLowerCase()) {
+          return false
+        }
+      }
+
+      if (!q) return true
+
+      const inTitle = article.title.toLowerCase().includes(q)
+      const inSubtitle = (article.subtitle || article.excerpt || '').toLowerCase().includes(q)
+      const inContent = (article.content || '').toLowerCase().includes(q)
+      const inAuthor = (article.author || '').toLowerCase().includes(q)
+      const inTags = (article.tags || []).some((t) => t.toLowerCase().includes(q))
+      const inCategory = (article.category || '').toLowerCase().includes(q)
+
+      return inTitle || inSubtitle || inContent || inAuthor || inTags || inCategory
+    })
+  }, [articles, query, selectedCategory])
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col bg-white dark:bg-background-dark">
-      <div className="layout-container flex h-full grow flex-col">
-        <div className="flex flex-1 justify-center">
-          <div className="layout-content-container flex flex-col w-full flex-1">
-            <Header />
+    <main className="flex-1 max-w-[1360px] mx-auto px-4 sm:px-6 py-8 w-full">
+      {/* Header */}
+      <div className="max-w-3xl mx-auto text-center mb-8">
+        <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-accent font-bold">
+          Singh Monster Archives
+        </span>
+        <h1 className="font-serif font-black text-3xl sm:text-5xl uppercase tracking-tight text-ink dark:text-dark-ink mt-1 mb-4">
+          Search Dispatches
+        </h1>
+        <p className="text-sm font-serif italic text-ink-mute dark:text-dark-mute">
+          Explore current breaking stories, investigative features, and historical reporting across every desk.
+        </p>
 
-            <main className="px-4 md:px-10 lg:px-20 max-w-[1400px] mx-auto w-full py-8">
-              {/* Search Header */}
-              <div className="border-b-4 border-black dark:border-white pb-6 mb-8">
-                <h1 className="text-primary dark:text-neutral-50 text-4xl md:text-5xl font-black font-body leading-tight mb-3">
-                  Search Results
-                </h1>
-                {query ? (
-                  <p className="text-neutral-600 dark:text-neutral-400 text-lg font-body">
-                    Found <strong>{filteredArticles.length}</strong> results for "{query}"
-                  </p>
-                ) : (
-                  <p className="text-neutral-600 dark:text-neutral-400 text-lg font-body">
-                    Enter a search query to find articles
-                  </p>
-                )}
-              </div>
-
-              {/* Search Form */}
-              <form method="GET" action="/search" className="mb-8">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    name="q"
-                    defaultValue={query}
-                    placeholder="Search articles, authors, categories..."
-                    className="flex-1 px-4 py-3 border-2 border-neutral-300 dark:border-neutral-600 rounded-sm bg-white dark:bg-neutral-800 text-primary dark:text-neutral-50 focus:outline-none focus:ring-2 focus:ring-blue-600 font-sans"
-                    autoFocus
-                  />
-                  <button
-                    type="submit"
-                    className="px-6 py-3 bg-blue-600 text-white font-bold rounded-sm hover:bg-blue-700 transition-colors"
-                  >
-                    Search
-                  </button>
-                </div>
-              </form>
-
-              {/* Search Results */}
-              {query && (
-                <div className="space-y-6">
-                  {filteredArticles.length === 0 ? (
-                    <div className="text-center py-12">
-                      <p className="text-neutral-600 dark:text-neutral-400 text-lg font-body mb-4">
-                        No articles found matching your search.
-                      </p>
-                      <p className="text-neutral-500 dark:text-neutral-500 text-sm font-sans mb-6">
-                        Try different keywords or browse our sections
-                      </p>
-                      <Link href="/" className="text-blue-600 hover:underline font-sans font-semibold">
-                        Back to Home →
-                      </Link>
-                    </div>
-                  ) : (
-                    filteredArticles.map((article) => (
-                      <article
-                        key={article.id}
-                        className="border-b border-neutral-200 dark:border-neutral-700 pb-6 hover:bg-neutral-50 dark:hover:bg-neutral-900 p-4 -mx-4 transition-colors"
-                      >
-                        <div className="flex flex-col md:flex-row gap-4">
-                          {article.imageUrl && (
-                            <Link href={`/article/${article.slug}`} className="flex-shrink-0">
-                              <div className="relative w-full md:w-48 aspect-video overflow-hidden">
-                                <Image
-                                  src={article.imageUrl}
-                                  alt={article.title}
-                                  fill
-                                  className="object-cover"
-                                />
-                              </div>
-                            </Link>
-                          )}
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <Link href={`/section/${article.category.toLowerCase()}`}>
-                                <span className="text-xs font-sans font-bold text-blue-600 uppercase tracking-wider hover:underline">
-                                  {article.category}
-                                </span>
-                              </Link>
-                              <span className="text-neutral-400">•</span>
-                              <span className="text-xs text-neutral-500 font-sans">
-                                {getTimeAgo(article.publishedAt)}
-                              </span>
-                            </div>
-                            <Link href={`/article/${article.slug}`}>
-                              <h2 className="text-primary dark:text-neutral-50 text-xl md:text-2xl font-bold font-body leading-tight hover:underline mb-2">
-                                {article.title}
-                              </h2>
-                            </Link>
-                            {article.excerpt && (
-                              <p className="text-neutral-600 dark:text-neutral-400 text-sm font-body leading-relaxed mb-2 line-clamp-2">
-                                {article.excerpt}
-                              </p>
-                            )}
-                            <Link
-                              href={`/author/${article.author.toLowerCase().replace(/\s+/g, '-')}`}
-                              className="text-sm text-neutral-500 hover:underline font-sans"
-                            >
-                              By {article.author}
-                            </Link>
-                          </div>
-                        </div>
-                      </article>
-                    ))
-                  )}
-                </div>
-              )}
-            </main>
-
-            <Footer />
+        {/* Search Input Bar */}
+        <form onSubmit={handleSearchSubmit} className="mt-6 flex gap-2">
+          <div className="relative flex-1">
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search by topic, headline, journalist, or keyword…"
+              className="w-full pl-10 pr-4 py-3 bg-paper-subtle dark:bg-dark-subtle border border-rule dark:border-dark-rule font-sans text-sm text-ink dark:text-dark-ink placeholder:text-ink-mute focus:outline-none focus:border-accent"
+              autoFocus
+            />
+            <svg
+              className="w-4 h-4 absolute left-3.5 top-3.5 text-ink-mute"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery('')}
+                className="absolute right-3 top-3 text-xs text-ink-mute hover:text-ink cursor-pointer"
+                title="Clear"
+              >
+                ✕
+              </button>
+            )}
           </div>
+          <button
+            type="submit"
+            className="px-6 py-3 bg-accent hover:bg-accent/90 text-white font-bold uppercase tracking-wider text-xs transition shadow-xs"
+          >
+            Search
+          </button>
+        </form>
+
+        {/* Category Filter Pills */}
+        <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat}
+              type="button"
+              onClick={() => setSelectedCategory(cat)}
+              className={`px-3 py-1 text-xs font-sans uppercase tracking-wider transition rounded-xs cursor-pointer ${
+                selectedCategory === cat
+                  ? 'bg-ink dark:bg-dark-ink text-paper dark:text-dark-paper font-bold'
+                  : 'bg-paper-subtle dark:bg-dark-subtle text-ink-mute dark:text-dark-mute hover:text-ink dark:hover:text-dark-ink border border-rule dark:border-dark-rule'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
         </div>
       </div>
+
+      {/* Results Section */}
+      <div className="border-t border-rule dark:border-dark-rule pt-6">
+        <div className="flex items-center justify-between mb-6">
+          <span className="text-xs font-mono uppercase tracking-wider text-ink-mute dark:text-dark-mute">
+            {loading ? (
+              'Searching broadsheet archives…'
+            ) : (
+              <>
+                Showing <strong>{filteredArticles.length}</strong>{' '}
+                {filteredArticles.length === 1 ? 'story' : 'stories'}
+                {query ? ` matching "${query}"` : ''}
+                {selectedCategory !== 'All' ? ` in ${selectedCategory}` : ''}
+              </>
+            )}
+          </span>
+        </div>
+
+        {loading ? (
+          <div className="py-20 text-center text-sm font-mono text-ink-mute">
+            Retrieving stories from the archive...
+          </div>
+        ) : filteredArticles.length === 0 ? (
+          <div className="py-20 text-center space-y-3 max-w-md mx-auto">
+            <div className="w-12 h-12 mx-auto rounded-full bg-paper-subtle dark:bg-dark-subtle border border-rule dark:border-dark-rule flex items-center justify-center text-ink-mute">
+              🔍
+            </div>
+            <h3 className="font-serif font-black text-xl text-ink dark:text-dark-ink">
+              No Matches Found
+            </h3>
+            <p className="text-xs font-serif italic text-ink-mute dark:text-dark-mute">
+              We couldn't find any published stories matching your query. Try searching with alternative keywords or clearing category filters.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredArticles.map((article) => (
+              <div
+                key={article.id}
+                className="pb-6 border-b border-rule dark:border-dark-rule"
+              >
+                <PostCard
+                  post={mapArticleToPostCard(article)}
+                  variant="dense-thumb"
+                  showDeck={true}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </main>
+  )
+}
+
+export default function SearchPage() {
+  return (
+    <div className="min-h-screen bg-paper dark:bg-dark-paper text-ink dark:text-dark-ink transition-colors duration-200 flex flex-col font-sans">
+      <Masthead brandName="Singh Monster" tagline="Sharp reporting. Deep analysis. No agenda but the truth." />
+      <Suspense fallback={<div className="p-12 text-center text-sm font-mono">Loading Search...</div>}>
+        <SearchContent />
+      </Suspense>
+      <Footer />
     </div>
   )
 }
