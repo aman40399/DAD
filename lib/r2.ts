@@ -3,26 +3,6 @@ import fs from 'fs'
 import path from 'path'
 import { refreshCloudflareToken } from './d1'
 
-// Cloudflare R2 configuration
-const accountId = process.env.CLOUDFLARE_ACCOUNT_ID || ''
-const accessKeyId = process.env.CLOUDFLARE_R2_ACCESS_KEY_ID || ''
-const secretAccessKey = process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY || ''
-const bucketName = process.env.CLOUDFLARE_R2_BUCKET_NAME || ''
-const publicUrl = process.env.CLOUDFLARE_R2_PUBLIC_URL || '' // e.g. https://media.yourdomain.com or R2 dev URL
-
-const hasR2Config = Boolean(accountId && accessKeyId && secretAccessKey && bucketName)
-
-const s3Client = hasR2Config
-  ? new S3Client({
-      region: 'auto',
-      endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
-      credentials: {
-        accessKeyId,
-        secretAccessKey,
-      },
-    })
-  : null
-
 export interface UploadResult {
   url: string
   key: string
@@ -37,55 +17,37 @@ export interface R2Object {
   last_modified: string
 }
 
-/**
- * Get a fresh Cloudflare API token (auto-refreshes via OAuth if needed)
- */
-async function getR2Token(): Promise<string> {
-  return refreshCloudflareToken()
-}
+function getR2S3Client() {
+  const accountId = process.env.CLOUDFLARE_ACCOUNT_ID || ''
+  const accessKeyId = process.env.CLOUDFLARE_R2_ACCESS_KEY_ID || ''
+  const secretAccessKey = process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY || ''
+  const bucketName = process.env.CLOUDFLARE_R2_BUCKET_NAME || 'singhmonster-media'
+  const publicUrl = process.env.CLOUDFLARE_R2_PUBLIC_URL || 'https://pub-f105b5c2551040e1b44a90da84ffa541.r2.dev'
 
-/**
- * Upload a file to R2 via Cloudflare REST API with auto-refresh token
- */
-async function r2RestUpload(key: string, buffer: Buffer, contentType: string): Promise<boolean> {
-  const r2ApiUrl = `https://api.cloudflare.com/client/v4/accounts/${accountId}/r2/buckets/${bucketName}/objects/${key}`
-
-  let token = await getR2Token()
-  let res = await fetch(r2ApiUrl, {
-    method: 'PUT',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': contentType,
-    },
-    body: new Uint8Array(buffer),
-  })
-
-  // Retry with refreshed token on auth failure
-  if (res.status === 401 || res.status === 403) {
-    token = await refreshCloudflareToken()
-    res = await fetch(r2ApiUrl, {
-      method: 'PUT',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': contentType,
+  if (accountId && accessKeyId && secretAccessKey && bucketName) {
+    const client = new S3Client({
+      region: 'auto',
+      endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
+      credentials: {
+        accessKeyId,
+        secretAccessKey,
       },
-      body: new Uint8Array(buffer),
     })
+    return { client, bucketName, accountId, publicUrl }
   }
-
-  return res.ok
+  return null
 }
 
 /**
- * List objects in R2 bucket via Cloudflare REST API with auto-refresh token
+ * List objects in R2 bucket (prefers native S3 protocol)
  */
 export async function listR2Objects(): Promise<R2Object[]> {
-  // 1. Try S3 ListObjectsV2 if S3 credentials are available
-  if (s3Client && hasR2Config) {
+  const s3 = getR2S3Client()
+  if (s3) {
     try {
-      const response = await s3Client.send(
+      const response = await s3.client.send(
         new ListObjectsV2Command({
-          Bucket: bucketName,
+          Bucket: s3.bucketName,
           MaxKeys: 500,
         })
       )
@@ -95,36 +57,41 @@ export async function listR2Objects(): Promise<R2Object[]> {
         last_modified: obj.LastModified?.toISOString() || new Date().toISOString(),
       }))
     } catch (err) {
-      console.error('S3 ListObjectsV2 error:', err)
+      console.error('[R2 S3 ListObjects error]:', err)
     }
   }
 
-  // 2. Try Cloudflare REST API with token refresh
+  // Fallback to Cloudflare REST API if S3 is not available
+  const accountId = process.env.CLOUDFLARE_ACCOUNT_ID
+  const bucketName = process.env.CLOUDFLARE_R2_BUCKET_NAME || 'singhmonster-media'
+
   if (accountId && bucketName) {
     const listUrl = `https://api.cloudflare.com/client/v4/accounts/${accountId}/r2/buckets/${bucketName}/objects`
-
-    let token = await getR2Token()
-    let res = await fetch(listUrl, {
-      headers: { 'Authorization': `Bearer ${token}` },
-      cache: 'no-store',
-    })
-
-    // Retry with refreshed token on auth failure
-    if (res.status === 401 || res.status === 403) {
-      token = await refreshCloudflareToken()
-      res = await fetch(listUrl, {
+    try {
+      let token = await refreshCloudflareToken()
+      let res = await fetch(listUrl, {
         headers: { 'Authorization': `Bearer ${token}` },
         cache: 'no-store',
       })
-    }
 
-    if (res.ok) {
-      const data = await res.json()
-      return (data.result || []).map((obj: any) => ({
-        key: obj.key,
-        size: obj.size || 0,
-        last_modified: obj.last_modified || new Date().toISOString(),
-      }))
+      if (res.status === 401 || res.status === 403) {
+        token = await refreshCloudflareToken()
+        res = await fetch(listUrl, {
+          headers: { 'Authorization': `Bearer ${token}` },
+          cache: 'no-store',
+        })
+      }
+
+      if (res.ok) {
+        const data = await res.json()
+        return (data.result || []).map((obj: any) => ({
+          key: obj.key,
+          size: obj.size || 0,
+          last_modified: obj.last_modified || new Date().toISOString(),
+        }))
+      }
+    } catch (err) {
+      console.error('[R2 REST List error]:', err)
     }
   }
 
@@ -132,7 +99,7 @@ export async function listR2Objects(): Promise<R2Object[]> {
 }
 
 /**
- * Upload buffer to Cloudflare R2 (or local fallback in dev)
+ * Upload buffer to Cloudflare R2 (prefers native S3 protocol, fallback to REST or local)
  */
 export async function uploadMedia(
   buffer: Buffer,
@@ -149,19 +116,20 @@ export async function uploadMedia(
     .slice(0, 40)
   const key = `news/${timestamp}-${cleanBase}-${random}.${extension}`
 
-  // 1. If Cloudflare R2 S3 credentials exist, upload directly via S3
-  if (s3Client && hasR2Config) {
+  // 1. Direct high-speed S3 upload to Cloudflare R2
+  const s3 = getR2S3Client()
+  if (s3) {
     try {
-      await s3Client.send(
+      await s3.client.send(
         new PutObjectCommand({
-          Bucket: bucketName,
+          Bucket: s3.bucketName,
           Key: key,
           Body: buffer,
           ContentType: contentType,
         })
       )
 
-      const fileUrl = publicUrl ? `${publicUrl.replace(/\/$/, '')}/${key}` : `https://${bucketName}.${accountId}.r2.cloudflarestorage.com/${key}`
+      const fileUrl = `${s3.publicUrl.replace(/\/$/, '')}/${key}`
 
       return {
         url: fileUrl,
@@ -170,20 +138,46 @@ export async function uploadMedia(
         contentType,
         storage: 'cloudflare-r2',
       }
-    } catch (err) {
-      console.error('R2 S3 upload error:', err)
+    } catch (err: any) {
+      console.error('[R2 S3 Put error]:', err)
+      if (process.env.VERCEL) {
+        throw new Error(`R2 Upload failed: ${err.message || 'S3 protocol error'}`)
+      }
     }
   }
 
-  // 2. Upload via Cloudflare REST API with auto-refresh OAuth token
+  // 2. Cloudflare REST API fallback
+  const accountId = process.env.CLOUDFLARE_ACCOUNT_ID
+  const bucketName = process.env.CLOUDFLARE_R2_BUCKET_NAME || 'singhmonster-media'
+  const publicUrl = process.env.CLOUDFLARE_R2_PUBLIC_URL || 'https://pub-f105b5c2551040e1b44a90da84ffa541.r2.dev'
+
   if (accountId && bucketName) {
     try {
-      const uploaded = await r2RestUpload(key, buffer, contentType)
-      if (uploaded) {
-        const fileUrl = publicUrl
-          ? `${publicUrl.replace(/\/$/, '')}/${key}`
-          : `https://${bucketName}.${accountId}.r2.cloudflarestorage.com/${key}`
+      const r2ApiUrl = `https://api.cloudflare.com/client/v4/accounts/${accountId}/r2/buckets/${bucketName}/objects/${key}`
+      let token = await refreshCloudflareToken()
+      let res = await fetch(r2ApiUrl, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': contentType,
+        },
+        body: new Uint8Array(buffer),
+      })
 
+      if (res.status === 401 || res.status === 403) {
+        token = await refreshCloudflareToken()
+        res = await fetch(r2ApiUrl, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': contentType,
+          },
+          body: new Uint8Array(buffer),
+        })
+      }
+
+      if (res.ok) {
+        const fileUrl = `${publicUrl.replace(/\/$/, '')}/${key}`
         return {
           url: fileUrl,
           key,
@@ -193,11 +187,15 @@ export async function uploadMedia(
         }
       }
     } catch (err) {
-      console.error('R2 REST API upload error:', err)
+      console.error('[R2 REST API upload error]:', err)
     }
   }
 
-  // 3. Fallback for local development if R2 credentials aren't available
+  // 3. Fallback for local development
+  if (process.env.VERCEL) {
+    throw new Error('Cloudflare R2 credentials missing or failed on production.')
+  }
+
   const uploadsDir = path.join(process.cwd(), 'public', 'uploads')
   if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true })
