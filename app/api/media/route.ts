@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import fs from 'fs'
 import path from 'path'
 import { getAllArticles } from '@/lib/articles'
+import { listR2Objects } from '@/lib/r2'
 
 export const dynamic = 'force-dynamic'
 export const fetchCache = 'force-no-store'
@@ -21,53 +22,35 @@ export async function GET(req: NextRequest) {
   try {
     const mediaMap = new Map<string, MediaItem>()
 
-    // 1. Fetch Cloudflare R2 bucket objects via Cloudflare REST API
-    const accountId = process.env.CLOUDFLARE_ACCOUNT_ID
-    const bucketName = process.env.CLOUDFLARE_R2_BUCKET_NAME || 'singhmonster-media'
     const publicUrl = process.env.CLOUDFLARE_R2_PUBLIC_URL || 'https://pub-f105b5c2551040e1b44a90da84ffa541.r2.dev'
-    const apiToken = process.env.CLOUDFLARE_API_TOKEN
 
-    if (apiToken && accountId && bucketName) {
-      try {
-        const r2Res = await fetch(
-          `https://api.cloudflare.com/client/v4/accounts/${accountId}/r2/buckets/${bucketName}/objects`,
-          {
-            headers: {
-              'Authorization': `Bearer ${apiToken}`,
-            },
-            cache: 'no-store',
-            next: { revalidate: 0 },
-          }
-        )
-        if (r2Res.ok) {
-          const r2Data = await r2Res.json()
-          const objects = r2Data.result || []
-          for (const obj of objects) {
-            const key = obj.key
-            if (key === 'test.txt' || key.startsWith('.')) continue
-            const isImage = /\.(webp|jpg|jpeg|png|gif|avif|svg)$/i.test(key)
-            if (isImage) {
-              const cdnUrl = `${publicUrl.replace(/\/$/, '')}/${key}`
-              const rawName = key
-                .replace(/^news\//, '')
-                .replace(/^[0-9]+-/, '')
-                .replace(/\.[^/.]+$/, '')
-                .replace(/[-_]+/g, ' ')
-              mediaMap.set(cdnUrl, {
-                id: `r2-${key}`,
-                url: cdnUrl,
-                title: rawName.trim() || 'Uploaded Media Asset',
-                source: 'upload',
-                aspectRatio: '16:10',
-                createdAt: obj.last_modified || new Date().toISOString(),
-                size: obj.size,
-              })
-            }
-          }
+    // 1. Fetch Cloudflare R2 bucket objects via lib/r2 (S3 or REST API with auto-refresh)
+    try {
+      const objects = await listR2Objects()
+      for (const obj of objects) {
+        const key = obj.key
+        if (key === 'test.txt' || key === 'test-upload-check.txt' || key.startsWith('.')) continue
+        const isImage = /\.(webp|jpg|jpeg|png|gif|avif|svg)$/i.test(key)
+        if (isImage) {
+          const cdnUrl = `${publicUrl.replace(/\/$/, '')}/${key}`
+          const rawName = key
+            .replace(/^news\//, '')
+            .replace(/^[0-9]+-/, '')
+            .replace(/\.[^/.]+$/, '')
+            .replace(/[-_]+/g, ' ')
+          mediaMap.set(cdnUrl, {
+            id: `r2-${key}`,
+            url: cdnUrl,
+            title: rawName.trim() || 'Uploaded Media Asset',
+            source: 'upload',
+            aspectRatio: '16:10',
+            createdAt: obj.last_modified || new Date().toISOString(),
+            size: obj.size,
+          })
         }
-      } catch (err) {
-        console.error('Error fetching R2 bucket objects:', err)
       }
+    } catch (err) {
+      console.error('Error fetching R2 bucket objects:', err)
     }
 
     // 2. Scan public/uploads directory (local filesystem fallback)

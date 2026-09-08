@@ -1,6 +1,7 @@
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
+import { S3Client, PutObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3'
 import fs from 'fs'
 import path from 'path'
+import { refreshCloudflareToken } from './d1'
 
 // Cloudflare R2 configuration
 const accountId = process.env.CLOUDFLARE_ACCOUNT_ID || ''
@@ -30,8 +31,108 @@ export interface UploadResult {
   storage: 'cloudflare-r2' | 'local'
 }
 
+export interface R2Object {
+  key: string
+  size: number
+  last_modified: string
+}
+
 /**
- * Upload buffer or base64 to Cloudflare R2 (or local fallback in dev)
+ * Get a fresh Cloudflare API token (auto-refreshes via OAuth if needed)
+ */
+async function getR2Token(): Promise<string> {
+  return refreshCloudflareToken()
+}
+
+/**
+ * Upload a file to R2 via Cloudflare REST API with auto-refresh token
+ */
+async function r2RestUpload(key: string, buffer: Buffer, contentType: string): Promise<boolean> {
+  const r2ApiUrl = `https://api.cloudflare.com/client/v4/accounts/${accountId}/r2/buckets/${bucketName}/objects/${key}`
+
+  let token = await getR2Token()
+  let res = await fetch(r2ApiUrl, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': contentType,
+    },
+    body: new Uint8Array(buffer),
+  })
+
+  // Retry with refreshed token on auth failure
+  if (res.status === 401 || res.status === 403) {
+    token = await refreshCloudflareToken()
+    res = await fetch(r2ApiUrl, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': contentType,
+      },
+      body: new Uint8Array(buffer),
+    })
+  }
+
+  return res.ok
+}
+
+/**
+ * List objects in R2 bucket via Cloudflare REST API with auto-refresh token
+ */
+export async function listR2Objects(): Promise<R2Object[]> {
+  // 1. Try S3 ListObjectsV2 if S3 credentials are available
+  if (s3Client && hasR2Config) {
+    try {
+      const response = await s3Client.send(
+        new ListObjectsV2Command({
+          Bucket: bucketName,
+          MaxKeys: 500,
+        })
+      )
+      return (response.Contents || []).map((obj) => ({
+        key: obj.Key || '',
+        size: obj.Size || 0,
+        last_modified: obj.LastModified?.toISOString() || new Date().toISOString(),
+      }))
+    } catch (err) {
+      console.error('S3 ListObjectsV2 error:', err)
+    }
+  }
+
+  // 2. Try Cloudflare REST API with token refresh
+  if (accountId && bucketName) {
+    const listUrl = `https://api.cloudflare.com/client/v4/accounts/${accountId}/r2/buckets/${bucketName}/objects`
+
+    let token = await getR2Token()
+    let res = await fetch(listUrl, {
+      headers: { 'Authorization': `Bearer ${token}` },
+      cache: 'no-store',
+    })
+
+    // Retry with refreshed token on auth failure
+    if (res.status === 401 || res.status === 403) {
+      token = await refreshCloudflareToken()
+      res = await fetch(listUrl, {
+        headers: { 'Authorization': `Bearer ${token}` },
+        cache: 'no-store',
+      })
+    }
+
+    if (res.ok) {
+      const data = await res.json()
+      return (data.result || []).map((obj: any) => ({
+        key: obj.key,
+        size: obj.size || 0,
+        last_modified: obj.last_modified || new Date().toISOString(),
+      }))
+    }
+  }
+
+  return []
+}
+
+/**
+ * Upload buffer to Cloudflare R2 (or local fallback in dev)
  */
 export async function uploadMedia(
   buffer: Buffer,
@@ -48,43 +149,37 @@ export async function uploadMedia(
     .slice(0, 40)
   const key = `news/${timestamp}-${cleanBase}-${random}.${extension}`
 
-  // 1. If Cloudflare R2 credentials exist, upload directly to R2
+  // 1. If Cloudflare R2 S3 credentials exist, upload directly via S3
   if (s3Client && hasR2Config) {
-    await s3Client.send(
-      new PutObjectCommand({
-        Bucket: bucketName,
-        Key: key,
-        Body: buffer,
-        ContentType: contentType,
-      })
-    )
+    try {
+      await s3Client.send(
+        new PutObjectCommand({
+          Bucket: bucketName,
+          Key: key,
+          Body: buffer,
+          ContentType: contentType,
+        })
+      )
 
-    const fileUrl = publicUrl ? `${publicUrl.replace(/\/$/, '')}/${key}` : `https://${bucketName}.${accountId}.r2.cloudflarestorage.com/${key}`
+      const fileUrl = publicUrl ? `${publicUrl.replace(/\/$/, '')}/${key}` : `https://${bucketName}.${accountId}.r2.cloudflarestorage.com/${key}`
 
-    return {
-      url: fileUrl,
-      key,
-      size: buffer.length,
-      contentType,
-      storage: 'cloudflare-r2',
+      return {
+        url: fileUrl,
+        key,
+        size: buffer.length,
+        contentType,
+        storage: 'cloudflare-r2',
+      }
+    } catch (err) {
+      console.error('R2 S3 upload error:', err)
     }
   }
 
-  // 2. If Cloudflare API Token and Account ID exist, upload directly via Cloudflare R2 REST API
-  const apiToken = process.env.CLOUDFLARE_API_TOKEN
-  if (apiToken && accountId && bucketName) {
+  // 2. Upload via Cloudflare REST API with auto-refresh OAuth token
+  if (accountId && bucketName) {
     try {
-      const r2ApiUrl = `https://api.cloudflare.com/client/v4/accounts/${accountId}/r2/buckets/${bucketName}/objects/${key}`
-      const res = await fetch(r2ApiUrl, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${apiToken}`,
-          'Content-Type': contentType,
-        },
-        body: new Uint8Array(buffer),
-      })
-
-      if (res.ok) {
+      const uploaded = await r2RestUpload(key, buffer, contentType)
+      if (uploaded) {
         const fileUrl = publicUrl
           ? `${publicUrl.replace(/\/$/, '')}/${key}`
           : `https://${bucketName}.${accountId}.r2.cloudflarestorage.com/${key}`
@@ -102,7 +197,7 @@ export async function uploadMedia(
     }
   }
 
-  // 2. Fallback for local development if R2 credentials aren't in .env yet
+  // 3. Fallback for local development if R2 credentials aren't available
   const uploadsDir = path.join(process.cwd(), 'public', 'uploads')
   if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true })
