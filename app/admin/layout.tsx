@@ -15,6 +15,7 @@ import {
   IconNavStories,
   IconNavSlots,
   IconNavMedia,
+  IconNavAbout,
   IconNavVisitor,
   IconLogout,
 } from '@/components/admin/AdminIcons'
@@ -72,6 +73,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { label: 'Stories', href: '/admin', exact: true },
     { label: 'Slot Manager', href: '/admin/slots', exact: false },
     { label: 'Media Vault', href: '/admin/media', exact: false },
+    { label: 'About Us Editor', href: '/admin/about', exact: false },
     { label: 'Visitor Intelligence', href: '/admin/analytics', exact: false },
   ]
 
@@ -86,6 +88,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (pathname === '/admin') return 'Stories'
     if (pathname.startsWith('/admin/slots')) return 'Slot Manager'
     if (pathname.startsWith('/admin/media')) return 'Media Vault'
+    if (pathname.startsWith('/admin/about')) return 'About Us Editor'
     if (pathname.startsWith('/admin/analytics')) return 'Visitor Intelligence'
     if (pathname.startsWith('/admin/articles/new')) return 'New Story'
     if (pathname.includes('/edit')) return 'Edit Story'
@@ -113,7 +116,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="h-dvh md:min-h-screen bg-paper dark:bg-dark-paper text-ink dark:text-dark-ink font-sans flex flex-col md:flex-row antialiased overflow-hidden md:overflow-visible">
       {/* MOBILE APP TOP BAR (Clean, compact, native feel - Solid opaque) */}
       <header className="md:hidden shrink-0 z-40 bg-paper dark:bg-[#0c0c0e] border-b border-rule/70 dark:border-white/[0.08] px-3.5 py-2.5 flex items-center justify-between select-none shadow-xs">
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setMobileOpen(true)}
+            className="w-7 h-7 -ml-1 rounded-full flex items-center justify-center text-ink dark:text-dark-ink hover:bg-paper-subtle dark:hover:bg-white/10 transition"
+            aria-label="Open newsroom menu"
+          >
+            <IconMenu className="w-4 h-4" />
+          </button>
           <Link href="/admin" className="flex items-center no-underline" title="Singh Monster CMS">
             <img
               src="/logo.png"
@@ -329,27 +340,40 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Tab 3: Media */}
         <Link
           href="/admin/media"
-          className={`flex flex-col items-center justify-center gap-0.5 py-1 px-3 rounded-xl transition ${
+          className={`flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-xl transition ${
             isDeskActive('/admin/media', false)
               ? 'text-accent dark:text-accent font-bold'
               : 'text-ink-mute dark:text-dark-mute hover:text-ink dark:hover:text-white'
           }`}
         >
-          <IconNavMedia className="w-[22px] h-[22px]" />
-          <span className="text-[10px] tracking-tight">Media</span>
+          <IconNavMedia className="w-[20px] h-[20px]" />
+          <span className="text-[9.5px] tracking-tight">Media</span>
         </Link>
 
-        {/* Tab 4: Analytics */}
+        {/* Tab 4: About Us */}
+        <Link
+          href="/admin/about"
+          className={`flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-xl transition ${
+            isDeskActive('/admin/about', false)
+              ? 'text-accent dark:text-accent font-bold'
+              : 'text-ink-mute dark:text-dark-mute hover:text-ink dark:hover:text-white'
+          }`}
+        >
+          <IconNavAbout className="w-[20px] h-[20px]" />
+          <span className="text-[9.5px] tracking-tight">About</span>
+        </Link>
+
+        {/* Tab 5: Analytics */}
         <Link
           href="/admin/analytics"
-          className={`flex flex-col items-center justify-center gap-0.5 py-1 px-3 rounded-xl transition ${
+          className={`flex flex-col items-center justify-center gap-0.5 py-1 px-2 rounded-xl transition ${
             isDeskActive('/admin/analytics', false)
               ? 'text-accent dark:text-accent font-bold'
               : 'text-ink-mute dark:text-dark-mute hover:text-ink dark:hover:text-white'
           }`}
         >
-          <IconNavVisitor className="w-[22px] h-[22px]" />
-          <span className="text-[10px] tracking-tight">Visitor</span>
+          <IconNavVisitor className="w-[20px] h-[20px]" />
+          <span className="text-[9.5px] tracking-tight">Visitor</span>
         </Link>
       </nav>
     </div>
