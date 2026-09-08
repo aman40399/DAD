@@ -2,8 +2,11 @@ import { Article, ArticleStatus, CreateArticleInput, ListArticlesOptions, Pagina
 import { supabase } from './supabase'
 import { localStore } from './localStore'
 import { generateSlug, resolveSlugCollision } from './utils'
+import { isD1Configured, queryD1, executeD1 } from './d1'
 
-// Check whether Supabase environment variables are properly configured
+// Check whether Cloudflare D1 or Supabase environment variables are properly configured
+export { isD1Configured }
+
 export function isSupabaseConfigured(): boolean {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -76,6 +79,15 @@ export function transformArticle(data: any): Article {
 
 // Check if a slug is already taken (excluding optional article ID for updates)
 export async function isSlugTaken(slug: string, excludeArticleId?: string): Promise<boolean> {
+  if (isD1Configured()) {
+    try {
+      const rows = excludeArticleId
+        ? await queryD1('SELECT id FROM articles WHERE slug = ?1 AND id != ?2 LIMIT 1', [slug, excludeArticleId])
+        : await queryD1('SELECT id FROM articles WHERE slug = ?1 LIMIT 1', [slug])
+      return rows.length > 0
+    } catch {}
+  }
+
   if (!isSupabaseConfigured()) {
     const store = localStore.getAll()
     return store.some(a => a.slug === slug && (!excludeArticleId || a.id !== excludeArticleId))
@@ -102,6 +114,16 @@ export async function generateUniqueArticleSlug(title: string, excludeArticleId?
 
 // Get all articles (sorted by published_at desc)
 export async function getAllArticles(): Promise<Article[]> {
+  if (isD1Configured()) {
+    try {
+      const rows = await queryD1('SELECT * FROM articles ORDER BY published_at DESC')
+      return rows.map(transformArticle)
+    } catch (error) {
+      console.warn('⚠️ Cloudflare D1 error fetching all articles, falling back to local store:', error)
+      return localStore.getAll()
+    }
+  }
+
   if (!isSupabaseConfigured()) {
     return localStore.getAll()
   }
@@ -122,6 +144,16 @@ export async function getAllArticles(): Promise<Article[]> {
 
 // Get article by ID
 export async function getArticleById(id: string): Promise<Article | null> {
+  if (isD1Configured()) {
+    try {
+      const rows = await queryD1('SELECT * FROM articles WHERE id = ?1 LIMIT 1', [id])
+      return rows[0] ? transformArticle(rows[0]) : null
+    } catch (error) {
+      console.warn(`⚠️ Cloudflare D1 error fetching article id=${id}, falling back to local store:`, error)
+      return localStore.getById(id)
+    }
+  }
+
   if (!isSupabaseConfigured()) {
     return localStore.getById(id)
   }
@@ -143,6 +175,16 @@ export async function getArticleById(id: string): Promise<Article | null> {
 
 // Get article by slug
 export async function getArticleBySlug(slug: string): Promise<Article | null> {
+  if (isD1Configured()) {
+    try {
+      const rows = await queryD1('SELECT * FROM articles WHERE slug = ?1 LIMIT 1', [slug])
+      return rows[0] ? transformArticle(rows[0]) : null
+    } catch (error) {
+      console.warn(`⚠️ Cloudflare D1 error fetching article slug=${slug}, falling back to local store:`, error)
+      return localStore.getBySlug(slug)
+    }
+  }
+
   if (!isSupabaseConfigured()) {
     return localStore.getBySlug(slug)
   }
@@ -164,6 +206,19 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
 
 // Get articles by category
 export async function getArticlesByCategory(category: string): Promise<Article[]> {
+  if (isD1Configured()) {
+    try {
+      const rows = await queryD1(
+        "SELECT * FROM articles WHERE category = ?1 AND status = 'published' ORDER BY published_at DESC",
+        [category]
+      )
+      return rows.map(transformArticle)
+    } catch (error) {
+      console.warn(`⚠️ Cloudflare D1 error fetching category=${category}, falling back to local store:`, error)
+      return localStore.getByCategory(category)
+    }
+  }
+
   if (!isSupabaseConfigured()) {
     return localStore.getByCategory(category)
   }
@@ -186,6 +241,18 @@ export async function getArticlesByCategory(category: string): Promise<Article[]
 
 // Get featured articles
 export async function getFeaturedArticles(): Promise<Article[]> {
+  if (isD1Configured()) {
+    try {
+      const rows = await queryD1(
+        "SELECT * FROM articles WHERE (featured = 1 OR featured = true) AND status = 'published' ORDER BY published_at DESC"
+      )
+      return rows.map(transformArticle)
+    } catch (error) {
+      console.warn('⚠️ Cloudflare D1 error fetching featured articles, falling back to local store:', error)
+      return localStore.getFeatured()
+    }
+  }
+
   if (!isSupabaseConfigured()) {
     return localStore.getFeatured()
   }
@@ -208,6 +275,19 @@ export async function getFeaturedArticles(): Promise<Article[]> {
 
 // Get recent articles
 export async function getRecentArticles(limit: number = 10): Promise<Article[]> {
+  if (isD1Configured()) {
+    try {
+      const rows = await queryD1(
+        "SELECT * FROM articles WHERE status = 'published' ORDER BY published_at DESC LIMIT ?1",
+        [limit]
+      )
+      return rows.map(transformArticle)
+    } catch (error) {
+      console.warn('⚠️ Cloudflare D1 error fetching recent articles, falling back to local store:', error)
+      return localStore.getRecent(limit)
+    }
+  }
+
   if (!isSupabaseConfigured()) {
     return localStore.getRecent(limit)
   }
@@ -230,6 +310,18 @@ export async function getRecentArticles(limit: number = 10): Promise<Article[]> 
 
 // Get homepage articles (positions 1-15)
 export async function getHomepageArticles(): Promise<Article[]> {
+  if (isD1Configured()) {
+    try {
+      const rows = await queryD1(
+        "SELECT * FROM articles WHERE status = 'published' AND homepage_position >= 1 AND homepage_position <= 15 ORDER BY homepage_position ASC"
+      )
+      return rows.map(transformArticle)
+    } catch (error) {
+      console.warn('⚠️ Cloudflare D1 error fetching homepage articles, falling back to local store:', error)
+      return localStore.getHomepage()
+    }
+  }
+
   if (!isSupabaseConfigured()) {
     return localStore.getHomepage()
   }
@@ -253,6 +345,21 @@ export async function getHomepageArticles(): Promise<Article[]> {
 
 // Get articles by specific broadsheet positions
 export async function getArticlesByPosition(positions: number[]): Promise<Article[]> {
+  if (isD1Configured()) {
+    try {
+      if (positions.length === 0) return []
+      const placeholders = positions.map((_, i) => `?${i + 1}`).join(',')
+      const rows = await queryD1(
+        `SELECT * FROM articles WHERE status = 'published' AND homepage_position IN (${placeholders}) ORDER BY homepage_position ASC`,
+        positions
+      )
+      return rows.map(transformArticle)
+    } catch (error) {
+      console.warn('⚠️ Cloudflare D1 error fetching articles by position, falling back to local store:', error)
+      return localStore.getByPositions(positions)
+    }
+  }
+
   if (!isSupabaseConfigured()) {
     return localStore.getByPositions(positions)
   }
@@ -275,6 +382,18 @@ export async function getArticlesByPosition(positions: number[]): Promise<Articl
 
 // Get breaking news stories (is_breaking = true or homepage_position = 1)
 export async function getBreakingArticles(): Promise<Article[]> {
+  if (isD1Configured()) {
+    try {
+      const rows = await queryD1(
+        "SELECT * FROM articles WHERE status = 'published' AND (is_breaking = 1 OR is_breaking = true OR homepage_position = 1) ORDER BY published_at DESC"
+      )
+      return rows.map(transformArticle)
+    } catch (error) {
+      console.warn('⚠️ Cloudflare D1 error fetching breaking articles, falling back to local store:', error)
+      return localStore.getBreaking()
+    }
+  }
+
   if (!isSupabaseConfigured()) {
     return localStore.getBreaking()
   }
@@ -346,6 +465,46 @@ export async function createArticle(input: CreateArticleInput): Promise<Article 
   // Always update local store so local state remains synchronized
   const localResult = localStore.create(input)
 
+  if (isD1Configured()) {
+    try {
+      const now = new Date().toISOString()
+      const pubAt = input.published_at || (input.status === 'published' ? now : null)
+      await executeD1(
+        `INSERT INTO articles (
+          id, title, slug, subtitle, excerpt, content, author, category,
+          image_url, image_caption, video_url, featured, is_breaking, status,
+          homepage_position, tags, language, created_at, updated_at, published_at
+        ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20)`,
+        [
+          localResult.id,
+          input.title,
+          input.slug || localResult.slug,
+          input.subtitle || null,
+          input.excerpt,
+          input.content,
+          input.author || 'Dhananjay Singh',
+          input.category || 'World',
+          input.image_url || input.imageUrl || '',
+          input.image_caption || input.imageCaption || null,
+          input.video_url !== undefined ? input.video_url : (input.videoUrl !== undefined ? input.videoUrl : null),
+          input.featured ? 1 : 0,
+          input.is_breaking ? 1 : 0,
+          input.status || 'draft',
+          typeof input.homepage_position === 'number' ? input.homepage_position : null,
+          JSON.stringify(input.tags || []),
+          input.language || 'english',
+          now,
+          now,
+          pubAt,
+        ]
+      )
+      return localResult
+    } catch (err) {
+      console.warn('⚠️ Cloudflare D1 error creating article, using local store:', err)
+      return localResult
+    }
+  }
+
   if (!isSupabaseConfigured()) {
     return localResult
   }
@@ -391,6 +550,48 @@ export async function createArticle(input: CreateArticleInput): Promise<Article 
 // Update existing article
 export async function updateArticle(id: string, updates: UpdateArticleInput): Promise<Article | null> {
   const localResult = localStore.update(id, updates)
+
+  if (isD1Configured()) {
+    try {
+      const existing = await getArticleById(id)
+      if (existing) {
+        const merged = { ...existing, ...updates, updated_at: new Date().toISOString() }
+        await executeD1(
+          `UPDATE articles SET
+            title = ?1, slug = ?2, subtitle = ?3, excerpt = ?4, content = ?5,
+            author = ?6, category = ?7, image_url = ?8, image_caption = ?9,
+            video_url = ?10, featured = ?11, is_breaking = ?12, status = ?13,
+            homepage_position = ?14, tags = ?15, language = ?16, updated_at = ?17, published_at = ?18
+          WHERE id = ?19`,
+          [
+            merged.title,
+            merged.slug,
+            merged.subtitle || null,
+            merged.excerpt,
+            merged.content,
+            merged.author,
+            merged.category,
+            merged.image_url || merged.imageUrl || '',
+            merged.image_caption || merged.imageCaption || null,
+            merged.video_url !== undefined ? merged.video_url : (merged.videoUrl !== undefined ? merged.videoUrl : null),
+            merged.featured ? 1 : 0,
+            merged.is_breaking ? 1 : 0,
+            merged.status,
+            typeof merged.homepage_position === 'number' ? merged.homepage_position : null,
+            JSON.stringify(merged.tags || []),
+            merged.language || 'english',
+            merged.updated_at,
+            merged.published_at || null,
+            id,
+          ]
+        )
+      }
+      return localResult
+    } catch (err) {
+      console.warn('⚠️ Cloudflare D1 error updating article, using local store:', err)
+      return localResult
+    }
+  }
 
   if (!isSupabaseConfigured()) {
     return localResult
@@ -447,6 +648,15 @@ export async function updateArticle(id: string, updates: UpdateArticleInput): Pr
 export async function deleteArticle(id: string): Promise<boolean> {
   const localSuccess = localStore.delete(id)
 
+  if (isD1Configured()) {
+    try {
+      await executeD1('DELETE FROM articles WHERE id = ?1', [id])
+      return true
+    } catch (err) {
+      return localSuccess
+    }
+  }
+
   if (!isSupabaseConfigured()) {
     return localSuccess
   }
@@ -473,6 +683,18 @@ export async function setArticleStatus(id: string, status: ArticleStatus): Promi
 // Update homepage position (1-15, or null to unpin)
 export async function updateArticlePosition(id: string, position: number | null): Promise<boolean> {
   const localSuccess = localStore.updatePosition(id, position)
+
+  if (isD1Configured()) {
+    try {
+      if (position !== null && position >= 1 && position <= 15) {
+        await executeD1('UPDATE articles SET homepage_position = NULL WHERE homepage_position = ?1', [position])
+      }
+      await executeD1('UPDATE articles SET homepage_position = ?1 WHERE id = ?2', [position, id])
+      return true
+    } catch (err) {
+      return localSuccess
+    }
+  }
 
   if (!isSupabaseConfigured()) {
     return localSuccess
@@ -504,6 +726,22 @@ export async function updateArticlePosition(id: string, position: number | null)
 export async function swapArticlePositions(id1: string, id2: string): Promise<boolean> {
   const localSuccess = localStore.swapPositions(id1, id2)
 
+  if (isD1Configured()) {
+    try {
+      const a1 = await getArticleById(id1)
+      const a2 = await getArticleById(id2)
+      if (!a1 || !a2) return false
+      const pos1 = a1.homepage_position
+      const pos2 = a2.homepage_position
+      await executeD1('UPDATE articles SET homepage_position = NULL WHERE id = ?1', [id1])
+      await executeD1('UPDATE articles SET homepage_position = ?1 WHERE id = ?2', [pos1, id2])
+      await executeD1('UPDATE articles SET homepage_position = ?1 WHERE id = ?2', [pos2, id1])
+      return true
+    } catch (err) {
+      return localSuccess
+    }
+  }
+
   if (!isSupabaseConfigured()) {
     return localSuccess
   }
@@ -531,6 +769,18 @@ export async function swapArticlePositions(id1: string, id2: string): Promise<bo
 
 // Get currently unassigned broadsheet positions (1-15)
 export async function getAvailablePositions(): Promise<number[]> {
+  if (isD1Configured()) {
+    try {
+      const rows = await queryD1<{ homepage_position: number }>(
+        "SELECT homepage_position FROM articles WHERE status = 'published' AND homepage_position >= 1 AND homepage_position <= 15"
+      )
+      const usedPositions = rows.map(r => r.homepage_position).filter(p => typeof p === 'number')
+      return Array.from({ length: 15 }, (_, i) => i + 1).filter((p) => !usedPositions.includes(p))
+    } catch (err) {
+      return localStore.getAvailablePositions()
+    }
+  }
+
   if (!isSupabaseConfigured()) {
     return localStore.getAvailablePositions()
   }
