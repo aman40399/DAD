@@ -14,7 +14,7 @@ function signToken(username: string): string {
   return `${data}:${hmac}`
 }
 
-export function verifyToken(token: string): { valid: boolean; username?: string } {
+function verifyToken(token: string): { valid: boolean; username?: string } {
   if (!token) return { valid: false }
   const parts = token.split(':')
   if (parts.length !== 3) return { valid: false }

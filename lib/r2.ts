@@ -70,6 +70,38 @@ export async function uploadMedia(
     }
   }
 
+  // 2. If Cloudflare API Token and Account ID exist, upload directly via Cloudflare R2 REST API
+  const apiToken = process.env.CLOUDFLARE_API_TOKEN
+  if (apiToken && accountId && bucketName) {
+    try {
+      const r2ApiUrl = `https://api.cloudflare.com/client/v4/accounts/${accountId}/r2/buckets/${bucketName}/objects/${key}`
+      const res = await fetch(r2ApiUrl, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${apiToken}`,
+          'Content-Type': contentType,
+        },
+        body: new Uint8Array(buffer),
+      })
+
+      if (res.ok) {
+        const fileUrl = publicUrl
+          ? `${publicUrl.replace(/\/$/, '')}/${key}`
+          : `https://${bucketName}.${accountId}.r2.cloudflarestorage.com/${key}`
+
+        return {
+          url: fileUrl,
+          key,
+          size: buffer.length,
+          contentType,
+          storage: 'cloudflare-r2',
+        }
+      }
+    } catch (err) {
+      console.error('R2 REST API upload error:', err)
+    }
+  }
+
   // 2. Fallback for local development if R2 credentials aren't in .env yet
   const uploadsDir = path.join(process.cwd(), 'public', 'uploads')
   if (!fs.existsSync(uploadsDir)) {
