@@ -75,7 +75,13 @@ export default function AdminMediaVaultPage() {
   const fetchMedia = async () => {
     setLoading(true)
     try {
-      const res = await fetch('/api/media')
+      const res = await fetch(`/api/media?_t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+        },
+      })
       if (res.ok) {
         const data = await res.json()
         setMediaItems(data.media || [])
@@ -122,6 +128,28 @@ export default function AdminMediaVaultPage() {
       if (!res.ok) {
         const errData = await res.json()
         throw new Error(errData.error || 'Upload failed')
+      }
+
+      const uploadData = await res.json()
+
+      // Optimistically insert newly uploaded asset immediately into view
+      if (uploadData && uploadData.url) {
+        const rawName = (uploadData.key || file.name)
+          .replace(/^news\//, '')
+          .replace(/^[0-9]+-/, '')
+          .replace(/\.[^/.]+$/, '')
+          .replace(/[-_]+/g, ' ')
+          .trim()
+        const optimisticItem: MediaItem = {
+          id: `r2-${uploadData.key || uploadData.url}`,
+          url: uploadData.url,
+          title: rawName || file.name,
+          source: 'upload',
+          aspectRatio: uploadData.aspectRatio || '16:10',
+          createdAt: new Date().toISOString(),
+          size: file.size || uploadData.size,
+        }
+        setMediaItems((prev) => [optimisticItem, ...prev.filter((m) => m.url !== optimisticItem.url)])
       }
 
       addToast('success', 'File Uploaded', `${file.name} saved to Cloudflare R2.`)

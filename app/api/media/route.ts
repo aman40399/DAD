@@ -4,6 +4,8 @@ import path from 'path'
 import { getAllArticles } from '@/lib/articles'
 
 export const dynamic = 'force-dynamic'
+export const fetchCache = 'force-no-store'
+export const revalidate = 0
 
 export interface MediaItem {
   id: string
@@ -33,6 +35,8 @@ export async function GET(req: NextRequest) {
             headers: {
               'Authorization': `Bearer ${apiToken}`,
             },
+            cache: 'no-store',
+            next: { revalidate: 0 },
           }
         )
         if (r2Res.ok) {
@@ -124,11 +128,22 @@ export async function GET(req: NextRequest) {
     // Sort newest first
     items.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 
-    return NextResponse.json({
-      success: true,
-      count: items.length,
-      media: items,
-    })
+    return NextResponse.json(
+      {
+        success: true,
+        count: items.length,
+        media: items,
+      },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+          'CDN-Cache-Control': 'no-store',
+          'Vercel-CDN-Cache-Control': 'no-store',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        },
+      }
+    )
   } catch (error: any) {
     console.error('Media fetch error:', error)
     return NextResponse.json({ error: 'Failed to list media' }, { status: 500 })

@@ -42,7 +42,13 @@ export default function MediaLibraryModal({
   const fetchMedia = async () => {
     setLoading(true)
     try {
-      const res = await fetch('/api/media')
+      const res = await fetch(`/api/media?_t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+        },
+      })
       if (res.ok) {
         const data = await res.json()
         setMediaItems(data.media || [])
@@ -120,6 +126,24 @@ export default function MediaLibraryModal({
       }
 
       const data = await res.json()
+      if (data && data.url) {
+        const rawName = (data.key || uploadFile.name)
+          .replace(/^news\//, '')
+          .replace(/^[0-9]+-/, '')
+          .replace(/\.[^/.]+$/, '')
+          .replace(/[-_]+/g, ' ')
+          .trim()
+        const optimisticItem: MediaAsset = {
+          id: `r2-${data.key || data.url}`,
+          url: data.url,
+          title: rawName || uploadFile.name,
+          source: 'upload',
+          aspectRatio: uploadAspectRatio,
+          createdAt: new Date().toISOString(),
+          size: uploadFile.size || data.size,
+        }
+        setMediaItems((prev) => [optimisticItem, ...prev.filter((m) => m.url !== optimisticItem.url)])
+      }
       setUploadFile(null)
       setUploadPreview(null)
       setActiveTab('browse')
