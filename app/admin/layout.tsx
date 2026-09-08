@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import ThemeToggle from '@/components/meridian/ThemeToggle'
 import {
   IconMenu,
@@ -16,11 +16,57 @@ import {
   IconNavSlots,
   IconNavMedia,
   IconNavVisitor,
+  IconLogout,
 } from '@/components/admin/AdminIcons'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+  const router = useRouter()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [checkingAuth, setCheckingAuth] = useState(pathname !== '/admin/login')
+
+  useEffect(() => {
+    if (pathname === '/admin/login') {
+      setCheckingAuth(false)
+      return
+    }
+
+    let isMounted = true
+    fetch('/api/admin/auth')
+      .then((res) => {
+        if (!res.ok) {
+          if (isMounted) {
+            router.replace('/admin/login')
+          }
+        } else {
+          if (isMounted) {
+            setCheckingAuth(false)
+          }
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          router.replace('/admin/login')
+        }
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [pathname, router])
+
+  const handleSignOut = async () => {
+    try {
+      await fetch('/api/admin/auth', { method: 'DELETE' })
+    } finally {
+      router.replace('/admin/login')
+    }
+  }
+
+  // If on login screen, render standalone without CMS chrome
+  if (pathname === '/admin/login') {
+    return <>{children}</>
+  }
 
   const desks = [
     { label: 'Stories', href: '/admin', exact: true },
@@ -44,6 +90,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (pathname.startsWith('/admin/articles/new')) return 'New Story'
     if (pathname.includes('/edit')) return 'Edit Story'
     return 'Newsroom'
+  }
+
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen bg-paper dark:bg-dark-paper flex items-center justify-center p-4">
+        <div className="flex flex-col items-center gap-3">
+          <img
+            src="/logo.png"
+            alt="Singh Monster"
+            className="w-10 h-10 object-contain dark:invert animate-pulse"
+          />
+          <p className="font-mono text-xs uppercase tracking-widest text-ink-mute dark:text-dark-mute">
+            Verifying Newsroom Credentials...
+          </p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -74,6 +137,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             Live Site ↗
           </Link>
           <ThemeToggle className="w-7 h-7 flex items-center justify-center rounded-full border border-rule/60 dark:border-white/10 text-ink-mute hover:text-ink dark:hover:text-white transition" />
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="w-7 h-7 flex items-center justify-center rounded-full border border-rule/60 dark:border-white/10 text-ink-mute hover:text-red-600 dark:hover:text-red-400 transition"
+            title="Sign Out"
+          >
+            <IconLogout className="w-3.5 h-3.5" />
+          </button>
           <div className="relative w-7 h-7 rounded-full overflow-hidden border border-rule/60 dark:border-white/10 shrink-0">
             <img
               src="/authr.png"
@@ -187,7 +258,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
           </div>
 
-          {/* Utility Actions: Live Site & Theme Toggle */}
+          {/* Utility Actions: Live Site, Theme Toggle & Sign Out */}
           <div className="flex items-center gap-2">
             <Link
               href="/"
@@ -199,6 +270,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <span>Live Site</span>
             </Link>
             <ThemeToggle className="w-9 h-9 flex items-center justify-center bg-paper dark:bg-white/[0.04] hover:bg-paper-subtle dark:hover:bg-white/10 border border-rule/60 dark:border-white/10 rounded-2xl text-ink-mute dark:text-dark-mute hover:text-ink dark:hover:text-white transition shadow-xs cursor-pointer" />
+            <button
+              type="button"
+              onClick={handleSignOut}
+              className="w-9 h-9 flex items-center justify-center bg-paper dark:bg-white/[0.04] hover:bg-red-50 dark:hover:bg-red-950/30 border border-rule/60 dark:border-white/10 hover:border-red-300 dark:hover:border-red-900/50 rounded-2xl text-ink-mute dark:text-dark-mute hover:text-red-600 dark:hover:text-red-400 transition shadow-xs cursor-pointer"
+              title="Sign Out of Newsroom"
+            >
+              <IconLogout className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </aside>
