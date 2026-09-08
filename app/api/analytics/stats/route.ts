@@ -35,6 +35,9 @@ export async function GET(req: NextRequest) {
     // Return with backward-compatible aliases
     return NextResponse.json({
       ...stats,
+      totalVisitors: stats.uniqueVisitors,
+      totalPageViews: stats.totalViews,
+      countries: stats.topCountries,
       viewsOverTime: stats.timeSeries,
       regionalBreakdown: stats.topCountries,
       referrerBreakdown: stats.topReferrers,

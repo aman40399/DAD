@@ -119,6 +119,13 @@ export async function POST(req: NextRequest) {
  */
 export async function DELETE() {
   const response = NextResponse.json({ success: true, message: 'Logged out' })
-  response.cookies.delete(SESSION_COOKIE_NAME)
+  response.cookies.set({
+    name: SESSION_COOKIE_NAME,
+    value: '',
+    path: '/',
+    maxAge: 0,
+    expires: new Date(0),
+    httpOnly: true,
+  })
   return response
 }
