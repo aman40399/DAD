@@ -283,7 +283,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* Main Admin Content Pane */}
-      <main className="flex-1 min-w-0 p-3 sm:p-7 lg:p-8 overflow-hidden md:overflow-y-auto flex flex-col pb-16 md:pb-8">
+      <main className="flex-1 min-w-0 p-3 sm:p-7 lg:p-8 overflow-y-auto flex flex-col pb-24 md:pb-12">
         <div className="max-w-[1360px] mx-auto w-full flex-1 flex flex-col min-h-0">
           {children}
         </div>

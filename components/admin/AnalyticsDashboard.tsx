@@ -59,29 +59,52 @@ export default function AnalyticsDashboard() {
   const [range, setRange] = useState<'today' | '7d' | '30d' | 'all'>('7d')
   const [stats, setStats] = useState<AnalyticsStats | null>(null)
   const [loading, setLoading] = useState(true)
+  const [clearing, setClearing] = useState(false)
+  const [showClearModal, setShowClearModal] = useState(false)
+  const [clearSuccess, setClearSuccess] = useState(false)
 
   // Interactive Chart Tooltip State
   const [hoveredPoint, setHoveredPoint] = useState<ChartPoint | null>(null)
   const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null)
   const chartContainerRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    async function loadStats() {
-      setLoading(true)
-      try {
-        const res = await fetch(`/api/analytics/stats?range=${range}&timeRange=${range}`)
-        if (res.ok) {
-          const data = await res.json()
-          setStats(data)
-        }
-      } catch (err) {
-        console.error('Failed to load analytics:', err)
-      } finally {
-        setLoading(false)
+  const loadStats = async () => {
+    setLoading(true)
+    try {
+      const res = await fetch(`/api/analytics/stats?range=${range}&timeRange=${range}`)
+      if (res.ok) {
+        const data = await res.json()
+        setStats(data)
       }
+    } catch (err) {
+      console.error('Failed to load analytics:', err)
+    } finally {
+      setLoading(false)
     }
+  }
+
+  useEffect(() => {
     loadStats()
   }, [range])
+
+  const handleClearData = async () => {
+    setClearing(true)
+    try {
+      const res = await fetch('/api/analytics/clear', { method: 'POST' })
+      if (res.ok) {
+        await loadStats()
+        setClearSuccess(true)
+        setTimeout(() => {
+          setClearSuccess(false)
+          setShowClearModal(false)
+        }, 1000)
+      }
+    } catch (err) {
+      console.error('Failed to clear analytics:', err)
+    } finally {
+      setClearing(false)
+    }
+  }
 
   // Trend pill strictly calculated from real telemetry deltas
   const renderTrendPill = (
@@ -407,27 +430,42 @@ export default function AnalyticsDashboard() {
           </p>
         </div>
 
-        {/* Range Filter Pills: full-width segmented control on mobile, compact on desktop */}
-        <div className="w-full md:w-auto flex items-center p-1 bg-paper-subtle dark:bg-white/[0.05] border border-rule/60 dark:border-white/10 rounded-2xl shadow-xs">
-          {[
-            { id: 'today', label: '1D' },
-            { id: '7d', label: '7D' },
-            { id: '30d', label: '30D' },
-            { id: 'all', label: 'All' },
-          ].map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => setRange(item.id as any)}
-              className={`flex-1 md:flex-initial px-4 py-1.5 text-xs font-bold uppercase tracking-wider rounded-xl transition cursor-pointer text-center ${
-                range === item.id
-                  ? 'bg-ink text-white dark:bg-white dark:text-black shadow-xs'
-                  : 'text-ink-mute dark:text-dark-mute hover:text-ink dark:hover:text-white'
-              }`}
-            >
-              {item.label}
-            </button>
-          ))}
+        {/* Range Filter & Clear Actions */}
+        <div className="flex items-center gap-2 w-full md:w-auto">
+          {/* Range Filter Pills: full-width segmented control on mobile, compact on desktop */}
+          <div className="flex-1 md:flex-initial flex items-center p-1 bg-paper-subtle dark:bg-white/[0.05] border border-rule/60 dark:border-white/10 rounded-2xl shadow-xs">
+            {[
+              { id: 'today', label: '1D' },
+              { id: '7d', label: '7D' },
+              { id: '30d', label: '30D' },
+              { id: 'all', label: 'All' },
+            ].map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setRange(item.id as any)}
+                className={`flex-1 md:flex-initial px-4 py-1.5 text-xs font-bold uppercase tracking-wider rounded-xl transition cursor-pointer text-center ${
+                  range === item.id
+                    ? 'bg-ink text-white dark:bg-white dark:text-black shadow-xs'
+                    : 'text-ink-mute dark:text-dark-mute hover:text-ink dark:hover:text-white'
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Purge / Clear Telemetry Button */}
+          <button
+            type="button"
+            onClick={() => setShowClearModal(true)}
+            className="px-3 py-2 text-xs font-mono font-medium text-ink-mute dark:text-dark-mute hover:text-red-600 dark:hover:text-red-400 bg-paper-subtle dark:bg-white/[0.05] border border-rule/60 dark:border-white/10 hover:border-red-500/40 rounded-2xl transition cursor-pointer flex items-center gap-1.5 shrink-0 shadow-xs active:scale-95"
+            title="Reset telemetry database"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+            <span className="hidden sm:inline">Clear Data</span>
+            <span className="sm:hidden">Clear</span>
+          </button>
         </div>
       </div>
 
@@ -662,6 +700,58 @@ export default function AnalyticsDashboard() {
           )}
         </div>
       </div>
+
+      {/* Confirmation Modal for Clearing Visitor Telemetry */}
+      {showClearModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="w-full max-w-md bg-paper dark:bg-[#141416] border border-rule/70 dark:border-white/15 rounded-3xl p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-rule/60 dark:border-white/10">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" />
+                <h3 className="font-serif font-bold text-lg text-ink dark:text-white">
+                  Purge Telemetry Data
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowClearModal(false)}
+                className="w-7 h-7 rounded-full flex items-center justify-center text-ink-mute hover:text-ink dark:hover:text-white transition"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-xs font-sans text-ink-mute dark:text-dark-mute leading-relaxed">
+              This will permanently delete all stored reader impressions, country analytics, device metrics, and session records from the production database. Real live reader traffic will continue to populate automatically.
+            </p>
+
+            {clearSuccess ? (
+              <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-center text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                All visitor telemetry wiped successfully.
+              </div>
+            ) : (
+              <div className="flex items-center justify-end gap-2.5 pt-2">
+                <button
+                  type="button"
+                  disabled={clearing}
+                  onClick={() => setShowClearModal(false)}
+                  className="px-4 py-2 text-xs font-semibold text-ink-mute hover:text-ink dark:text-dark-mute dark:hover:text-white transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={clearing}
+                  onClick={handleClearData}
+                  className="px-4 py-2 text-xs font-mono font-bold uppercase tracking-wider bg-red-600 hover:bg-red-700 text-white rounded-xl shadow-xs transition cursor-pointer disabled:opacity-50"
+                >
+                  {clearing ? 'Purging…' : 'Confirm Wipe'}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

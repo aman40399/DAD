@@ -53,6 +53,138 @@ const DEFAULT_CONFIG: EditorialConfig = {
   ],
 }
 
+const DEFAULT_HERO: ArticleData = {
+  id: 'hero-fallback-02',
+  title: "Mount Anak Krakatau Erupts, Forcing Closure of Jakarta's Main Airport and Disrupting Dozens of Flights",
+  category: 'World',
+  excerpt:
+    "A powerful eruption of Mount Anak Krakatau has shut down Jakarta's primary international airport, stranding thousands of passengers and disrupting regional air travel across Southeast Asia.",
+  author: 'Priya Sharma',
+  date: 'Sep 6, 2026',
+  readTime: '3 min read',
+  image: 'https://images.unsplash.com/photo-1462332420958-a05d1e002413?w=1200&auto=format&fit=crop&q=80',
+}
+
+const DEFAULT_LEFT_STORIES: ArticleData[] = [
+  {
+    id: 'left-fallback-03',
+    title: 'U.S. Navy Destroys Three Iranian Oil Tankers in Escalating Gulf Confrontation',
+    category: 'World',
+    author: 'Rahul Verma',
+    date: 'Sep 6, 2026',
+    image: 'https://pub-f105b5c2551040e1b44a90da84ffa541.r2.dev/news/1788848336699-us-navy-destroyer-patrol-b112sx.jpg',
+  },
+  {
+    id: 'left-fallback-04',
+    title: 'South Korea Hits Record $709 Billion in Cumulative Exports, Surpassing Annual Best',
+    category: 'Economy',
+    author: 'Seema Negi',
+    date: 'Sep 6, 2026',
+    image: 'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=600&auto=format&fit=crop&q=80',
+  },
+]
+
+const DEFAULT_SUB_LEADS: ArticleData[] = [
+  {
+    id: 'sub-fallback-05',
+    title: 'Building Collapse in New Delhi Kills One, Dozens Feared Trapped Under Rubble',
+    category: 'India',
+    excerpt: 'A four-storey residential building in New Delhi collapsed on Sunday morning, killing at least one person and leaving dozens feared trapped.',
+    author: 'Ankit Joshi',
+    date: 'Sep 6, 2026',
+    image: 'https://images.unsplash.com/photo-1567521464027-f127ff144326?w=600&auto=format&fit=crop&q=80',
+  },
+  {
+    id: 'sub-fallback-06',
+    title: 'Wildfires Rage Across the United States With Over 118 New Blazes Reported Nationwide',
+    category: 'Environment',
+    excerpt: 'The United States is battling a devastating wildfire season with over 118 new fires reported across the country and more than 16,500 personnel committed.',
+    author: 'Daniel Park',
+    date: 'Sep 6, 2026',
+    image: 'https://images.unsplash.com/photo-1473448912268-2022ce9509d8?w=600&auto=format&fit=crop&q=80',
+  },
+]
+
+const DEFAULT_RANKED_STORIES: ArticleData[] = [
+  {
+    id: 'rank-fallback-07',
+    rank: '06',
+    title: 'WHO Launches Global Mpox Vaccine Stockpile Initiative for Equitable Access',
+    category: 'Health',
+  },
+  {
+    id: 'rank-fallback-08',
+    rank: '07',
+    title: 'Global Trade Hits New Highs but Least-Developed Countries Fall Further Behind in Digital Exports',
+    category: 'Economy',
+  },
+  {
+    id: 'rank-fallback-09',
+    rank: '08',
+    title: 'Iran Threatens "Tougher Reprisals" After Claiming Strikes on U.S.-Linked Bases in Kuwait and UAE',
+    category: 'World',
+  },
+  {
+    id: 'rank-fallback-10',
+    rank: '09',
+    title: "Serbia's Ruling Party Nominates President Vučić as Lead Candidate for Snap Parliamentary Election",
+    category: 'World',
+  },
+  {
+    id: 'rank-fallback-11',
+    rank: '10',
+    title: 'Gaza Ceasefire Violations Continue as Localised Efforts Underway to Restore Power Infrastructure',
+    category: 'World',
+  },
+]
+
+const DEFAULT_PICKS: ArticleData[] = [
+  {
+    id: 'ep-fallback-12',
+    title: 'EU Lawmakers Finalise AI Act Enforcement Mechanism After Two Years of Debate',
+    category: 'Technology',
+    author: 'Imogen Hart',
+    readTime: '3 min read',
+    image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=600&auto=format&fit=crop&q=80',
+  },
+  {
+    id: 'ep-fallback-13',
+    title: 'Lebanon Military Operations Continue to Pose Civilian Risk Amid Fragile Political Transition',
+    category: 'World',
+    author: 'Priya Sharma',
+    readTime: '3 min read',
+    image: 'https://images.unsplash.com/photo-1569077382689-5ebf9e367b78?w=600&auto=format&fit=crop&q=80',
+  },
+  {
+    id: 'ep-fallback-14',
+    title: 'Brent Crude Surges Past $95 as Gulf Tensions and Supply Disruptions Rattle Energy Markets',
+    category: 'Economy',
+    author: 'Daniel Park',
+    readTime: '2 min read',
+    image: 'https://images.unsplash.com/photo-1611273426858-450d8e3c9fce?w=600&auto=format&fit=crop&q=80',
+  },
+  {
+    id: 'ep-fallback-15',
+    title: 'Brussels Greenlights Fifteenth Sanctions Package Targeting Russian Sanctions-Evasion Networks',
+    category: 'World',
+    author: 'Sofia Almeida',
+    readTime: '3 min read',
+    image: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&auto=format&fit=crop&q=80',
+  },
+]
+
+const DEFAULT_FEATURED_WORLD: ArticleData = {
+  id: 'world-feat-fallback',
+  title: 'Putin Holds "Substantive" Talks With U.S. Envoys as Ukraine Signals Willingness to Pause Strikes on Moscow',
+  category: 'World',
+  excerpt:
+    'Russian and American officials engaged in what the Kremlin described as frank discussions, while Ukraine signalled a temporary halt to strikes on the Russian capital.',
+  author: 'Nawab Singh',
+  date: 'Sep 6, 2026',
+  readTime: '3 min read',
+  image: 'https://images.unsplash.com/photo-1548345680-f5475ea5df84?w=1000&auto=format&fit=crop&q=80',
+}
+
 function SlotToolbar({
   slotNum,
   label,
@@ -73,22 +205,32 @@ function SlotToolbar({
   onAssignSlot: (slot: number, articleId: string | null) => void
 }) {
   return (
-    <div className="flex items-center justify-between gap-2 mb-2.5 p-1.5 px-3 rounded-full bg-paper-subtle/90 dark:bg-white/[0.06] border border-rule/60 dark:border-white/10 shadow-xs select-none">
-      <div className="flex items-center gap-2 min-w-0">
-        <span className="font-mono text-[10.5px] font-black px-2 py-0.5 rounded-full bg-ink text-paper dark:bg-white dark:text-black shrink-0">
-          SLOT {String(slotNum).padStart(2, '0')}
+    <div className="flex items-center justify-between gap-1.5 pb-1 mb-2 border-b border-rule/60 dark:border-white/10 text-[10px] font-mono select-none">
+      <div className="flex items-center gap-1.5 min-w-0">
+        <span className="font-bold text-ink dark:text-white uppercase tracking-wider text-[10px] shrink-0">
+          Slot {String(slotNum).padStart(2, '0')}
         </span>
+        <span className="text-ink-mute/40 shrink-0">/</span>
         <span
-          className={`w-2 h-2 rounded-full shrink-0 ${
-            isPinned ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'
+          className={`inline-flex items-center gap-1 text-[9px] uppercase tracking-wider font-semibold shrink-0 ${
+            isPinned ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'
           }`}
-        />
-        <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-ink-mute dark:text-dark-mute truncate">
-          {label ? `${label} · ` : ''}{isPinned ? 'PINNED' : 'AUTO-FLOW'}
+        >
+          <span
+            className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+              isPinned ? 'bg-emerald-500' : 'bg-amber-500'
+            }`}
+          />
+          {isPinned ? 'Pinned' : 'Auto'}
         </span>
+        {label && (
+          <span className="hidden xl:inline text-ink-mute dark:text-dark-mute text-[9px] truncate max-w-[85px]">
+            · {label}
+          </span>
+        )}
       </div>
 
-      <div className="flex items-center gap-1.5 shrink-0">
+      <div className="flex items-center gap-1 shrink-0">
         {!isPinned && hasArticle && articleId && (
           <button
             type="button"
@@ -97,7 +239,7 @@ function SlotToolbar({
               e.preventDefault()
               onAssignSlot(slotNum, articleId)
             }}
-            className="px-2.5 py-0.5 text-[10.5px] font-semibold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 rounded-full transition cursor-pointer border border-emerald-500/20"
+            className="px-1.5 py-0.5 text-[9px] font-mono font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 rounded transition cursor-pointer"
             title="Lock current story to slot"
           >
             Lock
@@ -111,8 +253,8 @@ function SlotToolbar({
               e.preventDefault()
               onAssignSlot(slotNum, null)
             }}
-            className="px-2.5 py-0.5 text-[10.5px] font-semibold text-red-600 dark:text-red-400 hover:bg-red-500/10 rounded-full transition cursor-pointer border border-red-500/20"
-            title="Release to dynamic auto-flow"
+            className="px-1.5 py-0.5 text-[9px] font-mono font-semibold text-red-600 dark:text-red-400 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 rounded transition cursor-pointer"
+            title="Release to auto-flow"
           >
             Release
           </button>
@@ -123,7 +265,7 @@ function SlotToolbar({
             e.preventDefault()
             onOpenDrawer(slotNum)
           }}
-          className="px-3 py-0.5 text-[10.5px] font-bold uppercase tracking-wider bg-accent hover:bg-accent/90 text-white rounded-full transition cursor-pointer shadow-xs"
+          className="px-2 py-0.5 text-[9px] font-mono font-bold uppercase tracking-wider bg-ink text-paper hover:bg-accent dark:bg-white dark:text-black dark:hover:bg-accent dark:hover:text-white rounded transition cursor-pointer"
         >
           Curate
         </button>
@@ -211,23 +353,31 @@ export default function SlotBlueprintView({
   }
 
   // Helper to convert resolved slot to ArticleData for PostCard
-  const getCardData = (slotNum: number, fallbackTitle: string): ArticleData => {
+  const getCardData = (slotNum: number): ArticleData => {
     const res = resolvedSlots.get(slotNum)
     if (res?.article) {
       return {
         ...mapArticleToPostCard(res.article),
-        rank: slotNum >= 7 && slotNum <= 10 ? String(slotNum).padStart(2, '0') : undefined,
+        rank: slotNum >= 7 && slotNum <= 11 ? String(slotNum - 1).padStart(2, '0') : undefined,
       }
     }
+
+    if (slotNum === 2) return DEFAULT_HERO
+    if (slotNum === 3) return DEFAULT_LEFT_STORIES[0]
+    if (slotNum === 4) return DEFAULT_LEFT_STORIES[1]
+    if (slotNum === 5) return DEFAULT_SUB_LEADS[0]
+    if (slotNum === 6) return DEFAULT_SUB_LEADS[1]
+    if (slotNum >= 7 && slotNum <= 11) return DEFAULT_RANKED_STORIES[slotNum - 7]
+    if (slotNum >= 12 && slotNum <= 15) return DEFAULT_PICKS[slotNum - 12]
+
     return {
-      id: `slot-empty-${slotNum}`,
-      title: fallbackTitle,
-      category: 'Unassigned',
-      excerpt: 'No article currently assigned. Click Curate to select an article from your catalog.',
-      author: 'Editorial Pool',
-      date: 'Auto-flow active',
-      readTime: '1 min read',
-      rank: slotNum >= 7 && slotNum <= 10 ? String(slotNum).padStart(2, '0') : undefined,
+      id: `slot-fallback-${slotNum}`,
+      title: `Curated Broadsheet Story ${slotNum}`,
+      category: 'Dispatch',
+      excerpt: 'Dynamic broadsheet dispatch allocated from active newsroom pool.',
+      author: 'Newsroom Staff',
+      date: 'Just now',
+      readTime: '2 min read',
     }
   }
 
@@ -249,11 +399,11 @@ export default function SlotBlueprintView({
             </span>
             <span
               className={`w-2 h-2 rounded-full shrink-0 ${
-                slot1?.isPinned ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'
+                slot1?.isPinned ? 'bg-emerald-500' : 'bg-amber-500'
               }`}
             />
             <p className="font-serif font-bold text-xs sm:text-sm text-ink dark:text-white truncate">
-              {slot1?.article ? slot1.article.title : 'No dispatch currently assigned to breaking ticker'}
+              {slot1?.article ? slot1.article.title : 'Global Trade Hits New Highs as World Assembly Convenes'}
             </p>
           </div>
 
@@ -307,7 +457,7 @@ export default function SlotBlueprintView({
               onOpenDrawer={onOpenDrawer}
               onAssignSlot={onAssignSlot}
             />
-            <PostCard article={getCardData(3, 'Left Rail Story 03')} variant="dense-thumb" />
+            <PostCard article={getCardData(3)} variant="dense-thumb" />
           </div>
 
           {/* Slot 04 */}
@@ -322,7 +472,7 @@ export default function SlotBlueprintView({
               onOpenDrawer={onOpenDrawer}
               onAssignSlot={onAssignSlot}
             />
-            <PostCard article={getCardData(4, 'Left Rail Story 04')} variant="dense-thumb" />
+            <PostCard article={getCardData(4)} variant="dense-thumb" />
           </div>
 
           {/* Editor's Note (with Interactive Edit Button) */}
@@ -381,7 +531,7 @@ export default function SlotBlueprintView({
               onOpenDrawer={onOpenDrawer}
               onAssignSlot={onAssignSlot}
             />
-            <PostCard article={getCardData(2, 'Main Broadsheet Lead Hero')} variant="hero" />
+            <PostCard article={getCardData(2)} variant="hero" />
           </div>
 
           {/* Center Broadsheet Divider */}
@@ -400,7 +550,7 @@ export default function SlotBlueprintView({
                 onOpenDrawer={onOpenDrawer}
                 onAssignSlot={onAssignSlot}
               />
-              <PostCard article={getCardData(5, 'Sub-Lead Dispatch 05')} variant="feed" />
+              <PostCard article={getCardData(5)} variant="feed" />
             </div>
 
             <div>
@@ -414,23 +564,23 @@ export default function SlotBlueprintView({
                 onOpenDrawer={onOpenDrawer}
                 onAssignSlot={onAssignSlot}
               />
-              <PostCard article={getCardData(6, 'Sub-Lead Dispatch 06')} variant="feed" />
+              <PostCard article={getCardData(6)} variant="feed" />
             </div>
           </div>
         </section>
 
-        {/* ---------------- RIGHT COLUMN (Slots 07-10 Ranked, Newsletter, Sponsor) ---------------- */}
+        {/* ---------------- RIGHT COLUMN (Slots 07-11 Ranked, Newsletter, Sponsor) ---------------- */}
         <aside className="order-3 lg:col-span-3 space-y-6">
           <div>
             <header className="flex justify-between items-baseline pb-2.5 border-b-2 border-ink dark:border-dark-ink mb-4">
               <h3 className="font-sans font-bold text-[12.5px] tracking-[0.16em] uppercase text-ink dark:text-dark-ink">
                 More To Read
               </h3>
-              <span className="text-[10px] font-mono text-ink-mute">Slots 07–10</span>
+              <span className="text-[10px] font-mono text-ink-mute">Slots 07–11</span>
             </header>
 
             <div className="space-y-4">
-              {[7, 8, 9, 10].map((sNum) => (
+              {[7, 8, 9, 10, 11].map((sNum) => (
                 <div key={sNum}>
                   <SlotToolbar
                     slotNum={sNum}
@@ -441,7 +591,7 @@ export default function SlotBlueprintView({
                     onOpenDrawer={onOpenDrawer}
                     onAssignSlot={onAssignSlot}
                   />
-                  <PostCard article={getCardData(sNum, `Ranked Story ${sNum}`)} variant="ranked" />
+                  <PostCard article={getCardData(sNum)} variant="ranked" />
                 </div>
               ))}
             </div>
@@ -456,7 +606,7 @@ export default function SlotBlueprintView({
       </div>
 
       {/* ------------------------------------------------------------ */}
-      {/* 3. EDITOR'S PICKS 4-CARD CAROUSEL (SLOTS 11, 12, 13, 14)     */}
+      {/* 3. EDITOR'S PICKS 4-CARD ROW (SLOTS 12, 13, 14, 15)           */}
       {/* ------------------------------------------------------------ */}
       <section className="py-8 border-b border-rule dark:border-dark-rule">
         <header className="flex justify-between items-center pb-2.5 border-b-2 border-ink dark:border-dark-ink mb-6">
@@ -464,7 +614,7 @@ export default function SlotBlueprintView({
             <h3 className="font-sans font-bold text-[13px] tracking-[0.18em] uppercase text-ink dark:text-dark-ink">
               Editor's Picks
             </h3>
-            <span className="text-[10px] font-mono text-ink-mute">Slots 11–14</span>
+            <span className="text-[10px] font-mono text-ink-mute">Slots 12–15</span>
           </div>
           <span className="text-[10px] font-mono text-ink-mute uppercase tracking-wider">
             Curated 4-Story Row
@@ -472,7 +622,7 @@ export default function SlotBlueprintView({
         </header>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[11, 12, 13, 14].map((sNum) => (
+          {[12, 13, 14, 15].map((sNum) => (
             <div key={sNum}>
               <SlotToolbar
                 slotNum={sNum}
@@ -483,14 +633,14 @@ export default function SlotBlueprintView({
                 onOpenDrawer={onOpenDrawer}
                 onAssignSlot={onAssignSlot}
               />
-              <PostCard article={getCardData(sNum, `Editor's Pick Story ${sNum}`)} variant="feed" />
+              <PostCard article={getCardData(sNum)} variant="feed" />
             </div>
           ))}
         </div>
       </section>
 
       {/* ------------------------------------------------------------ */}
-      {/* 4. WORLD CATEGORY SECTION (SLOT 15)                          */}
+      {/* 4. WORLD CATEGORY SECTION (DYNAMIC FEED)                     */}
       {/* ------------------------------------------------------------ */}
       <section className="py-8">
         <header className="flex justify-between items-center pb-2.5 border-b-2 border-ink dark:border-dark-ink mb-6">
@@ -498,30 +648,20 @@ export default function SlotBlueprintView({
             <h3 className="font-sans font-bold text-[13px] tracking-[0.18em] uppercase text-ink dark:text-dark-ink">
               World // Dispatch
             </h3>
-            <span className="text-[10px] font-mono text-ink-mute">Slot 15 Featured Story</span>
+            <span className="text-[10px] font-mono text-ink-mute">Dynamic Category Feed</span>
           </div>
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           <div className="lg:col-span-8">
-            <SlotToolbar
-              slotNum={15}
-              label="World Featured"
-              isPinned={resolvedSlots.get(15)?.isPinned}
-              hasArticle={Boolean(resolvedSlots.get(15)?.article)}
-              articleId={resolvedSlots.get(15)?.article?.id}
-              isSaving={savingSlot === 15}
-              onOpenDrawer={onOpenDrawer}
-              onAssignSlot={onAssignSlot}
-            />
-            <PostCard article={getCardData(15, 'World Section Featured Dispatch')} variant="hero" />
+            <PostCard article={DEFAULT_FEATURED_WORLD} variant="hero" />
           </div>
 
           <div className="lg:col-span-4 space-y-4">
             <div className="p-4 rounded-2xl bg-paper-subtle/50 dark:bg-white/[0.02] border border-rule/60 dark:border-white/10 text-xs font-mono text-ink-mute space-y-2">
-              <p className="font-bold uppercase tracking-wider text-ink dark:text-white">World Wire Sub-Stories</p>
+              <p className="font-bold uppercase tracking-wider text-ink dark:text-white">Dynamic Category Feed</p>
               <p className="leading-relaxed">
-                Secondary world section stories automatically populate from the newest published dispatches tagged under "World".
+                The World Section on the homepage automatically populates directly from published dispatches tagged under "World" or "International". Secondary stories populate chronologically.
               </p>
             </div>
           </div>

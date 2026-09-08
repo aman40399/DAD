@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import crypto from 'crypto'
+import { queryD1, executeD1, isD1Configured } from '@/lib/d1'
 import type {
   AnalyticsEvent,
   AnalyticsStats,
@@ -498,6 +499,18 @@ export function getStore(): AnalyticsEvent[] {
 // 7. Public Telemetry Ingest API
 // ---------------------------------------------------------------------------
 
+export async function clearAnalyticsData(): Promise<void> {
+  if (isD1Configured()) {
+    try {
+      await executeD1('DELETE FROM visitor_analytics')
+    } catch (err) {
+      console.error('Error clearing D1 visitor_analytics:', err)
+    }
+  }
+  globalThis.__meridian_analytics_store__ = []
+  writeToDiskAtomic([])
+}
+
 export async function recordAnalyticsEvent(event: Partial<AnalyticsEvent>): Promise<void> {
   const store = getStore()
   const countryCode = event.country ? event.country.toUpperCase().slice(0, 2) : 'US'
@@ -520,6 +533,35 @@ export async function recordAnalyticsEvent(event: Partial<AnalyticsEvent>): Prom
     timestamp: new Date().toISOString(),
   }
 
+  // 1. Write to Cloudflare D1 for durable cross-serverless persistence
+  if (isD1Configured()) {
+    try {
+      await executeD1(
+        `INSERT INTO visitor_analytics (id, visitor_id, session_id, page_path, country, region, city, device_type, browser, os, timestamp, title, referrer, duration_seconds)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          fullEvent.id,
+          fullEvent.sessionId,
+          fullEvent.sessionId,
+          fullEvent.path,
+          fullEvent.country,
+          fullEvent.countryName || '',
+          '',
+          fullEvent.device,
+          '',
+          '',
+          fullEvent.timestamp,
+          fullEvent.title || '',
+          fullEvent.referrer || 'Direct / Broadsheet Bookmark',
+          fullEvent.durationSeconds || 0,
+        ]
+      )
+    } catch (err) {
+      console.error('Non-fatal: failed to persist analytics event to D1:', err)
+    }
+  }
+
+  // 2. Keep in-memory / local file
   store.push(fullEvent)
   scheduleDiskFlush()
 }
@@ -565,7 +607,45 @@ export function calculateTrend(curr: number, prior: number): MetricTrend {
 export async function getAnalyticsStats(
   timeRange: TimeRangeFilter = '7d'
 ): Promise<AnalyticsStats> {
-  const allEvents = getStore()
+  let allEvents: AnalyticsEvent[] = []
+
+  if (isD1Configured()) {
+    try {
+      const rows = await queryD1<{
+        id: string
+        session_id: string
+        page_path: string
+        country: string
+        region: string
+        device_type: string
+        timestamp: string
+        title: string
+        referrer: string
+        duration_seconds: number
+      }>(
+        `SELECT id, session_id, page_path, country, region, device_type, timestamp, title, referrer, duration_seconds
+         FROM visitor_analytics ORDER BY timestamp DESC LIMIT 20000`
+      )
+
+      allEvents = (rows || []).map((r) => ({
+        id: r.id,
+        path: r.page_path,
+        title: r.title,
+        country: r.country || 'US',
+        countryName: COUNTRY_NAMES[r.country] || r.region || r.country || 'Global Reader',
+        referrer: r.referrer || 'Direct / Broadsheet Bookmark',
+        device: (r.device_type as any) || 'desktop',
+        sessionId: r.session_id,
+        durationSeconds: r.duration_seconds || undefined,
+        timestamp: r.timestamp,
+      }))
+    } catch (err) {
+      console.error('Error querying D1 for analytics, falling back to local file:', err)
+      allEvents = getStore()
+    }
+  } else {
+    allEvents = getStore()
+  }
   const now = new Date()
 
   // Window Cutoffs
