@@ -37,6 +37,7 @@ next-env.d.ts
 
 # database
 /data
+!/data/articles.json
 *.db
 *.sqlite
 
