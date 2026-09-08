@@ -4,7 +4,7 @@ import { useState, FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import ThemeToggle from '@/components/meridian/ThemeToggle'
-import { IconLock, IconEye, IconEyeOff } from '@/components/admin/AdminIcons'
+import { IconEye, IconEyeOff } from '@/components/admin/AdminIcons'
 
 export default function AdminLoginPage() {
   const router = useRouter()
@@ -19,14 +19,14 @@ export default function AdminLoginPage() {
     setErrorMessage(null)
 
     if (!username.trim() || !password) {
-      setErrorMessage('Please provide both username and password.')
+      setErrorMessage('Please enter both username and password.')
       return
     }
 
     setLoading(true)
 
     try {
-      // Strictly backend authentication — no password checks in client code
+      // Strictly backend authentication — zero client checks
       const res = await fetch('/api/admin/auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -39,82 +39,69 @@ export default function AdminLoginPage() {
       const data = await res.json().catch(() => ({}))
 
       if (!res.ok || !data.success) {
-        setErrorMessage(data.error || 'Invalid credentials. Access denied.')
+        setErrorMessage(data.error || 'Invalid credentials')
         setLoading(false)
         return
       }
 
-      // Successful authentication: navigate to Admin Desk
       router.push('/admin')
       router.refresh()
     } catch (err: any) {
-      setErrorMessage(err?.message || 'Network error occurred. Please try again.')
+      setErrorMessage(err?.message || 'Connection error')
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-dvh bg-paper dark:bg-[#0a0a0c] text-ink dark:text-dark-ink font-sans flex flex-col justify-between selection:bg-accent/20">
-      {/* Top Utility Header */}
-      <header className="px-4 py-3.5 sm:px-8 sm:py-5 flex items-center justify-between border-b border-rule/50 dark:border-white/[0.06]">
+    <div className="min-h-dvh bg-paper dark:bg-[#09090b] text-ink dark:text-dark-ink font-sans flex flex-col justify-between selection:bg-ink/10 dark:selection:bg-white/10">
+      {/* Sleek Minimal Header */}
+      <header className="px-5 py-4 flex items-center justify-between">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-xs font-semibold text-ink-mute dark:text-dark-mute hover:text-ink dark:hover:text-white transition group"
+          className="text-xs text-ink-mute dark:text-dark-mute hover:text-ink dark:hover:text-white transition flex items-center gap-1.5"
+          title="Back to live broadsheet"
         >
-          <span className="transition-transform group-hover:-translate-x-0.5">←</span>
-          <span>Back to Live Broadsheet</span>
+          <span>←</span>
+          <span>Live Site</span>
         </Link>
-        <div className="flex items-center gap-3">
-          <ThemeToggle className="w-8 h-8 flex items-center justify-center rounded-xl bg-paper-subtle dark:bg-white/[0.05] border border-rule/60 dark:border-white/10 text-ink-mute dark:text-dark-mute hover:text-ink dark:hover:text-white transition" />
-        </div>
+        <ThemeToggle className="w-8 h-8 flex items-center justify-center rounded-lg text-ink-mute hover:text-ink dark:text-dark-mute dark:hover:text-white transition" />
       </header>
 
       {/* Main Centered Login Section */}
-      <main className="flex-1 flex items-center justify-center px-4 py-8 sm:px-6 sm:py-12">
-        <div className="w-full max-w-md">
-          {/* Editorial Card */}
-          <div className="bg-paper-subtle/70 dark:bg-[#111114] border border-rule dark:border-white/[0.08] rounded-2xl p-6 sm:p-8 shadow-sm">
-            {/* Crest & Masthead */}
-            <div className="text-center mb-7">
-              <div className="inline-flex items-center justify-center mb-3.5">
-                <img
-                  src="/logo.png"
-                  alt="Singh Monster"
-                  className="w-14 h-14 sm:w-16 sm:h-16 object-contain dark:invert"
-                />
-              </div>
-              <p className="font-mono text-[10px] sm:text-[11px] uppercase tracking-widest text-accent font-semibold mb-1">
-                Restricted Editorial Desk
-              </p>
-              <h1 className="font-serif font-black text-2xl sm:text-3xl text-ink dark:text-dark-ink tracking-tight">
-                Singh Monster
-              </h1>
-              <p className="text-xs text-ink-mute dark:text-dark-mute mt-1">
-                Sign in to manage broadsheet stories, positions, and media.
-              </p>
-            </div>
+      <main className="flex-1 flex items-center justify-center px-4 py-6">
+        <div className="w-full max-w-[340px]">
+          {/* Brand Icon & Name */}
+          <div className="flex flex-col items-center text-center mb-6">
+            <img
+              src="/logo.png"
+              alt="Singh Monster"
+              className="w-12 h-12 object-contain dark:invert mb-2.5 drop-shadow-xs"
+            />
+            <h1 className="font-serif font-black text-xl tracking-tight text-ink dark:text-dark-ink">
+              Singh Monster
+            </h1>
+          </div>
 
-            {/* Error Message Alert Banner */}
+          {/* Minimal Card */}
+          <div className="bg-paper-subtle/50 dark:bg-[#121215] border border-rule/70 dark:border-white/[0.07] rounded-2xl p-5 sm:p-6 shadow-xs">
+            {/* Error Message */}
             {errorMessage && (
               <div
                 role="alert"
-                className="mb-5 p-3.5 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 flex items-start gap-2.5 text-xs text-red-700 dark:text-red-400"
+                className="mb-4 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-center text-xs font-medium text-red-600 dark:text-red-400"
               >
-                <div className="mt-0.5 shrink-0">
-                  <IconLock className="w-4 h-4 text-red-600 dark:text-red-400" />
-                </div>
-                <div className="leading-relaxed flex-1 font-medium">{errorMessage}</div>
+                {errorMessage}
               </div>
             )}
 
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Clean Form */}
+            <form onSubmit={handleSubmit} className="space-y-3">
               <div>
                 <label
                   htmlFor="admin-username"
-                  className="block font-mono text-[11px] uppercase tracking-wider text-ink-mute dark:text-dark-mute font-semibold mb-1.5"
+                  className="block text-[11px] font-medium text-ink-mute dark:text-dark-mute mb-1"
                 >
-                  Editor Username
+                  Username
                 </label>
                 <input
                   id="admin-username"
@@ -123,21 +110,19 @@ export default function AdminLoginPage() {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   disabled={loading}
-                  placeholder="admin"
+                  placeholder="Username"
                   required
-                  className="w-full h-11 px-3.5 rounded-xl bg-paper dark:bg-[#18181c] border border-rule/70 dark:border-white/10 text-ink dark:text-dark-ink text-sm placeholder:text-ink-mute/50 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition"
+                  className="w-full h-10 px-3 rounded-xl bg-paper dark:bg-[#18181c] border border-rule/80 dark:border-white/10 text-ink dark:text-dark-ink text-sm placeholder:text-ink-mute/40 focus:outline-none focus:border-ink dark:focus:border-white transition"
                 />
               </div>
 
               <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label
-                    htmlFor="admin-password"
-                    className="block font-mono text-[11px] uppercase tracking-wider text-ink-mute dark:text-dark-mute font-semibold"
-                  >
-                    Passkey
-                  </label>
-                </div>
+                <label
+                  htmlFor="admin-password"
+                  className="block text-[11px] font-medium text-ink-mute dark:text-dark-mute mb-1"
+                >
+                  Password
+                </label>
                 <div className="relative">
                   <input
                     id="admin-password"
@@ -146,21 +131,21 @@ export default function AdminLoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     disabled={loading}
-                    placeholder="••••••••••••"
+                    placeholder="Password"
                     required
-                    className="w-full h-11 pl-3.5 pr-11 rounded-xl bg-paper dark:bg-[#18181c] border border-rule/70 dark:border-white/10 text-ink dark:text-dark-ink text-sm placeholder:text-ink-mute/50 focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent transition"
+                    className="w-full h-10 pl-3 pr-10 rounded-xl bg-paper dark:bg-[#18181c] border border-rule/80 dark:border-white/10 text-ink dark:text-dark-ink text-sm placeholder:text-ink-mute/40 focus:outline-none focus:border-ink dark:focus:border-white transition"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     tabIndex={-1}
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
-                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-ink-mute hover:text-ink dark:text-dark-mute dark:hover:text-white transition"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-ink-mute/60 hover:text-ink dark:text-dark-mute/60 dark:hover:text-white transition"
                   >
                     {showPassword ? (
-                      <IconEyeOff className="w-4 h-4" />
+                      <IconEyeOff className="w-3.5 h-3.5" />
                     ) : (
-                      <IconEye className="w-4 h-4" />
+                      <IconEye className="w-3.5 h-3.5" />
                     )}
                   </button>
                 </div>
@@ -169,32 +154,26 @@ export default function AdminLoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full h-11 mt-2 rounded-xl bg-ink hover:bg-black dark:bg-white dark:hover:bg-neutral-200 text-paper dark:text-black font-semibold text-xs tracking-wider uppercase transition flex items-center justify-center gap-2 shadow-sm disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                className="w-full h-10 !mt-4 rounded-xl bg-ink hover:bg-neutral-800 dark:bg-white dark:hover:bg-neutral-200 text-paper dark:text-black font-semibold text-xs tracking-wide transition flex items-center justify-center gap-2 shadow-xs disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 {loading ? (
                   <>
                     <span className="w-3.5 h-3.5 border-2 border-paper/30 dark:border-black/30 border-t-paper dark:border-t-black rounded-full animate-spin" />
-                    <span>Verifying Access...</span>
+                    <span>Signing in...</span>
                   </>
                 ) : (
-                  <span>Sign In to Newsroom</span>
+                  <span>Sign In</span>
                 )}
               </button>
             </form>
-
-            <div className="mt-6 pt-5 border-t border-rule/50 dark:border-white/[0.06] text-center">
-              <p className="font-mono text-[10px] uppercase tracking-widest text-ink-mute dark:text-dark-mute">
-                Protected by HMAC Session Verification · Cloudflare
-              </p>
-            </div>
           </div>
         </div>
       </main>
 
-      {/* Broadsheet Colophon Footer */}
-      <footer className="px-4 py-4 sm:px-8 border-t border-rule/50 dark:border-white/[0.06] text-center">
-        <p className="text-[11px] text-ink-mute dark:text-dark-mute font-mono">
-          Singh Monster Broadsheet · Autonomous Publishing Infrastructure
+      {/* Minimal Footer */}
+      <footer className="py-4 text-center">
+        <p className="text-[10px] text-ink-mute/60 dark:text-dark-mute/40 font-mono tracking-widest uppercase">
+          Singh Monster
         </p>
       </footer>
     </div>
