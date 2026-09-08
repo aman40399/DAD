@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { ArticleData } from './PostCard'
 
 interface WorldSectionProps {
@@ -80,7 +81,7 @@ export default function WorldSection({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left Featured Big Story (7 cols) */}
         <article className="lg:col-span-7 group cursor-pointer">
-          <a href={`/article/${featuredArticle.slug || featuredArticle.id}`} className="block no-underline">
+          <Link href={`/article/${featuredArticle.slug || featuredArticle.id}`} prefetch={true} className="block no-underline">
             <div className="aspect-[16/10] overflow-hidden bg-paper-subtle dark:bg-dark-subtle border border-rule dark:border-dark-rule mb-3">
               <img
                 src={featuredArticle.image}
@@ -115,7 +116,7 @@ export default function WorldSection({
                 </>
               )}
             </footer>
-          </a>
+          </Link>
 
           {featuredArticle.caption && (
             <p className="font-sans text-[10px] text-ink-mute/70 dark:text-dark-mute/70 mt-3 pt-2 border-t border-rule dark:border-dark-rule italic leading-normal">
@@ -135,12 +136,13 @@ export default function WorldSection({
                 <span className="font-sans text-[10px] font-bold tracking-[0.12em] uppercase text-accent block mb-0.5">
                   {item.category}
                 </span>
-                <a
+                <Link
                   href={`/article/${item.slug || item.id}`}
+                  prefetch={true}
                   className="font-serif font-bold text-[15px] sm:text-[16px] leading-snug text-ink dark:text-dark-ink group-hover:underline group-hover:decoration-accent/40 block line-clamp-2"
                 >
                   {item.title}
-                </a>
+                </Link>
                 {item.excerpt && (
                   <p className="font-serif text-[12.5px] text-ink-mute dark:text-dark-mute line-clamp-2 leading-relaxed mt-1">
                     {item.excerpt}
@@ -149,14 +151,14 @@ export default function WorldSection({
               </div>
 
               {item.image && (
-                <a href={`/article/${item.slug || item.id}`} className="shrink-0 block">
+                <Link href={`/article/${item.slug || item.id}`} prefetch={true} className="shrink-0 block">
                   <img
                     src={item.image}
                     alt=""
                     className="w-20 h-20 sm:w-22 sm:h-22 object-cover border border-rule dark:border-dark-rule transition group-hover:opacity-90"
                     loading="lazy"
                   />
-                </a>
+                </Link>
               )}
             </article>
           ))}

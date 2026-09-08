@@ -93,67 +93,149 @@ export async function generateUniqueArticleSlug(title: string, excludeArticleId?
   return resolveSlugCollision(baseSlug, (candidate) => isSlugTaken(candidate, excludeArticleId))
 }
 
-// Get all articles (sorted by published_at desc)
+// High-speed In-Memory Cache with TTL for instant page transitions and server rendering
+interface CacheEntry<T> {
+  data: T
+  expiresAt: number
+}
+
+const memoryCache = new Map<string, CacheEntry<any>>()
+const CACHE_TTL_MS = 30000 // 30 seconds TTL
+
+export function getCached<T>(key: string): T | null {
+  const entry = memoryCache.get(key)
+  if (!entry) return null
+  if (Date.now() > entry.expiresAt) {
+    memoryCache.delete(key)
+    return null
+  }
+  return entry.data as T
+}
+
+export function setCached<T>(key: string, data: T, ttlMs = CACHE_TTL_MS): void {
+  memoryCache.set(key, {
+    data,
+    expiresAt: Date.now() + ttlMs,
+  })
+}
+
+export function invalidateArticleCache(): void {
+  memoryCache.clear()
+}
+
+// Get all articles (sorted by published_at desc) - Cached
 export async function getAllArticles(): Promise<Article[]> {
+  const cacheKey = 'all_articles'
+  const cached = getCached<Article[]>(cacheKey)
+  if (cached) return cached
+
+  let result: Article[]
   if (isD1Configured()) {
     try {
       const rows = await queryD1('SELECT * FROM articles ORDER BY published_at DESC')
-      return rows.map(transformArticle)
+      result = rows.map(transformArticle)
     } catch (error) {
       console.warn('⚠️ Cloudflare D1 error fetching all articles, falling back to local store:', error)
-      return localStore.getAll()
+      result = localStore.getAll()
+    }
+  } else {
+    result = localStore.getAll()
+  }
+
+  setCached(cacheKey, result)
+  return result
+}
+
+// Get article by ID - Cached
+export async function getArticleById(id: string): Promise<Article | null> {
+  const cacheKey = `article_id_${id}`
+  const cached = getCached<Article | null>(cacheKey)
+  if (cached !== null) return cached
+
+  // Quick check in all_articles cache
+  const allCached = getCached<Article[]>('all_articles')
+  if (allCached) {
+    const found = allCached.find(a => a.id === id)
+    if (found) {
+      setCached(cacheKey, found)
+      return found
     }
   }
 
-  return localStore.getAll()
-}
-
-// Get article by ID
-export async function getArticleById(id: string): Promise<Article | null> {
+  let result: Article | null = null
   if (isD1Configured()) {
     try {
       const rows = await queryD1('SELECT * FROM articles WHERE id = ?1 LIMIT 1', [id])
-      return rows[0] ? transformArticle(rows[0]) : null
+      result = rows[0] ? transformArticle(rows[0]) : null
     } catch (error) {
       console.warn(`⚠️ Cloudflare D1 error fetching article id=${id}, falling back to local store:`, error)
-      return localStore.getById(id)
+      result = localStore.getById(id)
+    }
+  } else {
+    result = localStore.getById(id)
+  }
+
+  setCached(cacheKey, result)
+  return result
+}
+
+// Get article by slug - Cached
+export async function getArticleBySlug(slug: string): Promise<Article | null> {
+  const cacheKey = `article_slug_${slug}`
+  const cached = getCached<Article | null>(cacheKey)
+  if (cached !== null) return cached
+
+  // Quick check in all_articles cache
+  const allCached = getCached<Article[]>('all_articles')
+  if (allCached) {
+    const found = allCached.find(a => a.slug === slug)
+    if (found) {
+      setCached(cacheKey, found)
+      return found
     }
   }
 
-  return localStore.getById(id)
-}
-
-// Get article by slug
-export async function getArticleBySlug(slug: string): Promise<Article | null> {
+  let result: Article | null = null
   if (isD1Configured()) {
     try {
       const rows = await queryD1('SELECT * FROM articles WHERE slug = ?1 LIMIT 1', [slug])
-      return rows[0] ? transformArticle(rows[0]) : null
+      result = rows[0] ? transformArticle(rows[0]) : null
     } catch (error) {
       console.warn(`⚠️ Cloudflare D1 error fetching article slug=${slug}, falling back to local store:`, error)
-      return localStore.getBySlug(slug)
+      result = localStore.getBySlug(slug)
     }
+  } else {
+    result = localStore.getBySlug(slug)
   }
 
-  return localStore.getBySlug(slug)
+  setCached(cacheKey, result)
+  return result
 }
 
-// Get articles by category
+// Get articles by category - Cached
 export async function getArticlesByCategory(category: string): Promise<Article[]> {
+  const cacheKey = `category_${category.toLowerCase()}`
+  const cached = getCached<Article[]>(cacheKey)
+  if (cached) return cached
+
+  let result: Article[]
   if (isD1Configured()) {
     try {
       const rows = await queryD1(
         "SELECT * FROM articles WHERE category = ?1 AND status = 'published' ORDER BY published_at DESC",
         [category]
       )
-      return rows.map(transformArticle)
+      result = rows.map(transformArticle)
     } catch (error) {
       console.warn(`⚠️ Cloudflare D1 error fetching category=${category}, falling back to local store:`, error)
-      return localStore.getByCategory(category)
+      result = localStore.getByCategory(category)
     }
+  } else {
+    result = localStore.getByCategory(category)
   }
 
-  return localStore.getByCategory(category)
+  setCached(cacheKey, result)
+  return result
 }
 
 // Get featured articles
@@ -173,39 +255,55 @@ export async function getFeaturedArticles(): Promise<Article[]> {
   return localStore.getFeatured()
 }
 
-// Get recent articles
+// Get recent articles - Cached
 export async function getRecentArticles(limit: number = 10): Promise<Article[]> {
+  const cacheKey = `recent_articles_${limit}`
+  const cached = getCached<Article[]>(cacheKey)
+  if (cached) return cached
+
+  let result: Article[]
   if (isD1Configured()) {
     try {
       const rows = await queryD1(
         "SELECT * FROM articles WHERE status = 'published' ORDER BY published_at DESC LIMIT ?1",
         [limit]
       )
-      return rows.map(transformArticle)
+      result = rows.map(transformArticle)
     } catch (error) {
       console.warn('⚠️ Cloudflare D1 error fetching recent articles, falling back to local store:', error)
-      return localStore.getRecent(limit)
+      result = localStore.getRecent(limit)
     }
+  } else {
+    result = localStore.getRecent(limit)
   }
 
-  return localStore.getRecent(limit)
+  setCached(cacheKey, result)
+  return result
 }
 
-// Get homepage articles (positions 1-15)
+// Get homepage articles (positions 1-15) - Cached
 export async function getHomepageArticles(): Promise<Article[]> {
+  const cacheKey = 'homepage_articles'
+  const cached = getCached<Article[]>(cacheKey)
+  if (cached) return cached
+
+  let result: Article[]
   if (isD1Configured()) {
     try {
       const rows = await queryD1(
         "SELECT * FROM articles WHERE status = 'published' AND homepage_position >= 1 AND homepage_position <= 15 ORDER BY homepage_position ASC"
       )
-      return rows.map(transformArticle)
+      result = rows.map(transformArticle)
     } catch (error) {
       console.warn('⚠️ Cloudflare D1 error fetching homepage articles, falling back to local store:', error)
-      return localStore.getHomepage()
+      result = localStore.getHomepage()
     }
+  } else {
+    result = localStore.getHomepage()
   }
 
-  return localStore.getHomepage()
+  setCached(cacheKey, result)
+  return result
 }
 
 // Get articles by specific broadsheet positions
@@ -301,6 +399,7 @@ export async function listArticles(options?: ListArticlesOptions): Promise<Pagin
 
 // Create new article
 export async function createArticle(input: CreateArticleInput): Promise<Article | null> {
+  invalidateArticleCache()
   // Always update local store so local state remains synchronized
   const localResult = localStore.create(input)
 
@@ -349,6 +448,7 @@ export async function createArticle(input: CreateArticleInput): Promise<Article 
 
 // Update existing article
 export async function updateArticle(id: string, updates: UpdateArticleInput): Promise<Article | null> {
+  invalidateArticleCache()
   const localResult = localStore.update(id, updates)
 
   if (isD1Configured()) {
@@ -398,6 +498,7 @@ export async function updateArticle(id: string, updates: UpdateArticleInput): Pr
 
 // Delete article
 export async function deleteArticle(id: string): Promise<boolean> {
+  invalidateArticleCache()
   const localSuccess = localStore.delete(id)
 
   if (isD1Configured()) {
@@ -419,6 +520,7 @@ export async function setArticleStatus(id: string, status: ArticleStatus): Promi
 
 // Update homepage position (1-15, or null to unpin)
 export async function updateArticlePosition(id: string, position: number | null): Promise<boolean> {
+  invalidateArticleCache()
   const localSuccess = localStore.updatePosition(id, position)
 
   if (isD1Configured()) {
@@ -438,6 +540,7 @@ export async function updateArticlePosition(id: string, position: number | null)
 
 // Swap positions between two articles
 export async function swapArticlePositions(id1: string, id2: string): Promise<boolean> {
+  invalidateArticleCache()
   const localSuccess = localStore.swapPositions(id1, id2)
 
   if (isD1Configured()) {

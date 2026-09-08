@@ -99,7 +99,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <img
             src="/logo.png"
             alt="Singh Monster"
-            className="w-10 h-10 object-contain dark:invert animate-pulse"
+            className="w-10 h-10 object-contain animate-pulse"
           />
           <p className="font-mono text-xs uppercase tracking-widest text-ink-mute dark:text-dark-mute">
             Verifying Newsroom Credentials...
@@ -111,14 +111,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="h-dvh md:min-h-screen bg-paper dark:bg-dark-paper text-ink dark:text-dark-ink font-sans flex flex-col md:flex-row antialiased overflow-hidden md:overflow-visible">
-      {/* MOBILE APP TOP BAR (Clean, compact, native feel) */}
-      <header className="md:hidden shrink-0 z-40 bg-paper/95 dark:bg-[#0c0c0e]/95 backdrop-blur-xl border-b border-rule/60 dark:border-white/[0.08] px-3.5 py-2.5 flex items-center justify-between select-none">
+      {/* MOBILE APP TOP BAR (Clean, compact, native feel - Solid opaque) */}
+      <header className="md:hidden shrink-0 z-40 bg-paper dark:bg-[#0c0c0e] border-b border-rule/70 dark:border-white/[0.08] px-3.5 py-2.5 flex items-center justify-between select-none shadow-xs">
         <div className="flex items-center gap-2.5">
           <Link href="/admin" className="flex items-center no-underline" title="Singh Monster CMS">
             <img
               src="/logo.png"
               alt="Singh Monster"
-              className="w-7 h-7 object-contain dark:invert shrink-0"
+              className="w-7 h-7 object-contain shrink-0"
             />
           </Link>
           <span className="font-serif font-black text-base tracking-tight text-ink dark:text-dark-ink">
@@ -185,7 +185,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <img
                 src="/logo.png"
                 alt="Singh Monster"
-                className="w-12 h-12 object-contain dark:invert shrink-0 transition-transform duration-200 group-hover:scale-105 drop-shadow-xs"
+                className="w-12 h-12 object-contain shrink-0 transition-transform duration-200 group-hover:scale-105 drop-shadow-xs"
               />
               <div>
                 <div className="flex items-center gap-1.5">
@@ -289,8 +289,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       </main>
 
-      {/* MOBILE BOTTOM APP NAVIGATION BAR (Native App Feel) */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-paper/95 dark:bg-[#0c0c0e]/95 backdrop-blur-2xl border-t border-rule/60 dark:border-white/[0.08] px-3 py-1.5 flex items-center justify-around select-none shadow-lg">
+      {/* MOBILE BOTTOM APP NAVIGATION BAR (Native App Feel - Solid opaque) */}
+      <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-paper dark:bg-[#0c0c0e] border-t border-rule/70 dark:border-white/[0.08] px-3 py-1.5 flex items-center justify-around select-none shadow-lg">
         {/* Tab 1: Stories */}
         <Link
           href="/admin"

@@ -101,6 +101,10 @@ export async function GET(request: NextRequest) {
       offset,
       page: Math.floor(offset / limit) + 1,
       totalPages: Math.ceil(total / limit) || 1,
+    }, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=15, stale-while-revalidate=45',
+      },
     })
   } catch (error: any) {
     console.error('Error in GET /api/articles:', error)

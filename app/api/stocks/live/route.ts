@@ -59,6 +59,10 @@ export async function GET() {
       exchange: 'NSE / BSE',
       timestamp: new Date().toISOString(),
       stocks: liveQuotes,
+    }, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=10, stale-while-revalidate=20',
+      },
     })
   } catch (error: any) {
     return NextResponse.json({
@@ -67,6 +71,10 @@ export async function GET() {
       exchange: 'NSE / BSE',
       timestamp: new Date().toISOString(),
       stocks: BASE_STOCKS,
+    }, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=10, stale-while-revalidate=20',
+      },
     })
   }
 }

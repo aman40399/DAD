@@ -75,7 +75,7 @@ export default function AdminLoginPage() {
             <img
               src="/logo.png"
               alt="Singh Monster"
-              className="w-12 h-12 object-contain dark:invert mb-2.5 drop-shadow-xs"
+              className="w-12 h-12 object-contain mb-2.5 drop-shadow-xs"
             />
             <h1 className="font-serif font-black text-xl tracking-tight text-ink dark:text-dark-ink">
               Singh Monster

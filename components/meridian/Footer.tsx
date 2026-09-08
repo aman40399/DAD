@@ -1,5 +1,7 @@
 'use client'
 
+import Link from 'next/link'
+
 interface FooterProps {
   brandName?: string
 }
@@ -18,7 +20,7 @@ export default function Footer({ brandName = 'Singh Monster' }: FooterProps) {
             <img
               src="/logo.png"
               alt="Singh Monster"
-              className="w-16 h-16 sm:w-20 sm:h-20 object-contain dark:invert shrink-0"
+              className="w-16 h-16 sm:w-20 sm:h-20 object-contain shrink-0"
             />
             <div>
               <span className="font-serif font-black text-2xl sm:text-3xl uppercase tracking-wider text-ink dark:text-dark-ink">
@@ -48,11 +50,11 @@ export default function Footer({ brandName = 'Singh Monster' }: FooterProps) {
               News
             </h4>
             <ul className="space-y-2">
-              <li><a href="/section/world" className="hover:text-accent dark:hover:text-dark-accent transition">World</a></li>
-              <li><a href="/section/politics" className="hover:text-accent dark:hover:text-dark-accent transition">Politics</a></li>
-              <li><a href="/section/business" className="hover:text-accent dark:hover:text-dark-accent transition">Business</a></li>
-              <li><a href="/section/technology" className="hover:text-accent dark:hover:text-dark-accent transition">Technology</a></li>
-              <li><a href="/section/sports" className="hover:text-accent dark:hover:text-dark-accent transition">Sports</a></li>
+              <li><Link href="/section/world" prefetch={true} className="hover:text-accent dark:hover:text-dark-accent transition">World</Link></li>
+              <li><Link href="/section/politics" prefetch={true} className="hover:text-accent dark:hover:text-dark-accent transition">Politics</Link></li>
+              <li><Link href="/section/business" prefetch={true} className="hover:text-accent dark:hover:text-dark-accent transition">Business</Link></li>
+              <li><Link href="/section/technology" prefetch={true} className="hover:text-accent dark:hover:text-dark-accent transition">Technology</Link></li>
+              <li><Link href="/section/sports" prefetch={true} className="hover:text-accent dark:hover:text-dark-accent transition">Sports</Link></li>
             </ul>
           </div>
 
@@ -61,10 +63,10 @@ export default function Footer({ brandName = 'Singh Monster' }: FooterProps) {
               Opinion
             </h4>
             <ul className="space-y-2">
-              <li><a href="/section/columnists" className="hover:text-accent dark:hover:text-dark-accent transition">Columnists</a></li>
-              <li><a href="/section/editorials" className="hover:text-accent dark:hover:text-dark-accent transition">Editorials</a></li>
-              <li><a href="/section/guest-essays" className="hover:text-accent dark:hover:text-dark-accent transition">Guest Essays</a></li>
-              <li><a href="/section/letters" className="hover:text-accent dark:hover:text-dark-accent transition">Letters</a></li>
+              <li><Link href="/section/columnists" prefetch={true} className="hover:text-accent dark:hover:text-dark-accent transition">Columnists</Link></li>
+              <li><Link href="/section/editorials" prefetch={true} className="hover:text-accent dark:hover:text-dark-accent transition">Editorials</Link></li>
+              <li><Link href="/section/guest-essays" prefetch={true} className="hover:text-accent dark:hover:text-dark-accent transition">Guest Essays</Link></li>
+              <li><Link href="/section/letters" prefetch={true} className="hover:text-accent dark:hover:text-dark-accent transition">Letters</Link></li>
             </ul>
           </div>
 
@@ -73,10 +75,10 @@ export default function Footer({ brandName = 'Singh Monster' }: FooterProps) {
               Arts & Life
             </h4>
             <ul className="space-y-2">
-              <li><a href="/section/books" className="hover:text-accent dark:hover:text-dark-accent transition">Books</a></li>
-              <li><a href="/section/movies" className="hover:text-accent dark:hover:text-dark-accent transition">Movies</a></li>
-              <li><a href="/section/music" className="hover:text-accent dark:hover:text-dark-accent transition">Music</a></li>
-              <li><a href="/section/food" className="hover:text-accent dark:hover:text-dark-accent transition">Food & Drink</a></li>
+              <li><Link href="/section/books" prefetch={true} className="hover:text-accent dark:hover:text-dark-accent transition">Books</Link></li>
+              <li><Link href="/section/movies" prefetch={true} className="hover:text-accent dark:hover:text-dark-accent transition">Movies</Link></li>
+              <li><Link href="/section/music" prefetch={true} className="hover:text-accent dark:hover:text-dark-accent transition">Music</Link></li>
+              <li><Link href="/section/food" prefetch={true} className="hover:text-accent dark:hover:text-dark-accent transition">Food & Drink</Link></li>
             </ul>
           </div>
 
@@ -85,10 +87,10 @@ export default function Footer({ brandName = 'Singh Monster' }: FooterProps) {
               Company
             </h4>
             <ul className="space-y-2">
-              <li><a href="/about" className="hover:text-accent dark:hover:text-dark-accent transition">About Us</a></li>
-              <li><a href="/ethics" className="hover:text-accent dark:hover:text-dark-accent transition">Ethics Policy</a></li>
-              <li><a href="/contact" className="hover:text-accent dark:hover:text-dark-accent transition">Contact Newsroom</a></li>
-              <li><a href="/careers" className="hover:text-accent dark:hover:text-dark-accent transition">Careers</a></li>
+              <li><Link href="/about" prefetch={true} className="hover:text-accent dark:hover:text-dark-accent transition">About Us</Link></li>
+              <li><Link href="/ethics" prefetch={true} className="hover:text-accent dark:hover:text-dark-accent transition">Ethics Policy</Link></li>
+              <li><Link href="/contact" prefetch={true} className="hover:text-accent dark:hover:text-dark-accent transition">Contact Newsroom</Link></li>
+              <li><Link href="/careers" prefetch={true} className="hover:text-accent dark:hover:text-dark-accent transition">Careers</Link></li>
             </ul>
           </div>
 
@@ -114,9 +116,9 @@ export default function Footer({ brandName = 'Singh Monster' }: FooterProps) {
         <div className="pt-8 border-t border-rule dark:border-dark-rule flex flex-col sm:flex-row items-center justify-between text-[11px] text-ink-mute dark:text-dark-mute gap-4">
           <p>© {new Date().getFullYear()} {brandName}. All rights reserved.</p>
           <div className="flex items-center gap-4">
-            <a href="/about" className="hover:underline">About</a>
+            <Link href="/about" prefetch={true} className="hover:underline">About</Link>
             <span>·</span>
-            <a href="/privacy" className="hover:underline">Privacy & Disclaimers</a>
+            <Link href="/privacy" prefetch={true} className="hover:underline">Privacy & Disclaimers</Link>
             <span>·</span>
             <a href="/sitemap.xml" className="hover:underline">Sitemap</a>
           </div>

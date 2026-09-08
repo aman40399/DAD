@@ -27,8 +27,12 @@ export default async function HomePage() {
   } catch {}
 
   try {
-    homepageArticles = await getHomepageArticles()
-    recentArticles = await getRecentArticles(30)
+    const [hp, rec] = await Promise.all([
+      getHomepageArticles(),
+      getRecentArticles(30),
+    ])
+    homepageArticles = hp
+    recentArticles = rec
   } catch (error) {
     console.error('Error loading articles in HomePage:', error)
   }

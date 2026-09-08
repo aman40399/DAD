@@ -107,15 +107,15 @@ export default function NavigationDrawer({
         aria-hidden="true"
       />
 
-      {/* Slide-out Drawer Panel */}
-      <div className="relative w-[85vw] max-w-[360px] bg-paper dark:bg-[#0e0e11] border-r border-rule/70 dark:border-white/10 flex flex-col h-full z-10 shadow-2xl transition-transform duration-300">
+      {/* Slide-out Drawer Panel (Full Screen on Mobile) */}
+      <div className="relative w-full max-w-full sm:w-[85vw] sm:max-w-[360px] bg-paper dark:bg-[#0e0e11] border-r-0 sm:border-r border-rule/70 dark:border-white/10 flex flex-col h-full z-10 shadow-2xl transition-transform duration-300">
         {/* Drawer Header */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-rule/70 dark:border-white/10 bg-paper-subtle/50 dark:bg-white/[0.02]">
           <div className="flex items-center gap-2.5">
             <img
               src="/logo.png"
               alt="Singh Monster"
-              className="w-7 h-7 object-contain dark:invert shrink-0"
+              className="w-7 h-7 object-contain shrink-0"
             />
             <span className="font-serif font-black text-lg tracking-tight uppercase text-ink dark:text-dark-ink">
               {brandName}

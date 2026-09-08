@@ -51,18 +51,20 @@ const nextConfig = {
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    minimumCacheTTL: 60,
+    minimumCacheTTL: 86400,
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
+  // Disable x-powered-by header
+  poweredByHeader: false,
   // Compression
   compress: true,
   // Performance optimizations
   swcMinify: true,
   // Enable experimental features for better performance
   experimental: {
-    optimizePackageImports: ['@/components', '@/lib'],
+    optimizePackageImports: ['@/components', '@/lib', 'lucide-react'],
   },
   // Compiler options
   compiler: {
@@ -72,7 +74,7 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source: '/:all*(svg|jpg|jpeg|png|webp|avif|gif|ico)',
+        source: '/:all*(svg|jpg|jpeg|png|webp|avif|gif|ico|woff|woff2|ttf|otf|eot)',
         locale: false,
         headers: [
           {

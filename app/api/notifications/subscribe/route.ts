@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const result = savePushSubscription({
+    const result = await savePushSubscription({
       endpoint: subscription.endpoint,
       expirationTime: subscription.expirationTime,
       keys: subscription.keys,
@@ -58,7 +58,7 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'Missing endpoint' }, { status: 400 })
     }
 
-    const removed = removePushSubscription(body.endpoint)
+    const removed = await removePushSubscription(body.endpoint)
     return NextResponse.json({ success: true, removed })
   } catch (error) {
     return NextResponse.json({ success: false, error: 'Failed to unsubscribe' }, { status: 500 })

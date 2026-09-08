@@ -97,10 +97,7 @@ export default async function SectionPage({
         <header className="pb-5 mb-8 border-b-2 border-ink dark:border-dark-ink">
           <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
             <div>
-              <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-accent font-bold">
-                Section // Dispatch
-              </span>
-              <h1 className="font-serif font-black text-3xl sm:text-5xl uppercase tracking-tight text-ink dark:text-dark-ink mt-1">
+              <h1 className="font-serif font-black text-3xl sm:text-5xl uppercase tracking-tight text-ink dark:text-dark-ink">
                 {sectionName}
               </h1>
             </div>

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import webpush from 'web-push'
 import {
-  getAllPushSubscriptions,
+  getAllPushSubscriptionsAsync,
   removePushSubscription,
 } from '@/lib/pushStore'
 import {
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
       tag = 'singh-monster-broadcast',
     } = body
 
-    const subscriptions = getAllPushSubscriptions()
+    const subscriptions = await getAllPushSubscriptionsAsync()
 
     if (subscriptions.length === 0) {
       return NextResponse.json({
@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
 
     // Cleanup dead subscriptions
     for (const deadEndpoint of deadEndpoints) {
-      removePushSubscription(deadEndpoint)
+      await removePushSubscription(deadEndpoint)
     }
 
     return NextResponse.json({

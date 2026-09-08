@@ -42,21 +42,23 @@ export default function AboutPage() {
           <div className="w-24 h-0.5 bg-accent mx-auto mt-8 opacity-80" />
         </header>
 
-        {/* Lead Correspondent Box */}
-        <div className="bg-paper-subtle dark:bg-dark-subtle border border-rule dark:border-dark-rule rounded-2xl p-6 sm:p-8 mb-14 shadow-xs">
-          <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-accent/10 dark:bg-accent/20 border border-accent/20 flex items-center justify-center shrink-0">
-              <span className="font-serif font-black text-2xl sm:text-3xl text-accent dark:text-dark-accent">
-                DS
-              </span>
+        {/* Founder & Lead Correspondent Profile */}
+        <div className="bg-paper-subtle dark:bg-[#121215] border border-rule/80 dark:border-white/10 rounded-2xl p-6 sm:p-8 mb-14 shadow-xs">
+          <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 items-center sm:items-start text-center sm:text-left">
+            <div className="relative w-28 h-28 sm:w-36 sm:h-36 rounded-2xl overflow-hidden border-2 border-rule dark:border-white/15 shadow-md shrink-0 bg-paper-subtle dark:bg-dark-subtle">
+              <img
+                src="/authr.png"
+                alt="Dhananjay Singh — Founder & Editor-in-Chief"
+                className="w-full h-full object-cover object-top"
+              />
             </div>
-            <div className="space-y-3">
-              <div className="flex flex-wrap items-baseline gap-3">
-                <h2 className="font-serif font-bold text-2xl sm:text-3xl text-ink dark:text-dark-ink">
+            <div className="space-y-3 flex-1">
+              <div className="flex flex-col sm:flex-row sm:items-baseline gap-1.5 sm:gap-3">
+                <h2 className="font-serif font-black text-2xl sm:text-3xl text-ink dark:text-dark-ink">
                   Dhananjay Singh
                 </h2>
                 <span className="font-mono text-xs uppercase tracking-widest text-accent dark:text-dark-accent font-semibold">
-                  Founder • Lead Correspondent • Editor
+                  Founder • Editor-in-Chief • Lead Correspondent
                 </span>
               </div>
               <p className="font-serif text-sm sm:text-base leading-relaxed text-ink/85 dark:text-dark-ink/85">
@@ -65,10 +67,10 @@ export default function AboutPage() {
                 entanglements, the publication was created to deliver an unsparing mirror to power, finance, and global
                 developments.
               </p>
-              <div className="flex items-center gap-4 pt-2 font-mono text-xs text-ink-mute dark:text-dark-mute">
-                <span>Location: India / Global Coverage</span>
+              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-1 pt-1 font-mono text-xs text-ink-mute dark:text-dark-mute">
+                <span>Location: India &amp; Global Dispatches</span>
                 <span>•</span>
-                <span>Direct Inquiries: <a href="mailto:editorial@singhmonster.com" className="text-accent hover:underline">editorial@singhmonster.com</a></span>
+                <span>Inquiries: <a href="mailto:editorial@singhmonster.com" className="text-accent hover:underline">editorial@singhmonster.com</a></span>
               </div>
             </div>
           </div>

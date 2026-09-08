@@ -125,7 +125,7 @@ export default function MobileBottomNav() {
   return (
     <nav
       aria-label="Mobile Bottom Navigation"
-      className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-paper/92 dark:bg-[#0c0c0e]/92 backdrop-blur-xl border-t border-rule/60 dark:border-white/10 pb-[max(0.4rem,env(safe-area-inset-bottom))] shadow-[0_-4px_24px_rgba(0,0,0,0.06)]"
+      className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-paper dark:bg-[#0c0c0e] border-t border-rule/70 dark:border-white/10 pb-[max(0.4rem,env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(0,0,0,0.08)] select-none"
     >
       <div className="grid grid-cols-5 h-14 items-center">
         {items.map((item) => {

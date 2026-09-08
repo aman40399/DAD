@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef } from 'react'
+import Link from 'next/link'
 import { ArticleData } from './PostCard'
 
 interface EditorsPicksProps {
@@ -96,7 +97,7 @@ export default function EditorsPicks({ articles = DEFAULT_PICKS }: EditorsPicksP
       >
         {articles.map((item) => (
           <article key={item.id} className="group cursor-pointer">
-            <a href={`/article/${item.slug || item.id}`} className="block no-underline">
+            <Link href={`/article/${item.slug || item.id}`} prefetch={true} className="block no-underline">
               <div className="aspect-[16/10] overflow-hidden bg-paper-subtle dark:bg-dark-subtle border border-rule dark:border-dark-rule mb-2.5">
                 <img
                   src={item.image}
@@ -123,7 +124,7 @@ export default function EditorsPicks({ articles = DEFAULT_PICKS }: EditorsPicksP
                   </>
                 )}
               </footer>
-            </a>
+            </Link>
           </article>
         ))}
       </div>

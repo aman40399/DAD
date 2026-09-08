@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import NavigationDrawer from './NavigationDrawer'
 import BookmarkPanel from './BookmarkPanel'
 import ThemeToggle from './ThemeToggle'
@@ -42,17 +43,17 @@ export default function Masthead({
   return (
     <>
       {/* 1. Mobile Apple-Style App Bar */}
-      <header className="md:hidden sticky top-0 z-40 bg-paper/92 dark:bg-[#0c0c0e]/92 backdrop-blur-xl border-b border-rule/60 dark:border-white/10 px-4 h-14 flex items-center justify-between select-none">
-        <a href="/" className="flex items-center gap-2.5 no-underline">
+      <header className="md:hidden sticky top-0 z-40 bg-paper dark:bg-[#0c0c0e] border-b border-rule/70 dark:border-white/10 px-3.5 h-[60px] flex items-center justify-between select-none shadow-xs">
+        <Link href="/" prefetch={true} className="flex items-center gap-2.5 no-underline">
           <img
             src="/logo.png"
             alt={brandName}
-            className="w-7 h-7 object-contain dark:invert shrink-0"
+            className="h-10 sm:h-11 w-auto max-w-[56px] object-contain shrink-0"
           />
           <span className="font-serif font-black text-lg tracking-tight uppercase text-ink dark:text-dark-ink leading-none">
             {brandName}
           </span>
-        </a>
+        </Link>
 
         <div className="flex items-center gap-1.5">
           <button
@@ -151,34 +152,24 @@ export default function Masthead({
             </div>
           </div>
 
-          {/* Central Newspaper Wordmark */}
-          <div className="py-6 sm:py-8 text-center">
-            <a
+          {/* Central Newspaper Wordmark & Brand - Single Inline Row */}
+          <div className="py-3.5 sm:py-5 flex flex-col items-center justify-center">
+            <Link
               href="/"
-              className="group inline-flex flex-col items-center justify-center text-ink dark:text-dark-ink no-underline"
+              prefetch={true}
+              className="group inline-flex items-center justify-center gap-2 sm:gap-2.5 md:gap-3 text-ink dark:text-dark-ink no-underline"
             >
-              {/* Centered Lion Crest Logo */}
-              <div className="relative mb-2 sm:mb-3.5 flex items-center justify-center">
-                <span className="hidden sm:inline-block w-12 md:w-24 h-px bg-ink dark:bg-dark-ink opacity-30 group-hover:opacity-70 transition mr-4" />
-                <img
-                  src="/logo.png"
-                  alt="Singh Monster"
-                  className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 object-contain dark:invert transition-transform duration-300 group-hover:scale-105 shrink-0 drop-shadow-xs"
-                />
-                <span className="hidden sm:inline-block w-12 md:w-24 h-px bg-ink dark:bg-dark-ink opacity-30 group-hover:opacity-70 transition ml-4" />
-              </div>
+              <img
+                src="/logo.png"
+                alt="Singh Monster"
+                className="h-16 sm:h-20 md:h-24 lg:h-28 w-auto object-contain transition-transform duration-200 group-hover:scale-105 shrink-0 drop-shadow-xs"
+              />
+              <h1 className="font-serif font-black text-3xl sm:text-4xl md:text-5xl lg:text-[58px] uppercase tracking-[0.03em] leading-none transition group-hover:text-accent dark:group-hover:text-dark-accent">
+                {brandName}
+              </h1>
+            </Link>
 
-              {/* Title Wordmark with Flourishes */}
-              <div className="inline-flex items-center justify-center gap-4 sm:gap-6">
-                <span className="hidden lg:inline-block w-10 sm:w-16 h-px bg-ink dark:bg-dark-ink opacity-40 group-hover:opacity-80 transition" />
-                <h1 className="font-serif font-black text-3xl sm:text-5xl md:text-6xl lg:text-7xl uppercase tracking-[0.02em] leading-none transition group-hover:text-accent dark:group-hover:text-dark-accent">
-                  {brandName}
-                </h1>
-                <span className="hidden lg:inline-block w-10 sm:w-16 h-px bg-ink dark:bg-dark-ink opacity-40 group-hover:opacity-80 transition" />
-              </div>
-            </a>
-
-            <p className="font-serif italic text-xs sm:text-[14px] text-ink-mute dark:text-dark-mute mt-2.5 tracking-wide font-normal">
+            <p className="font-serif italic text-xs sm:text-[13px] text-ink-mute dark:text-dark-mute mt-1.5 tracking-wide font-normal">
               {tagline}
             </p>
           </div>
@@ -189,33 +180,33 @@ export default function Masthead({
               className="flex items-center justify-center gap-5 sm:gap-7 md:gap-8 overflow-x-auto text-[11.5px] sm:text-[12.5px] font-sans font-semibold tracking-wider uppercase whitespace-nowrap scrollbar-none"
               aria-label="Sections"
             >
-              <a href="/section/us" className="text-ink dark:text-dark-ink hover:text-accent dark:hover:text-dark-accent transition">
+              <Link href="/section/us" prefetch={true} className="text-ink dark:text-dark-ink hover:text-accent dark:hover:text-dark-accent transition">
                 U.S
-              </a>
-              <a href="/section/world" className="text-ink dark:text-dark-ink hover:text-accent dark:hover:text-dark-accent transition">
+              </Link>
+              <Link href="/section/world" prefetch={true} className="text-ink dark:text-dark-ink hover:text-accent dark:hover:text-dark-accent transition">
                 World
-              </a>
-              <a href="/section/politics" className="text-ink dark:text-dark-ink hover:text-accent dark:hover:text-dark-accent transition">
+              </Link>
+              <Link href="/section/politics" prefetch={true} className="text-ink dark:text-dark-ink hover:text-accent dark:hover:text-dark-accent transition">
                 Politics
-              </a>
-              <a href="/section/business" className="text-ink dark:text-dark-ink hover:text-accent dark:hover:text-dark-accent transition">
+              </Link>
+              <Link href="/section/business" prefetch={true} className="text-ink dark:text-dark-ink hover:text-accent dark:hover:text-dark-accent transition">
                 Business
-              </a>
-              <a href="/section/technology" className="text-ink dark:text-dark-ink hover:text-accent dark:hover:text-dark-accent transition">
+              </Link>
+              <Link href="/section/technology" prefetch={true} className="text-ink dark:text-dark-ink hover:text-accent dark:hover:text-dark-accent transition">
                 Technology
-              </a>
-              <a href="/section/sports" className="text-ink dark:text-dark-ink hover:text-accent dark:hover:text-dark-accent transition">
+              </Link>
+              <Link href="/section/sports" prefetch={true} className="text-ink dark:text-dark-ink hover:text-accent dark:hover:text-dark-accent transition">
                 Sports
-              </a>
-              <a href="/section/opinion" className="text-ink dark:text-dark-ink hover:text-accent dark:hover:text-dark-accent transition">
+              </Link>
+              <Link href="/section/opinion" prefetch={true} className="text-ink dark:text-dark-ink hover:text-accent dark:hover:text-dark-accent transition">
                 Opinion
-              </a>
-              <a href="/section/video" className="text-ink dark:text-dark-ink hover:text-accent dark:hover:text-dark-accent transition">
+              </Link>
+              <Link href="/section/video" prefetch={true} className="text-ink dark:text-dark-ink hover:text-accent dark:hover:text-dark-accent transition">
                 Video
-              </a>
-              <a href="/about" className="text-ink dark:text-dark-ink hover:text-accent dark:hover:text-dark-accent transition">
+              </Link>
+              <Link href="/about" prefetch={true} className="text-ink dark:text-dark-ink hover:text-accent dark:hover:text-dark-accent transition">
                 About Us
-              </a>
+              </Link>
             </nav>
           </div>
         </div>

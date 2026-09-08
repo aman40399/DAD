@@ -23,6 +23,7 @@ const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
   variable: '--font-jetbrains-mono',
   display: 'swap',
+  preload: true,
 })
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
@@ -76,6 +77,8 @@ export default function RootLayout({
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
         <meta name="theme-color" content="#8a5e1f" />
+        <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://images.unsplash.com" />
         <script
           id="theme-init"
           dangerouslySetInnerHTML={{

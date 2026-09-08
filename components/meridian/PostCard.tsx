@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useBookmarks } from '@/lib/bookmarks'
 
 export interface ArticleData {
@@ -67,7 +68,7 @@ export default function PostCard({
   if (variant === 'hero') {
     return (
       <article className="group" data-component="post-card" data-variant="hero">
-        <a href={articleUrl} className="block no-underline">
+        <Link href={articleUrl} prefetch={true} className="block no-underline">
           {article.category && (
             <p className="font-sans text-[11px] font-bold tracking-[0.14em] uppercase text-accent mb-1.5">
               {article.category}
@@ -81,12 +82,13 @@ export default function PostCard({
               {article.excerpt}
             </p>
           )}
-        </a>
+        </Link>
 
         {article.image && (
           <figure className="mt-4 mb-3 m-0">
-            <a
+            <Link
               href={articleUrl}
+              prefetch={true}
               className="relative block aspect-[16/10] overflow-hidden border border-rule dark:border-dark-rule bg-paper-subtle dark:bg-dark-subtle"
             >
               <img
@@ -107,7 +109,7 @@ export default function PostCard({
                   </svg>
                 </span>
               )}
-            </a>
+            </Link>
           </figure>
         )}
 
@@ -176,7 +178,7 @@ export default function PostCard({
         data-component="post-card"
         data-variant="dense-thumb"
       >
-        <a href={articleUrl} className="block no-underline">
+        <Link href={articleUrl} prefetch={true} className="block no-underline">
           {article.image && (
             <div className="relative aspect-[16/10] overflow-hidden border border-rule dark:border-dark-rule bg-paper-subtle dark:bg-dark-subtle mb-2.5">
               <img
@@ -219,22 +221,22 @@ export default function PostCard({
                 By <strong className="text-ink dark:text-dark-ink font-semibold">{article.author}</strong>
               </span>
             )}
-            {formattedDate && (
-              <>
-                <span className="opacity-40">·</span>
-                <time>{formattedDate}</time>
-              </>
-            )}
+            {article.author && formattedDate && <span>·</span>}
+            {formattedDate && <time dateTime={article.date}>{formattedDate}</time>}
           </footer>
-        </a>
+        </Link>
       </article>
     )
   }
 
-  // 3. RANKED STORY VARIANT (06, 07, 08 in Right Rail)
+  // 3. RANKED VARIANT (Trending Rail)
   if (variant === 'ranked') {
     return (
-      <article className="grid grid-cols-[32px_1fr] gap-2.5 pb-3.5 border-b border-rule dark:border-dark-rule last:border-b-0 group">
+      <article
+        className="flex items-start gap-4 pb-4 border-b border-rule/70 dark:border-dark-rule/70 last:border-0 group"
+        data-component="post-card"
+        data-variant="ranked"
+      >
         <span className="font-mono font-bold text-2xl text-ink dark:text-dark-ink leading-none select-none">
           {article.rank || '01'}
         </span>
@@ -244,12 +246,13 @@ export default function PostCard({
               {article.category}
             </p>
           )}
-          <a
+          <Link
             href={articleUrl}
+            prefetch={true}
             className="font-serif font-bold text-[15px] leading-snug text-ink dark:text-dark-ink group-hover:underline group-hover:decoration-accent/50 group-hover:decoration-2 block break-words"
           >
             {article.title}
-          </a>
+          </Link>
         </div>
       </article>
     )
@@ -258,7 +261,7 @@ export default function PostCard({
   // 4. FEED / SUB-LEAD VARIANT
   return (
     <article className="group" data-component="post-card" data-variant="feed">
-      <a href={articleUrl} className="block no-underline">
+      <Link href={articleUrl} prefetch={true} className="block no-underline">
         {article.image && (
           <div className="relative aspect-[16/10] overflow-hidden border border-rule dark:border-dark-rule bg-paper-subtle dark:bg-dark-subtle mb-2.5">
             <img
@@ -311,7 +314,7 @@ export default function PostCard({
             </>
           )}
         </footer>
-      </a>
+      </Link>
     </article>
   )
 }
