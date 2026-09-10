@@ -1,5 +1,7 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { ArticleData } from './PostCard'
+
 
 interface WorldSectionProps {
   title?: string
@@ -82,12 +84,14 @@ export default function WorldSection({
         {/* Left Featured Big Story (7 cols) */}
         <article className="lg:col-span-7 group cursor-pointer">
           <Link href={`/article/${featuredArticle.slug || featuredArticle.id}`} prefetch={true} className="block no-underline">
-            <div className="aspect-[16/10] overflow-hidden bg-paper-subtle dark:bg-dark-subtle border border-rule dark:border-dark-rule mb-3">
-              <img
-                src={featuredArticle.image}
+            <div className="relative aspect-[16/10] overflow-hidden bg-paper-subtle dark:bg-dark-subtle border border-rule dark:border-dark-rule mb-3">
+              <Image
+                src={featuredArticle.image || 'https://images.unsplash.com/photo-1548345680-f5475ea5df84?w=1000&auto=format&fit=crop&q=80'}
                 alt={featuredArticle.title}
-                className="w-full h-full object-cover transition group-hover:scale-102 duration-300"
-                loading="lazy"
+                fill
+                sizes="(max-width: 1024px) 100vw, 650px"
+                quality={80}
+                className="object-cover transition group-hover:scale-102 duration-300"
               />
             </div>
 
@@ -151,12 +155,14 @@ export default function WorldSection({
               </div>
 
               {item.image && (
-                <Link href={`/article/${item.slug || item.id}`} prefetch={true} className="shrink-0 block">
-                  <img
+                <Link href={`/article/${item.slug || item.id}`} prefetch={true} className="shrink-0 block relative w-20 h-20 sm:w-22 sm:h-22 overflow-hidden border border-rule dark:border-dark-rule">
+                  <Image
                     src={item.image}
-                    alt=""
-                    className="w-20 h-20 sm:w-22 sm:h-22 object-cover border border-rule dark:border-dark-rule transition group-hover:opacity-90"
-                    loading="lazy"
+                    alt={item.title}
+                    fill
+                    sizes="90px"
+                    quality={70}
+                    className="object-cover transition group-hover:opacity-90"
                   />
                 </Link>
               )}

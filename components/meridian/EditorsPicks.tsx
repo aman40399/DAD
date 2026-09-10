@@ -2,7 +2,9 @@
 
 import { useRef } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ArticleData } from './PostCard'
+
 
 interface EditorsPicksProps {
   articles?: ArticleData[]
@@ -98,12 +100,14 @@ export default function EditorsPicks({ articles = DEFAULT_PICKS }: EditorsPicksP
         {articles.map((item) => (
           <article key={item.id} className="group cursor-pointer">
             <Link href={`/article/${item.slug || item.id}`} prefetch={true} className="block no-underline">
-              <div className="aspect-[16/10] overflow-hidden bg-paper-subtle dark:bg-dark-subtle border border-rule dark:border-dark-rule mb-2.5">
-                <img
-                  src={item.image}
+              <div className="relative aspect-[16/10] overflow-hidden bg-paper-subtle dark:bg-dark-subtle border border-rule dark:border-dark-rule mb-2.5">
+                <Image
+                  src={item.image || 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=800&auto=format&fit=crop&q=80'}
                   alt={item.title}
-                  className="w-full h-full object-cover transition group-hover:scale-103 duration-300"
-                  loading="lazy"
+                  fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                  quality={75}
+                  className="object-cover transition group-hover:scale-103 duration-300"
                 />
               </div>
 

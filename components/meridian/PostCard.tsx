@@ -1,6 +1,8 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useBookmarks } from '@/lib/bookmarks'
 
 export interface ArticleData {
@@ -30,7 +32,45 @@ interface PostCardProps {
 const FALLBACK_IMAGE =
   'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=800&auto=format&fit=crop&q=80'
 
+function SafeCardImage({
+  src,
+  alt,
+  priority = false,
+  sizes,
+  quality = 80,
+  className,
+}: {
+  src: string
+  alt: string
+  priority?: boolean
+  sizes: string
+  quality?: number
+  className?: string
+}) {
+  const [imgSrc, setImgSrc] = useState(src)
+  const [hasError, setHasError] = useState(false)
+
+  return (
+    <Image
+      src={hasError ? FALLBACK_IMAGE : imgSrc}
+      alt={alt}
+      fill
+      priority={priority}
+      sizes={sizes}
+      quality={quality}
+      className={className}
+      onError={() => {
+        if (!hasError) {
+          setHasError(true)
+          setImgSrc(FALLBACK_IMAGE)
+        }
+      }}
+    />
+  )
+}
+
 function safeFormatDate(rawDate?: string): string {
+
   if (!rawDate) return ''
   try {
     const parsed = new Date(rawDate)
@@ -91,16 +131,13 @@ export default function PostCard({
               prefetch={true}
               className="relative block aspect-[16/10] overflow-hidden border border-rule dark:border-dark-rule bg-paper-subtle dark:bg-dark-subtle"
             >
-              <img
+              <SafeCardImage
                 src={article.image}
                 alt={article.title || 'Broadsheet dispatch'}
-                className="w-full h-full object-cover transition duration-300 group-hover:scale-102"
-                loading={priority ? 'eager' : 'lazy'}
-                onError={(e) => {
-                  if (e.currentTarget.src !== FALLBACK_IMAGE) {
-                    e.currentTarget.src = FALLBACK_IMAGE
-                  }
-                }}
+                priority={priority}
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 60vw, 650px"
+                quality={82}
+                className="object-cover transition duration-300 group-hover:scale-102"
               />
               {article.isVideo && (
                 <span className="absolute inset-0 m-auto w-12 h-12 rounded-full bg-black/60 flex items-center justify-center text-white backdrop-blur-xs">
@@ -181,16 +218,12 @@ export default function PostCard({
         <Link href={articleUrl} prefetch={true} className="block no-underline">
           {article.image && (
             <div className="relative aspect-[16/10] overflow-hidden border border-rule dark:border-dark-rule bg-paper-subtle dark:bg-dark-subtle mb-2.5">
-              <img
+              <SafeCardImage
                 src={article.image}
                 alt={article.title || 'Broadsheet dispatch'}
-                className="w-full h-full object-cover transition group-hover:scale-103 duration-300"
-                loading="lazy"
-                onError={(e) => {
-                  if (e.currentTarget.src !== FALLBACK_IMAGE) {
-                    e.currentTarget.src = FALLBACK_IMAGE
-                  }
-                }}
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 25vw, 280px"
+                quality={75}
+                className="object-cover transition group-hover:scale-103 duration-300"
               />
               {article.isVideo && (
                 <span className="absolute inset-0 m-auto w-8 h-8 rounded-full bg-black/60 flex items-center justify-center text-white">
@@ -264,16 +297,12 @@ export default function PostCard({
       <Link href={articleUrl} prefetch={true} className="block no-underline">
         {article.image && (
           <div className="relative aspect-[16/10] overflow-hidden border border-rule dark:border-dark-rule bg-paper-subtle dark:bg-dark-subtle mb-2.5">
-            <img
+            <SafeCardImage
               src={article.image}
               alt={article.title || 'Broadsheet dispatch'}
-              className="w-full h-full object-cover transition group-hover:scale-103 duration-300"
-              loading="lazy"
-              onError={(e) => {
-                if (e.currentTarget.src !== FALLBACK_IMAGE) {
-                  e.currentTarget.src = FALLBACK_IMAGE
-                }
-              }}
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 30vw, 320px"
+              quality={75}
+              className="object-cover transition group-hover:scale-103 duration-300"
             />
             {article.isVideo && (
               <span className="absolute inset-0 m-auto w-8 h-8 rounded-full bg-black/60 flex items-center justify-center text-white">

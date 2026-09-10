@@ -48,12 +48,15 @@ export default function Masthead({
           <img
             src="/logo.png"
             alt={brandName}
+            width={44}
+            height={44}
             className="h-10 sm:h-11 w-auto max-w-[56px] object-contain shrink-0"
           />
-          <span className="font-serif font-black text-lg tracking-tight uppercase text-ink dark:text-dark-ink leading-none">
+          <h1 className="font-serif font-black text-lg tracking-tight uppercase text-ink dark:text-dark-ink leading-none">
             {brandName}
-          </span>
+          </h1>
         </Link>
+
 
         <div className="flex items-center gap-1.5">
           <button
@@ -176,6 +179,8 @@ export default function Masthead({
               <img
                 src="/logo.png"
                 alt="Singh Monster"
+                width={112}
+                height={112}
                 className="h-16 sm:h-20 md:h-24 lg:h-28 w-auto object-contain transition-transform duration-200 group-hover:scale-105 shrink-0 drop-shadow-xs"
               />
               <h1 className="font-serif font-black text-3xl sm:text-4xl md:text-5xl lg:text-[58px] uppercase tracking-[0.03em] leading-none transition group-hover:text-accent dark:group-hover:text-dark-accent">

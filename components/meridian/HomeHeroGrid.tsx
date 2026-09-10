@@ -141,7 +141,7 @@ export default function HomeHeroGrid({
         className="order-1 lg:order-2 lg:col-span-6 lg:border-r border-rule dark:border-dark-rule lg:pr-6 xl:pr-8"
         aria-label="Lead story"
       >
-        <PostCard article={heroStory} variant="hero" />
+        <PostCard article={heroStory} variant="hero" priority={true} />
 
         {/* Section Divider */}
         <hr className="border-0 h-[3px] bg-ink dark:bg-dark-ink my-7" />
