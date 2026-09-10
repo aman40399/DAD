@@ -124,7 +124,27 @@ const nextConfig = {
       },
     ]
   },
+  async redirects() {
+    return [
+      {
+        source: '/sitemap',
+        destination: '/sitemap.xml',
+        permanent: true,
+      },
+      {
+        source: '/feed',
+        destination: '/feed.xml',
+        permanent: true,
+      },
+      {
+        source: '/rss',
+        destination: '/rss.xml',
+        permanent: true,
+      },
+    ]
+  },
 }
+
 
 
 module.exports = nextConfig
