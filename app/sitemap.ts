@@ -8,6 +8,7 @@ const SECTIONS = [
   'india',
   'politics',
   'business',
+  'technology',
   'tech',
   'sports',
   'opinion',
@@ -15,8 +16,21 @@ const SECTIONS = [
   'science',
 ]
 
+const TRUST_PAGES = [
+  { path: '/about', priority: 0.9, changeFrequency: 'weekly' as const },
+  { path: '/editorial-guidelines', priority: 0.85, changeFrequency: 'monthly' as const },
+  { path: '/fact-checking', priority: 0.85, changeFrequency: 'monthly' as const },
+  { path: '/corrections', priority: 0.85, changeFrequency: 'monthly' as const },
+  { path: '/contact', priority: 0.85, changeFrequency: 'monthly' as const },
+  { path: '/authors', priority: 0.85, changeFrequency: 'weekly' as const },
+  { path: '/author/dhananjay-singh', priority: 0.85, changeFrequency: 'weekly' as const },
+  { path: '/privacy', priority: 0.6, changeFrequency: 'monthly' as const },
+  { path: '/privacy-policy', priority: 0.6, changeFrequency: 'monthly' as const },
+  { path: '/terms', priority: 0.6, changeFrequency: 'monthly' as const },
+]
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000').replace(/\/$/, '')
+  const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || 'https://www.singh.monster').replace(/\/$/, '')
 
   const entries: MetadataRoute.Sitemap = [
     {
@@ -25,15 +39,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'hourly',
       priority: 1.0,
     },
-    {
-      url: `${baseUrl}/bookmarks`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.4,
-    },
   ]
 
-  // Add category sections
+  // Add E-E-A-T high-authority trust and policy pages
+  for (const page of TRUST_PAGES) {
+    entries.push({
+      url: `${baseUrl}${page.path}`,
+      lastModified: new Date(),
+      changeFrequency: page.changeFrequency,
+      priority: page.priority,
+    })
+  }
+
+  // Add category section pages
   for (const section of SECTIONS) {
     entries.push({
       url: `${baseUrl}/section/${section}`,
@@ -69,4 +87,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return entries
 }
+
 

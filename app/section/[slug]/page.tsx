@@ -27,6 +27,8 @@ const KNOWN_SECTIONS: Record<string, string> = {
   lifestyle: 'Lifestyle',
 }
 
+const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || 'https://www.singh.monster').replace(/\/$/, '')
+
 export async function generateMetadata({
   params,
 }: {
@@ -35,12 +37,49 @@ export async function generateMetadata({
   const resolvedParams = await Promise.resolve(params)
   const rawSlug = (Array.isArray(resolvedParams?.slug) ? resolvedParams.slug[0] : resolvedParams?.slug || '').toLowerCase().trim()
   const sectionTitle = KNOWN_SECTIONS[rawSlug] || rawSlug.charAt(0).toUpperCase() + rawSlug.slice(1)
+  const pageUrl = `${baseUrl}/section/${rawSlug}`
 
   return {
-    title: `${sectionTitle} — Singh Monster`,
+    title: `${sectionTitle} News & Reporting — Singh Monster`,
     description: `Comprehensive reporting, investigative journalism, and deep analysis in ${sectionTitle}.`,
+    alternates: {
+      canonical: pageUrl,
+    },
+    openGraph: {
+      title: `${sectionTitle} — Singh Monster`,
+      description: `Comprehensive reporting, investigative journalism, and deep analysis in ${sectionTitle}.`,
+      url: pageUrl,
+      type: 'website',
+      siteName: 'Singh Monster',
+      images: [
+        {
+          url: `${baseUrl}/logo.png`,
+          width: 1200,
+          height: 630,
+          alt: `${sectionTitle} — Singh Monster`,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${sectionTitle} — Singh Monster`,
+      description: `Comprehensive reporting, investigative journalism, and deep analysis in ${sectionTitle}.`,
+      images: [`${baseUrl}/logo.png`],
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
   }
 }
+
 
 export default async function SectionPage({
   params,
@@ -88,8 +127,34 @@ export default async function SectionPage({
       ]
     : recentArticles.slice(0, 5).map((a) => ({ id: String(a.id), title: a.title, url: `/article/${a.slug}` }))
 
+  const jsonLdCollection = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    'name': `${sectionName} News & Reporting — Singh Monster`,
+    'url': `${baseUrl}/section/${rawSlug}`,
+    'description': `Comprehensive reporting, investigative journalism, and deep analysis in ${sectionName}.`,
+    'publisher': {
+      '@type': 'NewsMediaOrganization',
+      'name': 'Singh Monster',
+      'url': baseUrl,
+    },
+    'mainEntity': {
+      '@type': 'ItemList',
+      'itemListElement': articles.slice(0, 20).map((a, i) => ({
+        '@type': 'ListItem',
+        'position': i + 1,
+        'url': `${baseUrl}/article/${a.slug}`,
+        'name': a.title,
+      })),
+    },
+  }
+
   return (
     <div className="min-h-screen bg-paper dark:bg-dark-paper text-ink dark:text-dark-ink transition-colors duration-200 flex flex-col font-sans">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdCollection) }}
+      />
       <BreakingTicker items={tickerItems} />
       <StockTicker />
       <Masthead brandName="Singh Monster" tagline="Sharp reporting. Deep analysis. No agenda but the truth." />

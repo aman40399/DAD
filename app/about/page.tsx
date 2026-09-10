@@ -7,15 +7,57 @@ import { getAboutConfig } from '@/lib/aboutConfig'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
+const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || 'https://www.singh.monster').replace(/\/$/, '')
+
 export async function generateMetadata(): Promise<Metadata> {
   const config = await getAboutConfig()
+  const title = config.metaTitle || 'About Us — Editorial Mission & Standards | Singh Monster'
+  const description =
+    config.metaDescription ||
+    'The editorial philosophy, journalistic standards, and independent mission of Singh Monster, led by Dhananjay Singh.'
+  const pageUrl = `${baseUrl}/about`
+
   return {
-    title: config.metaTitle || 'About Us — Editorial Mission & Standards',
-    description:
-      config.metaDescription ||
-      'The editorial philosophy, journalistic standards, and independent mission of Singh Monster, led by Dhananjay Singh.',
+    title,
+    description,
+    alternates: {
+      canonical: pageUrl,
+    },
+    openGraph: {
+      title,
+      description,
+      url: pageUrl,
+      type: 'website',
+      siteName: 'Singh Monster',
+      images: [
+        {
+          url: `${baseUrl}/authr.png`,
+          width: 800,
+          height: 800,
+          alt: 'Dhananjay Singh — Singh Monster',
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [`${baseUrl}/authr.png`],
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
   }
 }
+
 
 export default async function AboutPage() {
   const config = await getAboutConfig()
@@ -32,8 +74,31 @@ export default async function AboutPage() {
       ? 'items-start text-left'
       : 'items-center sm:items-start text-center sm:text-left'
 
+  const jsonLdAbout = {
+    '@context': 'https://schema.org',
+    '@type': 'AboutPage',
+    'name': config.headline || 'About Singh Monster',
+    'description': config.metaDescription,
+    'url': `${baseUrl}/about`,
+    'mainEntity': {
+      '@type': 'NewsMediaOrganization',
+      'name': 'Singh Monster',
+      'url': baseUrl,
+      'founder': {
+        '@type': 'Person',
+        'name': 'Dhananjay Singh',
+        'jobTitle': 'Founder & Editor-in-Chief',
+        'url': `${baseUrl}/author/dhananjay-singh`,
+      },
+    },
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-paper dark:bg-dark-paper text-ink dark:text-dark-ink transition-colors">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdAbout) }}
+      />
       <Masthead />
 
       <main className={`flex-1 max-w-[1080px] w-full mx-auto px-4 sm:px-6 ${containerPadding}`}>

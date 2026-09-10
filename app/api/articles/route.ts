@@ -12,6 +12,7 @@ import {
   validateCreateArticle,
   formatArticleResponse,
 } from '@/lib/validation'
+import { triggerSearchEngineSync } from '@/lib/indexnow'
 
 export const dynamic = 'force-dynamic'
 
@@ -202,6 +203,17 @@ export async function POST(request: NextRequest) {
       if (created.category) revalidatePath(`/section/${created.category.toLowerCase()}`, 'page')
       revalidatePath('/admin', 'page')
       revalidatePath('/admin/slots', 'page')
+
+      if (created.status === 'published') {
+        triggerSearchEngineSync([
+          '/',
+          `/article/${created.slug}`,
+          `/section/${(created.category || 'news').toLowerCase()}`,
+          '/feed.xml',
+          '/sitemap.xml',
+          '/sitemap-news.xml',
+        ])
+      }
     } catch {}
 
     return NextResponse.json(

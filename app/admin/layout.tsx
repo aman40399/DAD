@@ -75,6 +75,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { label: 'Media Vault', href: '/admin/media', exact: false },
     { label: 'About Us Editor', href: '/admin/about', exact: false },
     { label: 'Visitor Intelligence', href: '/admin/analytics', exact: false },
+    { label: 'SEO & Search Indexing', href: '/admin/seo', exact: false },
   ]
 
   const isDeskActive = (href: string, exact: boolean) => {
@@ -90,10 +91,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (pathname.startsWith('/admin/media')) return 'Media Vault'
     if (pathname.startsWith('/admin/about')) return 'About Us Editor'
     if (pathname.startsWith('/admin/analytics')) return 'Visitor Intelligence'
+    if (pathname.startsWith('/admin/seo')) return 'SEO & Search Indexing'
     if (pathname.startsWith('/admin/articles/new')) return 'New Story'
     if (pathname.includes('/edit')) return 'Edit Story'
     return 'Newsroom'
   }
+
 
   if (checkingAuth) {
     return (

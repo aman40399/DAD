@@ -14,6 +14,7 @@ import {
   validateUpdateArticle,
   formatArticleResponse,
 } from '@/lib/validation'
+import { triggerSearchEngineSync } from '@/lib/indexnow'
 
 export const dynamic = 'force-dynamic'
 
@@ -220,6 +221,17 @@ async function handleUpdate(
       if (updated.category) revalidatePath(`/section/${updated.category.toLowerCase()}`, 'page')
       revalidatePath('/admin', 'page')
       revalidatePath('/admin/slots', 'page')
+
+      if (updated.status === 'published') {
+        triggerSearchEngineSync([
+          '/',
+          `/article/${updated.slug}`,
+          `/section/${(updated.category || 'news').toLowerCase()}`,
+          '/feed.xml',
+          '/sitemap.xml',
+          '/sitemap-news.xml',
+        ])
+      }
     } catch {}
 
     return NextResponse.json({

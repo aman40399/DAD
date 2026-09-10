@@ -154,6 +154,10 @@ export default async function ArticlePage({
   const modDate = rawMod ? new Date(rawMod).toISOString() : pubDate
   const description = article.excerpt || article.subtitle || article.content.replace(/<[^>]*>/g, '').slice(0, 160)
   const tags = article.tags && article.tags.length > 0 ? article.tags : [article.category, 'Singh Monster']
+  const isHindi =
+    article.language === 'hindi' ||
+    /[\u0900-\u097F]/.test(article.title || '') ||
+    /[\u0900-\u097F]/.test(article.excerpt || '')
 
   // Schema.org NewsArticle & Breadcrumbs structured data
   const jsonLdNewsArticle = {
@@ -171,14 +175,19 @@ export default async function ArticlePage({
     'author': {
       '@type': 'Person',
       'name': 'Dhananjay Singh',
-      'jobTitle': 'Admin & Editor-in-Chief',
+      'jobTitle': 'Founder & Editor-in-Chief',
       'image': `${baseUrl}/authr.png`,
-      'url': `${baseUrl}`,
+      'url': `${baseUrl}/author/dhananjay-singh`,
+      'sameAs': [
+        'https://twitter.com/SinghMonster',
+        'https://www.linkedin.com/company/singhmonster',
+      ],
     },
     'publisher': {
       '@type': 'NewsMediaOrganization',
       'name': 'Singh Monster',
       'url': baseUrl,
+      'publishingPrinciples': `${baseUrl}/editorial-guidelines`,
       'logo': {
         '@type': 'ImageObject',
         'url': `${baseUrl}/logo.png`,
@@ -190,7 +199,12 @@ export default async function ArticlePage({
     'articleBody': article.content.replace(/<[^>]*>/g, ' ').slice(0, 5000),
     'articleSection': article.category,
     'keywords': tags.join(', '),
-    'inLanguage': 'en-US',
+    'inLanguage': isHindi ? 'hi' : 'en-US',
+    'isAccessibleForFree': true,
+    'speakable': {
+      '@type': 'SpeakableSpecification',
+      'cssSelector': ['h1', 'article p:first-of-type'],
+    },
   }
 
   const jsonLdBreadcrumbs = {
