@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 
 const FALLBACK_IMAGE =
   'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=800&auto=format&fit=crop&q=80'
@@ -9,20 +10,32 @@ interface ArticleHeroImageProps {
   src: string
   alt: string
   caption?: string
+  priority?: boolean
 }
 
-export default function ArticleHeroImage({ src, alt, caption }: ArticleHeroImageProps) {
+export default function ArticleHeroImage({
+  src,
+  alt,
+  caption,
+  priority = true,
+}: ArticleHeroImageProps) {
   const [imgSrc, setImgSrc] = useState(src)
+  const [hasError, setHasError] = useState(false)
 
   return (
     <figure className="my-6 m-0">
-      <div className="aspect-[16/10] overflow-hidden bg-paper-subtle dark:bg-dark-subtle border border-rule dark:border-dark-rule">
-        <img
-          src={imgSrc}
+      <div className="relative aspect-[16/10] w-full overflow-hidden bg-paper-subtle dark:bg-dark-subtle border border-rule dark:border-dark-rule">
+        <Image
+          src={hasError ? FALLBACK_IMAGE : imgSrc}
           alt={alt}
-          className="w-full h-full object-cover"
+          fill
+          priority={priority}
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 980px"
+          quality={82}
+          className="object-cover"
           onError={() => {
-            if (imgSrc !== FALLBACK_IMAGE) {
+            if (!hasError) {
+              setHasError(true)
               setImgSrc(FALLBACK_IMAGE)
             }
           }}
@@ -36,3 +49,4 @@ export default function ArticleHeroImage({ src, alt, caption }: ArticleHeroImage
     </figure>
   )
 }
+
