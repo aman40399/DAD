@@ -48,12 +48,18 @@ export async function submitToIndexNow(urls: string[]): Promise<IndexNowResult[]
         body: JSON.stringify(payload),
       })
 
+      let msg = response.status === 200 ? 'OK' : response.status === 202 ? 'Accepted' : `HTTP ${response.status}`
+      if (response.status === 403) {
+        msg = 'Key awaiting Bing crawler verification. Verify domain in Bing Webmaster Tools.'
+      }
+
       results.push({
         engine: ep.name,
         status: response.status,
         ok: response.status >= 200 && response.status < 300,
-        message: response.status === 200 ? 'OK' : response.status === 202 ? 'Accepted' : `HTTP ${response.status}`,
+        message: msg,
       })
+
     } catch (err: any) {
       results.push({
         engine: ep.name,
