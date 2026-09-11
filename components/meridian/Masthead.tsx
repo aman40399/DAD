@@ -124,24 +124,6 @@ export default function Masthead({
               </a>
 
               <ThemeToggle />
-
-              <button
-                type="button"
-                disabled
-                className="hidden sm:inline-block tracking-wide text-ink-mute/50 dark:text-dark-mute/50 font-medium cursor-not-allowed select-none"
-                title="Sign in is currently disabled"
-              >
-                Sign in
-              </button>
-
-              <button
-                type="button"
-                disabled
-                className="bg-accent/40 text-white/70 px-3 sm:px-3.5 py-1.5 font-bold uppercase tracking-wider text-[10px] sm:text-[11px] shadow-xs cursor-not-allowed opacity-60 select-none"
-                title="Subscriptions are currently disabled"
-              >
-                Subscribe
-              </button>
             </div>
           </div>
 

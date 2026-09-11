@@ -527,29 +527,6 @@ export default function AdminMediaVaultPage() {
                         </span>
                       </div>
                     )}
-
-                    {/* Top Right Floating Action Pills */}
-                    <div className="absolute top-2 right-2 flex items-center gap-1 z-10 opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                      <a
-                        href={item.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        onClick={(e) => e.stopPropagation()}
-                        className="p-1.5 bg-black/60 hover:bg-black text-white rounded-full transition-all shadow-xs"
-                        title="Open in new tab"
-                      >
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
-                      <button
-                        type="button"
-                        onClick={(e) => promptDelete(item, e)}
-                        className="p-1.5 bg-black/60 hover:bg-red-600 text-white rounded-full transition-all shadow-xs cursor-pointer active:scale-95"
-                        title={usedIn.length > 0 ? `In use (${usedIn.length} stories) - Delete asset` : 'Delete asset'}
-                        aria-label="Delete asset"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </button>
-                    </div>
                   </div>
 
                   <div className="space-y-0.5 mb-2">
