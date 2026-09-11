@@ -9,6 +9,8 @@ import { mapArticleToPostCard } from '@/lib/meridianData'
 import ReadingProgressBar from '@/components/meridian/ReadingProgressBar'
 import BreakingTicker from '@/components/meridian/BreakingTicker'
 import StockTicker from '@/components/meridian/StockTicker'
+import ArticleAudioPlayer from '@/components/meridian/ArticleAudioPlayer'
+import ArticleShareBar from '@/components/meridian/ArticleShareBar'
 
 export const dynamic = 'force-dynamic'
 
@@ -279,21 +281,33 @@ export default async function ArticlePage({
             </p>
           )}
 
+          {/* Audio Narration Player */}
+          <div className="pt-1">
+            <ArticleAudioPlayer title={article.title} content={article.content} />
+          </div>
+
           {/* Byline & Metadata Bar */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 pb-4 border-y border-rule dark:border-dark-rule text-xs text-ink-mute dark:text-dark-mute">
             <div className="flex items-center gap-3.5">
-              <div className="relative w-11 h-11 rounded-full overflow-hidden border-2 border-accent/40 dark:border-dark-accent/40 shrink-0 shadow-xs bg-paper-subtle dark:bg-dark-subtle">
+              <a
+                href="/author/dhananjay-singh"
+                className="group relative w-11 h-11 rounded-full overflow-hidden border-2 border-accent/40 dark:border-dark-accent/40 shrink-0 shadow-xs bg-paper-subtle dark:bg-dark-subtle hover:border-accent transition"
+                title="View author profile"
+              >
                 <img
                   src="/authr.png"
                   alt={article.author}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover group-hover:scale-105 transition"
                 />
-              </div>
+              </a>
               <div className="flex flex-col gap-0.5">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-sans text-ink dark:text-dark-ink font-bold text-[13px]">
+                  <a
+                    href="/author/dhananjay-singh"
+                    className="font-sans text-ink dark:text-dark-ink font-bold text-[13px] hover:text-accent dark:hover:text-dark-accent transition"
+                  >
                     {article.author || 'Dhananjay Singh'}
-                  </span>
+                  </a>
                   <span className="px-2 py-0.5 bg-accent text-white dark:bg-dark-accent text-[9.5px] font-mono uppercase tracking-wider rounded-xs font-bold shadow-xs">
                     Admin
                   </span>
@@ -327,28 +341,8 @@ export default async function ArticlePage({
               </div>
             </div>
 
-            {/* Share & Bookmark Actions */}
-            <div className="flex items-center gap-3">
-              <span className="text-[11px] uppercase tracking-wider font-semibold">Share:</span>
-              <a
-                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(article.title)}&url=`}
-                target="_blank"
-                rel="noreferrer"
-                className="hover:text-accent transition"
-                title="Share on X"
-              >
-                𝕏
-              </a>
-              <a
-                href={`https://www.linkedin.com/sharing/share-offsite/?url=`}
-                target="_blank"
-                rel="noreferrer"
-                className="hover:text-accent transition"
-                title="Share on LinkedIn"
-              >
-                in
-              </a>
-            </div>
+            {/* Complete Working Share Bar */}
+            <ArticleShareBar title={article.title} url={pageUrl} />
           </div>
 
           {/* Main Cropped Featured Hero Image */}
@@ -372,9 +366,9 @@ export default async function ArticlePage({
             const isHtml = /<[a-z][\s\S]*>/i.test(sanitized)
 
             if (isHtml) {
-              // Ensure lead paragraph contains drop-cap styling
+              // Ensure lead paragraph contains drop-cap styling only for non-Hindi (Latin) articles
               let formattedHtml = sanitized
-              if (!formattedHtml.includes('drop-cap') && !formattedHtml.includes('first-letter:')) {
+              if (!isHindi && !formattedHtml.includes('drop-cap') && !formattedHtml.includes('first-letter:')) {
                 formattedHtml = formattedHtml.replace(
                   /<p\b([^>]*)>/i,
                   '<p$1 class="drop-cap first-letter:text-5xl first-letter:font-serif first-letter:font-bold first-letter:float-left first-letter:mr-3 first-letter:leading-none first-letter:text-ink dark:first-letter:text-dark-ink">'
@@ -435,7 +429,7 @@ export default async function ArticlePage({
                     <p
                       key={index}
                       className={
-                        isLead
+                        isLead && !isHindi
                           ? 'drop-cap first-letter:text-5xl first-letter:font-serif first-letter:font-bold first-letter:float-left first-letter:mr-3 first-letter:leading-none first-letter:text-ink dark:first-letter:text-dark-ink leading-relaxed'
                           : 'leading-relaxed'
                       }
@@ -462,26 +456,51 @@ export default async function ArticlePage({
             </div>
           )}
 
+          {/* Bottom Share & Engagement Bar */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-4 border-y border-rule dark:border-dark-rule my-6">
+            <span className="font-serif italic text-xs text-ink-mute dark:text-dark-mute">
+              Found this dispatch informative? Share it with your network:
+            </span>
+            <ArticleShareBar title={article.title} url={pageUrl} />
+          </div>
+
           {/* Author Box */}
-          <div className="p-6 bg-paper-subtle dark:bg-dark-subtle border border-rule dark:border-dark-rule rounded-sm mt-10 flex flex-col sm:flex-row gap-5 items-start sm:items-center">
-            <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-accent shrink-0 shadow-md bg-paper-subtle dark:bg-dark-subtle">
+          <div className="p-6 bg-paper-subtle dark:bg-dark-subtle border border-rule dark:border-dark-rule rounded-sm mt-8 flex flex-col sm:flex-row gap-5 items-start sm:items-center">
+            <a
+              href="/author/dhananjay-singh"
+              className="group relative w-16 h-16 rounded-full overflow-hidden border-2 border-accent shrink-0 shadow-md bg-paper-subtle dark:bg-dark-subtle hover:border-accent/80 transition"
+              title="View author profile"
+            >
               <img
                 src="/authr.png"
                 alt={article.author}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover group-hover:scale-105 transition"
               />
-            </div>
+            </a>
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <p className="text-[10px] uppercase tracking-widest font-bold text-accent">Reported by</p>
                 <span className="w-1 h-1 rounded-full bg-accent" />
                 <span className="text-[10px] font-mono text-ink-mute dark:text-dark-mute uppercase tracking-wider">Singh Monster Newsroom</span>
-                <span className="px-1.5 py-0.2 bg-accent/20 text-accent text-[9px] font-mono font-bold uppercase tracking-wider rounded-xs">Admin</span>
+                <span className="px-1.5 py-0.5 bg-accent/20 text-accent text-[9px] font-mono font-bold uppercase tracking-wider rounded-xs">Verified Editor</span>
               </div>
-              <h4 className="font-serif font-bold text-xl text-ink dark:text-dark-ink mt-0.5">{article.author || 'Dhananjay Singh'}</h4>
+              <h4 className="font-serif font-bold text-xl text-ink dark:text-dark-ink mt-0.5">
+                <a href="/author/dhananjay-singh" className="hover:text-accent dark:hover:text-dark-accent transition">
+                  {article.author || 'Dhananjay Singh'}
+                </a>
+              </h4>
               <p className="text-xs text-ink-mute dark:text-dark-mute mt-1.5 leading-relaxed">
-                Admin & Lead Investigative Reporter at Singh Monster, directing global security dispatches, macroeconomic analysis, and investigative journalism.
+                Founder &amp; Editor-in-Chief at Singh Monster. Directing global geopolitical dispatches, macroeconomic analysis, telecommunications &amp; 6G developments, and investigative journalism.
               </p>
+              <div className="mt-3 flex items-center gap-3 text-xs">
+                <a
+                  href="/author/dhananjay-singh"
+                  className="inline-flex items-center gap-1 font-semibold text-accent dark:text-dark-accent hover:underline text-[11px]"
+                >
+                  <span>View Full Profile &amp; Archive</span>
+                  <span>→</span>
+                </a>
+              </div>
             </div>
           </div>
         </article>
