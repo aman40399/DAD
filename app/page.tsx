@@ -3,7 +3,7 @@ import StockTicker from '@/components/meridian/StockTicker'
 import Masthead from '@/components/meridian/Masthead'
 import HomeHeroGrid from '@/components/meridian/HomeHeroGrid'
 import EditorsPicks from '@/components/meridian/EditorsPicks'
-import WorldSection from '@/components/meridian/WorldSection'
+import TopicDeskSection from '@/components/meridian/TopicDeskSection'
 import Footer from '@/components/meridian/Footer'
 import { getHomepageArticles, getRecentArticles } from '@/lib/articles'
 import { mapArticleToPostCard } from '@/lib/meridianData'
@@ -25,91 +25,95 @@ export default async function HomePage() {
   try {
     const [hp, rec] = await Promise.all([
       getHomepageArticles(),
-      getRecentArticles(30),
+      getRecentArticles(50),
     ])
-    homepageArticles = hp
-    recentArticles = rec
+    homepageArticles = hp || []
+    recentArticles = rec || []
   } catch (error) {
     console.error('Error loading articles in HomePage:', error)
   }
 
-  // Helper to distinguish dummy seed placeholder articles from real user-published articles
-  const isSeed = (a?: Article) => Boolean(a?.id && String(a.id).startsWith('n-'))
-
-  // Helper to find pinned article for a slot
-  const getPinned = (pos: number): Article | undefined => {
-    return (
-      homepageArticles.find((a) => (a.homepage_position ?? a.homepagePosition) === pos) ||
-      recentArticles.find((a) => (a.homepage_position ?? a.homepagePosition) === pos)
-    )
-  }
-
-  // Set of IDs that are explicitly pinned so auto-flow doesn't duplicate them
-  const pinnedIds = new Set<string>()
-  for (let i = 1; i <= 15; i++) {
-    const p = getPinned(i)
-    if (p?.id && !isSeed(p)) pinnedIds.add(String(p.id))
-  }
-
-  // Real published articles that are unpinned or fresh
-  const realUnpinned = recentArticles.filter((a) => !isSeed(a) && !pinnedIds.has(String(a.id)))
-  // Remaining pool of all unpinned articles
-  const genericUnpinned = recentArticles.filter((a) => isSeed(a) && !pinnedIds.has(String(a.id)))
-
-  let realIndex = 0
-  let genericIndex = 0
-
-  const getNextStory = (slotPos: number): Article | undefined => {
-    const pinned = getPinned(slotPos)
-    // If pinned story is a real user article, always prioritize it
-    if (pinned && !isSeed(pinned)) return pinned
-    // If we have an unpinned real user article, let it take precedence over dummy seed pins
-    if (realIndex < realUnpinned.length) {
-      return realUnpinned[realIndex++]
+  // Combine and deduplicate articles by ID
+  const allArticles = [...homepageArticles, ...recentArticles]
+  const seenIds = new Set<string>()
+  const uniqueArticles: Article[] = []
+  for (const a of allArticles) {
+    const idStr = String(a.id || (a as any)._id || '')
+    if (idStr && !seenIds.has(idStr)) {
+      seenIds.add(idStr)
+      uniqueArticles.push(a)
     }
-    // Otherwise keep the seed pinned article if available
-    if (pinned) return pinned
-    // Fallback to next generic unpinned story
-    return genericUnpinned[genericIndex++]
   }
 
-  // 1. Ticker (Slot 1 or breaking stories or newest real story)
-  const slot1 =
-    recentArticles.find((a) => a.is_breaking || a.isBreaking) ||
-    (realUnpinned[0] ? realUnpinned[0] : getPinned(1)) ||
-    recentArticles[0]
+  // Exact pinned slots (1-15) as configured in /admin/slots
+  const pinnedMap = new Map<number, Article>()
+  const pinnedIds = new Set<string>()
 
-  const tickerItems = recentArticles.length > 0
+  for (const a of uniqueArticles) {
+    const pos = a.homepage_position ?? (a as any).homepagePosition
+    if (typeof pos === 'number' && pos >= 1 && pos <= 15) {
+      if (!pinnedMap.has(pos)) {
+        pinnedMap.set(pos, a)
+        pinnedIds.add(String(a.id || (a as any)._id))
+      }
+    }
+  }
+
+  // Pool of published, unpinned articles ordered chronologically (newest first)
+  const unpinnedPool = uniqueArticles
+    .filter((a) => (a.status === 'published' || !a.status) && !pinnedIds.has(String(a.id || (a as any)._id)))
+    .sort((a, b) => {
+      const tA = new Date(a.published_at || (a as any).publishedAt || (a as any).date || 0).getTime()
+      const tB = new Date(b.published_at || (b as any).publishedAt || (b as any).date || 0).getTime()
+      return tB - tA
+    })
+
+  // 1:1 Slot Resolver matching /admin/slots blueprint
+  const slotAssignments = new Map<number, Article>()
+  let unpinnedIdx = 0
+
+  for (let s = 1; s <= 15; s++) {
+    if (pinnedMap.has(s)) {
+      slotAssignments.set(s, pinnedMap.get(s)!)
+    } else if (unpinnedIdx < unpinnedPool.length) {
+      slotAssignments.set(s, unpinnedPool[unpinnedIdx++])
+    }
+  }
+
+  // 1. Breaking Ticker (Slot 1 or breaking stories or newest published story)
+  const slot1Article =
+    slotAssignments.get(1) ||
+    uniqueArticles.find((a) => a.is_breaking || (a as any).isBreaking) ||
+    uniqueArticles[0]
+
+  const tickerItems = uniqueArticles.length > 0
     ? [
-        ...(slot1 ? [{ id: String(slot1.id), title: slot1.title, url: `/article/${slot1.slug}` }] : []),
-        ...recentArticles
-          .filter((a) => a.id !== slot1?.id)
+        ...(slot1Article ? [{ id: String(slot1Article.id), title: slot1Article.title, url: `/article/${slot1Article.slug}` }] : []),
+        ...uniqueArticles
+          .filter((a) => a.id !== slot1Article?.id)
           .slice(0, 5)
           .map((a) => ({ id: String(a.id), title: a.title, url: `/article/${a.slug}` })),
       ]
     : undefined
 
-  // 2. Main Hero Story (Slot 2 or fresh story)
-  const heroArticle = getNextStory(2) || recentArticles[0]
+  // 2. Main Hero Story (Slot 2 or fresh article)
+  const heroArticle = slotAssignments.get(2) || uniqueArticles[0]
   const heroStory = heroArticle ? mapArticleToPostCard(heroArticle) : undefined
 
-  // 3. Left Rail Stories (Slot 3 and 4)
-  const left1 = getNextStory(3) || recentArticles[1]
-  const left2 = getNextStory(4) || recentArticles[2]
-  const leftStories = [left1, left2].filter(Boolean).map((a) => mapArticleToPostCard(a!))
+  // 3. Left Rail Stories (Slot 3 & 4)
+  const leftArticles = [slotAssignments.get(3), slotAssignments.get(4)].filter(Boolean) as Article[]
+  const leftStories = leftArticles.map((a) => mapArticleToPostCard(a))
 
-  // 4. Center Sub-Leads (Slot 5 and 6)
-  const sub1 = getNextStory(5) || recentArticles[3]
-  const sub2 = getNextStory(6) || recentArticles[4]
-  const subLeads = [sub1, sub2].filter(Boolean).map((a) => mapArticleToPostCard(a!))
+  // 4. Center Sub-Leads (Slot 5 & 6)
+  const subLeadArticles = [slotAssignments.get(5), slotAssignments.get(6)].filter(Boolean) as Article[]
+  const subLeads = subLeadArticles.map((a) => mapArticleToPostCard(a))
 
   // 5. Ranked Stories (Slots 7 to 11)
   const rankedSource: Article[] = []
   for (let s = 7; s <= 11; s++) {
-    const art = getNextStory(s)
+    const art = slotAssignments.get(s)
     if (art) rankedSource.push(art)
   }
-
   const rankedStories =
     rankedSource.length > 0
       ? rankedSource.map((a, idx) => ({
@@ -121,25 +125,30 @@ export default async function HomePage() {
   // 6. Editor's Picks (Slots 12 to 15)
   const picksSource: Article[] = []
   for (let s = 12; s <= 15; s++) {
-    const art = getNextStory(s)
+    const art = slotAssignments.get(s)
     if (art) picksSource.push(art)
   }
   const editorPicks = picksSource.length > 0 ? picksSource.map((a) => mapArticleToPostCard(a)) : undefined
 
-  // 7. World Category Section from live dispatches
-  const worldArticles = recentArticles.filter(
-    (a) => a.category?.toLowerCase() === 'world' || a.category?.toLowerCase() === 'international'
-  )
-  const worldFeatured = worldArticles[0]
-    ? {
-        ...mapArticleToPostCard(worldArticles[0]),
-        caption: worldArticles[0].image_caption || worldArticles[0].imageCaption || undefined,
-      }
-    : undefined
-  const worldSecondary =
-    worldArticles.length > 1
-      ? worldArticles.slice(1, 5).map((a) => mapArticleToPostCard(a))
-      : undefined
+  // Curated Reporting Topic Desks helper
+  const getBeatArticles = (matcher: RegExp) => {
+    return uniqueArticles
+      .filter((a) => {
+        const cat = (a.category || '').toLowerCase()
+        const sub = ((a as any).sub_category || (a as any).subCategory || '').toLowerCase()
+        return matcher.test(cat) || matcher.test(sub)
+      })
+      .map((a) => ({
+        ...mapArticleToPostCard(a),
+        caption: (a as any).image_caption || (a as any).imageCaption || undefined,
+      }))
+  }
+
+  const worldArticles = getBeatArticles(/world|international|foreign|diplomacy|global/i)
+  const economyArticles = getBeatArticles(/economy|market|business|finance|trade/i)
+  const techArticles = getBeatArticles(/tech|technology|science|ai|cyber/i)
+  const indiaArticles = getBeatArticles(/india|national|delhi|bharat/i)
+  const envArticles = getBeatArticles(/environment|climate|planet|earth|weather|wildfire/i)
 
   const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000').replace(/\/$/, '')
 
@@ -192,7 +201,6 @@ export default async function HomePage() {
       {/* 2. Editorial Masthead with flourishes and navigation */}
       <Masthead brandName="Singh Monster" tagline="Sharp reporting. Deep analysis. No agenda but the truth." />
 
-
       {/* 3. Main Broadsheet Container */}
       <main className="max-w-[1360px] mx-auto px-4 sm:px-6">
         {/* 3-Column Broadsheet Hero Grid */}
@@ -205,19 +213,68 @@ export default async function HomePage() {
           recommendedItems={editorialConfig?.recommendedItems}
         />
 
-        {/* 4. Editor's Picks 4-Card Carousel */}
-        <EditorsPicks articles={editorPicks} />
+        {/* 4. Editor's Picks */}
+        {editorPicks && editorPicks.length > 0 && (
+          <EditorsPicks articles={editorPicks} />
+        )}
 
-        {/* 5. World Category Section with Split Layout */}
-        <WorldSection
-          title="World"
-          moreUrl="/section/world"
-          featuredArticle={worldFeatured}
-          secondaryArticles={worldSecondary}
-        />
+        {/* 5. World & Geopolitics Desk (Split Lead Layout) */}
+        {worldArticles.length > 0 && (
+          <TopicDeskSection
+            title="World & Geopolitics"
+            kicker="Global Dispatches"
+            moreUrl="/section/world"
+            layout="split"
+            articles={worldArticles}
+          />
+        )}
+
+        {/* 6. Economy & Markets Desk (Grid Layout) */}
+        {economyArticles.length > 0 && (
+          <TopicDeskSection
+            title="Economy & Markets"
+            kicker="Financial Intelligence"
+            moreUrl="/section/economy"
+            layout="grid"
+            articles={economyArticles}
+          />
+        )}
+
+        {/* 7. India & Domestic Desk (if articles exist) */}
+        {indiaArticles.length > 0 && (
+          <TopicDeskSection
+            title="India & Domestic Affairs"
+            kicker="National Beat"
+            moreUrl="/section/india"
+            layout="grid"
+            articles={indiaArticles}
+          />
+        )}
+
+        {/* 8. Technology & Innovation Desk (if articles exist) */}
+        {techArticles.length > 0 && (
+          <TopicDeskSection
+            title="Technology & Innovation"
+            kicker="The Next Frontier"
+            moreUrl="/section/technology"
+            layout="grid"
+            articles={techArticles}
+          />
+        )}
+
+        {/* 9. Environment & Climate Desk (if articles exist) */}
+        {envArticles.length > 0 && (
+          <TopicDeskSection
+            title="Environment & Climate"
+            kicker="Earth Dispatches"
+            moreUrl="/section/environment"
+            layout="grid"
+            articles={envArticles}
+          />
+        )}
       </main>
 
-      {/* 6. Newspaper Broadsheet Footer */}
+      {/* 10. Newspaper Broadsheet Footer */}
       <Footer brandName="Singh Monster" />
     </div>
   )

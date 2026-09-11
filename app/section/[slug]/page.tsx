@@ -12,19 +12,25 @@ import { mapArticleToPostCard } from '@/lib/meridianData'
 export const dynamic = 'force-dynamic'
 
 const KNOWN_SECTIONS: Record<string, string> = {
-  us: 'U.S. News',
   world: 'World',
-  politics: 'Politics',
-  business: 'Business',
-  technology: 'Technology',
+  india: 'India',
+  economy: 'Economy & Markets',
+  business: 'Business & Finance',
+  technology: 'Technology & AI',
+  tech: 'Technology & AI',
+  politics: 'Politics & Governance',
+  environment: 'Environment & Climate',
+  health: 'Health & Science',
+  opinion: 'Opinion & Editorial',
+  us: 'U.S. News',
   sports: 'Sports',
-  opinion: 'Opinion',
   arts: 'Arts & Culture',
   culture: 'Culture',
-  style: 'Style',
+  style: 'Style & Life',
   weather: 'Weather',
   education: 'Education',
   lifestyle: 'Lifestyle',
+  video: 'Video Dispatches',
 }
 
 const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || 'https://www.singh.monster').replace(/\/$/, '')
@@ -96,6 +102,19 @@ export default async function SectionPage({
   // If no direct slug match, check with capitalized name or aliases
   if (articles.length === 0) {
     articles = await getArticlesByCategory(sectionName)
+  }
+  if (articles.length === 0 && (rawSlug === 'economy' || rawSlug === 'business')) {
+    const econ = await getArticlesByCategory('Economy')
+    const biz = await getArticlesByCategory('Business')
+    const seen = new Set<string>()
+    articles = [...econ, ...biz].filter(a => {
+      if (seen.has(a.id)) return false
+      seen.add(a.id)
+      return true
+    })
+  }
+  if (articles.length === 0 && (rawSlug === 'technology' || rawSlug === 'tech')) {
+    articles = await getArticlesByCategory('Technology')
   }
   if (articles.length === 0 && rawSlug === 'us') {
     articles = await getArticlesByCategory('U.S.')

@@ -175,29 +175,29 @@ export default function Masthead({
               className="flex items-center justify-center gap-5 sm:gap-7 md:gap-8 overflow-x-auto text-[11.5px] sm:text-[12.5px] font-sans font-semibold tracking-wider uppercase whitespace-nowrap scrollbar-none"
               aria-label="Sections"
             >
-              <Link href="/section/us" prefetch={true} className="text-ink dark:text-dark-ink hover:text-accent dark:hover:text-dark-accent transition">
-                U.S
-              </Link>
               <Link href="/section/world" prefetch={true} className="text-ink dark:text-dark-ink hover:text-accent dark:hover:text-dark-accent transition">
                 World
               </Link>
-              <Link href="/section/politics" prefetch={true} className="text-ink dark:text-dark-ink hover:text-accent dark:hover:text-dark-accent transition">
-                Politics
+              <Link href="/section/india" prefetch={true} className="text-ink dark:text-dark-ink hover:text-accent dark:hover:text-dark-accent transition">
+                India
               </Link>
-              <Link href="/section/business" prefetch={true} className="text-ink dark:text-dark-ink hover:text-accent dark:hover:text-dark-accent transition">
-                Business
+              <Link href="/section/economy" prefetch={true} className="text-ink dark:text-dark-ink hover:text-accent dark:hover:text-dark-accent transition">
+                Economy
               </Link>
               <Link href="/section/technology" prefetch={true} className="text-ink dark:text-dark-ink hover:text-accent dark:hover:text-dark-accent transition">
                 Technology
               </Link>
-              <Link href="/section/sports" prefetch={true} className="text-ink dark:text-dark-ink hover:text-accent dark:hover:text-dark-accent transition">
-                Sports
+              <Link href="/section/politics" prefetch={true} className="text-ink dark:text-dark-ink hover:text-accent dark:hover:text-dark-accent transition">
+                Politics
+              </Link>
+              <Link href="/section/environment" prefetch={true} className="text-ink dark:text-dark-ink hover:text-accent dark:hover:text-dark-accent transition">
+                Environment
+              </Link>
+              <Link href="/section/health" prefetch={true} className="text-ink dark:text-dark-ink hover:text-accent dark:hover:text-dark-accent transition">
+                Health
               </Link>
               <Link href="/section/opinion" prefetch={true} className="text-ink dark:text-dark-ink hover:text-accent dark:hover:text-dark-accent transition">
                 Opinion
-              </Link>
-              <Link href="/section/video" prefetch={true} className="text-ink dark:text-dark-ink hover:text-accent dark:hover:text-dark-accent transition">
-                Video
               </Link>
               <Link href="/about" prefetch={true} className="text-ink dark:text-dark-ink hover:text-accent dark:hover:text-dark-accent transition">
                 About Us

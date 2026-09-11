@@ -64,8 +64,7 @@ function SafeCardImage({
       priority={priority}
       sizes={sizes}
       quality={quality}
-      className={`${className || ''} transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
-      onLoad={() => setLoaded(true)}
+      className={className || ''}
       onError={() => {
         if (!hasError) {
           setHasError(true)

@@ -49,8 +49,12 @@ const DEFAULT_PICKS: ArticleData[] = [
   },
 ]
 
-export default function EditorsPicks({ articles = DEFAULT_PICKS }: EditorsPicksProps) {
+export default function EditorsPicks({ articles }: EditorsPicksProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
+
+  if (!articles || articles.length === 0) {
+    return null
+  }
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
@@ -60,7 +64,7 @@ export default function EditorsPicks({ articles = DEFAULT_PICKS }: EditorsPicksP
   }
 
   return (
-    <section className="py-8 border-b border-rule dark:border-dark-rule content-auto" aria-labelledby="editors-picks-title">
+    <section className="py-8 border-b border-rule dark:border-dark-rule" aria-labelledby="editors-picks-title">
       <div className="flex items-end justify-between mb-4">
         <div>
           <h2 id="editors-picks-title" className="font-serif font-black text-2xl sm:text-3xl text-ink dark:text-dark-ink leading-tight">
@@ -105,7 +109,7 @@ export default function EditorsPicks({ articles = DEFAULT_PICKS }: EditorsPicksP
                   src={item.image || 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=800&auto=format&fit=crop&q=80'}
                   alt={item.title}
                   fill
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 320px"
                   quality={75}
                   className="object-cover transition group-hover:scale-103 duration-300"
                 />

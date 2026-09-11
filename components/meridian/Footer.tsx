@@ -47,14 +47,15 @@ export default function Footer({ brandName = 'Singh Monster' }: FooterProps) {
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-8 py-8 text-xs text-ink-mute dark:text-dark-mute">
           <div>
             <h4 className="font-bold tracking-widest uppercase text-ink dark:text-dark-ink mb-3 text-[11px]">
-              News
+              News Beats
             </h4>
             <ul className="space-y-2">
               <li><Link href="/section/world" prefetch={true} className="hover:text-accent dark:hover:text-dark-accent transition">World</Link></li>
-              <li><Link href="/section/politics" prefetch={true} className="hover:text-accent dark:hover:text-dark-accent transition">Politics</Link></li>
-              <li><Link href="/section/business" prefetch={true} className="hover:text-accent dark:hover:text-dark-accent transition">Business</Link></li>
+              <li><Link href="/section/india" prefetch={true} className="hover:text-accent dark:hover:text-dark-accent transition">India</Link></li>
+              <li><Link href="/section/economy" prefetch={true} className="hover:text-accent dark:hover:text-dark-accent transition">Economy & Markets</Link></li>
               <li><Link href="/section/technology" prefetch={true} className="hover:text-accent dark:hover:text-dark-accent transition">Technology</Link></li>
-              <li><Link href="/section/sports" prefetch={true} className="hover:text-accent dark:hover:text-dark-accent transition">Sports</Link></li>
+              <li><Link href="/section/environment" prefetch={true} className="hover:text-accent dark:hover:text-dark-accent transition">Environment</Link></li>
+              <li><Link href="/section/health" prefetch={true} className="hover:text-accent dark:hover:text-dark-accent transition">Health</Link></li>
             </ul>
           </div>
 

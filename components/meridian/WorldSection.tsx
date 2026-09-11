@@ -62,11 +62,15 @@ const DEFAULT_SECONDARY: ArticleData[] = [
 export default function WorldSection({
   title = 'World',
   moreUrl = '/section/world',
-  featuredArticle = DEFAULT_FEATURED,
-  secondaryArticles = DEFAULT_SECONDARY,
+  featuredArticle,
+  secondaryArticles = [],
 }: WorldSectionProps) {
+  const lead = featuredArticle || secondaryArticles[0]
+  const rest = featuredArticle ? secondaryArticles : secondaryArticles.slice(1)
+
+  if (!lead) return null
   return (
-    <section className="py-8 border-b border-rule dark:border-dark-rule content-auto" aria-labelledby="section-heading">
+    <section className="py-8 border-b border-rule dark:border-dark-rule" aria-labelledby="section-heading">
       {/* Header */}
       <div className="flex items-baseline justify-between pb-2 border-b-2 border-ink dark:border-dark-ink mb-6">
         <h2 id="section-heading" className="font-serif font-black text-2xl sm:text-3xl text-ink dark:text-dark-ink">
@@ -84,11 +88,11 @@ export default function WorldSection({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left Featured Big Story (7 cols) */}
         <article className="lg:col-span-7 group cursor-pointer">
-          <Link href={`/article/${featuredArticle.slug || featuredArticle.id}`} prefetch={true} className="block no-underline">
+          <Link href={`/article/${lead.slug || lead.id}`} prefetch={true} className="block no-underline">
             <div className="relative aspect-[16/10] overflow-hidden bg-paper-subtle dark:bg-dark-subtle border border-rule dark:border-dark-rule mb-3">
               <Image
-                src={featuredArticle.image || 'https://images.unsplash.com/photo-1548345680-f5475ea5df84?w=1000&auto=format&fit=crop&q=80'}
-                alt={featuredArticle.title}
+                src={lead.image || 'https://images.unsplash.com/photo-1548345680-f5475ea5df84?w=1000&auto=format&fit=crop&q=80'}
+                alt={lead.title}
                 fill
                 sizes="(max-width: 1024px) 100vw, 650px"
                 quality={80}
@@ -97,42 +101,42 @@ export default function WorldSection({
             </div>
 
             <span className="font-sans text-[10.5px] font-bold tracking-[0.14em] uppercase text-accent block mb-1">
-              {featuredArticle.category}
+              {lead.category}
             </span>
 
             <h3 className="font-serif font-black text-2xl sm:text-3xl leading-tight text-ink dark:text-dark-ink group-hover:text-accent dark:group-hover:text-dark-accent transition-colors">
-              {featuredArticle.title}
+              {lead.title}
             </h3>
 
-            {featuredArticle.excerpt && (
+            {lead.excerpt && (
               <p className="font-serif italic text-[15px] sm:text-[16px] text-ink-mute dark:text-dark-mute mt-2.5 leading-relaxed">
-                {featuredArticle.excerpt}
+                {lead.excerpt}
               </p>
             )}
 
             <footer className="font-sans text-[11px] text-ink-mute dark:text-dark-mute uppercase tracking-wider mt-2.5 flex items-center gap-2">
-              <span>By <strong className="text-ink dark:text-dark-ink font-semibold">{featuredArticle.author}</strong></span>
+              <span>By <strong className="text-ink dark:text-dark-ink font-semibold">{lead.author}</strong></span>
               <span className="opacity-40">·</span>
-              <time>{featuredArticle.date}</time>
-              {featuredArticle.readTime && (
+              <time>{lead.date}</time>
+              {lead.readTime && (
                 <>
                   <span className="opacity-40">·</span>
-                  <span>{featuredArticle.readTime}</span>
+                  <span>{lead.readTime}</span>
                 </>
               )}
             </footer>
           </Link>
 
-          {featuredArticle.caption && (
+          {(lead as any).caption && (
             <p className="font-sans text-[10px] text-ink-mute/70 dark:text-dark-mute/70 mt-3 pt-2 border-t border-rule dark:border-dark-rule italic leading-normal">
-              {featuredArticle.caption}
+              {(lead as any).caption}
             </p>
           )}
         </article>
 
         {/* Right Stacked Stories (5 cols) */}
         <div className="lg:col-span-5 space-y-4">
-          {secondaryArticles.map((item) => (
+          {rest.map((item) => (
             <article
               key={item.id}
               className="flex gap-4 pb-4 border-b border-rule dark:border-dark-rule last:border-b-0 group cursor-pointer"
