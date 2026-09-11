@@ -354,7 +354,7 @@ export default function SlotManagerPage() {
         </div>
       ) : viewMode === 'grid' ? (
         /* HOMEPAGE REPLICA BLUEPRINT VIEW */
-        <div className="overflow-x-auto pb-4">
+        <div className="pb-4">
           <SlotBlueprintView
             resolvedSlots={resolvedSlots}
             savingSlot={savingSlot}

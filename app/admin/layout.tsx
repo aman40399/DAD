@@ -118,7 +118,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="h-dvh bg-[#f5f5f7] dark:bg-[#000000] text-[#1d1d1f] dark:text-white font-apple flex flex-col md:flex-row antialiased overflow-hidden">
+    <div className="relative h-dvh bg-[#f5f5f7] dark:bg-[#000000] text-[#1d1d1f] dark:text-white font-apple flex flex-col md:flex-row antialiased overflow-hidden">
       {/* MOBILE APP TOP BAR (Apple Frosted Glass) */}
       <header className="md:hidden shrink-0 z-40 backdrop-blur-2xl bg-white/80 dark:bg-[#161617]/80 border-b border-black/[0.05] dark:border-white/[0.06] px-4 py-3 flex items-center justify-between select-none">
         <div className="flex items-center gap-3">
@@ -174,7 +174,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* DESKTOP SIDEBAR (Translucent Glass + 2x Borderless Logo + Singh Monster Heading) */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 apple-glass-sidebar backdrop-blur-3xl bg-white/60 dark:bg-[#121214]/60 border-r border-black/[0.05] dark:border-white/[0.06] flex flex-col justify-between p-6 transition-transform duration-300 md:translate-x-0 md:static md:h-screen md:sticky md:top-0 select-none ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 apple-glass-sidebar backdrop-blur-3xl bg-white/60 dark:bg-[#121214]/60 border-r border-black/[0.05] dark:border-white/[0.06] flex flex-col justify-between p-6 transition-transform duration-300 md:translate-x-0 md:static md:h-full select-none ${
           mobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
         }`}
       >
@@ -287,7 +287,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* Main Admin Content Pane */}
-      <main className="flex-1 min-w-0 p-3 sm:p-7 lg:p-8 overflow-y-auto flex flex-col pb-28 md:pb-12">
+      <main className="relative flex-1 min-w-0 p-3 sm:p-7 lg:p-8 overflow-y-auto flex flex-col pb-28 md:pb-12">
         <div className="max-w-[1360px] mx-auto w-full flex-1 flex flex-col min-h-0">
           {children}
         </div>
