@@ -283,7 +283,11 @@ export default async function ArticlePage({
 
           {/* Audio Narration Player */}
           <div className="pt-1">
-            <ArticleAudioPlayer title={article.title} content={article.content} />
+            <ArticleAudioPlayer
+              title={article.title}
+              content={article.content}
+              language={article.language}
+            />
           </div>
 
           {/* Byline & Metadata Bar */}
