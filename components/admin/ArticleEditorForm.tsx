@@ -241,36 +241,40 @@ export default function ArticleEditorForm({
 
 
   const [mobileTab, setMobileTab] = useState<'write' | 'settings'>('write')
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
 
   const handleTabSwitch = (tab: 'write' | 'settings') => {
     setMobileTab(tab)
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTop = 0
+    if (typeof window !== 'undefined') {
+      const mainEl = document.querySelector('main')
+      if (mainEl) mainEl.scrollTo({ top: 0, behavior: 'smooth' })
+      else window.scrollTo({ top: 0, behavior: 'smooth' })
     }
   }
 
   return (
     <div className="flex-1 min-h-0 flex flex-col space-y-3 sm:space-y-4 md:space-y-6 font-sans">
       {/* DESKTOP TOP ACTION BAR (hidden on mobile) */}
-      <div className="hidden md:flex p-4 sm:p-5 backdrop-blur-xl bg-white/75 dark:bg-[#161617]/75 border border-black/[0.06] dark:border-white/[0.08] rounded-3xl sm:items-center justify-between gap-4 shadow-[0_4px_24px_rgba(0,0,0,0.03)] shrink-0">
+      <div className="hidden md:flex items-center justify-between gap-4 pb-1 shrink-0">
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={() => router.push('/admin')}
-            className="px-3.5 py-1.5 text-ink-mute hover:text-ink dark:hover:text-white bg-black/5 dark:bg-white/10 hover:bg-black/10 rounded-full transition cursor-pointer text-xs font-semibold active:scale-95"
-            title="Return to dispatches"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-ink/70 dark:text-white/70 hover:text-ink dark:hover:text-white bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 rounded-full transition cursor-pointer active:scale-95"
+            title="Return to stories"
           >
             ← Stories
           </button>
-          <div className="h-4 w-px bg-black/[0.06] dark:bg-white/[0.08]" />
-          <div>
-            <h2 className="font-serif font-black text-xl text-ink dark:text-dark-ink leading-tight tracking-tight">
-              {isEditing ? 'Edit Story' : 'New Story'}
-            </h2>
-            <p className="text-[11px] text-ink-mute dark:text-dark-mute">
-              Compose or update broadsheet dispatch
-            </p>
+          <div className="h-4 w-px bg-black/[0.08] dark:bg-white/[0.1]" />
+          <h1 className="text-2xl font-bold tracking-tight text-ink dark:text-dark-ink">
+            {isEditing ? 'Edit Story' : 'New Story'}
+          </h1>
+          <div className="flex items-center gap-2 px-3 py-1 rounded-full backdrop-blur-md bg-white/60 dark:bg-white/[0.06] border border-black/[0.08] dark:border-white/[0.08] text-xs font-medium text-ink-mute dark:text-dark-mute shadow-2xs">
+            <span className="w-2 h-2 rounded-full bg-[#0071e3]" />
+            <span className="capitalize">{category || 'News'}</span>
+            <span className="opacity-40">•</span>
+            <span>{slotPosition ? `Slot #${slotPosition}` : 'Unslotted'}</span>
+            <span className="opacity-40">•</span>
+            <span className="capitalize">{status}</span>
           </div>
         </div>
 
@@ -279,7 +283,7 @@ export default function ArticleEditorForm({
             type="button"
             onClick={() => handleSubmit('draft')}
             disabled={saving}
-            className="px-4 py-2 border border-black/[0.08] dark:border-white/10 text-ink dark:text-dark-ink text-xs font-semibold rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition disabled:opacity-50 cursor-pointer active:scale-95 shadow-xs"
+            className="px-4 py-2 text-xs font-medium text-ink/80 dark:text-white/80 hover:text-ink dark:hover:text-white rounded-full border border-black/[0.08] dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5 transition disabled:opacity-50 cursor-pointer active:scale-95 shadow-2xs"
           >
             Save Draft
           </button>
@@ -287,9 +291,9 @@ export default function ArticleEditorForm({
             type="button"
             onClick={() => handleSubmit('published')}
             disabled={saving}
-            className="px-5 py-2 bg-[#0071e3] hover:bg-[#0077ed] text-white text-xs font-semibold rounded-full transition disabled:opacity-50 shadow-xs cursor-pointer active:scale-95"
+            className="px-5 py-2 text-xs font-medium text-white rounded-full bg-[#0071e3] hover:bg-[#0077ed] active:bg-[#0062c4] transition disabled:opacity-50 shadow-xs cursor-pointer active:scale-95"
           >
-            {saving ? 'Publishing…' : 'Publish Story'}
+            {saving ? 'Publishing…' : isEditing ? 'Update Story' : 'Publish Story'}
           </button>
         </div>
       </div>
@@ -365,12 +369,8 @@ export default function ArticleEditorForm({
         </div>
       )}
 
-      {/* SCROLLABLE VIEWPORT CONTAINER (Scrolls smoothly on mobile, normal on desktop) */}
-      <div
-        ref={scrollContainerRef}
-        id="mobile-editor-scroll-pane"
-        className="flex-1 min-h-0 overflow-y-auto overscroll-y-contain no-scrollbar md:overflow-visible"
-      >
+      {/* VIEWPORT CONTAINER */}
+      <div className="flex-1 min-h-0">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6 items-start pb-16 md:pb-0">
           {/* COLUMN 1: WRITING CANVAS (Visible on mobile when mobileTab === 'write', always on desktop) */}
           <div

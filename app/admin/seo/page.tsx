@@ -102,40 +102,44 @@ export default function AdminSeoPage() {
   ]
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-8 max-w-6xl mx-auto font-sans">
-      {/* Page Title */}
-      <div className="border-b border-black/[0.06] dark:border-white/[0.08] pb-5 flex flex-col sm:flex-row sm:items-baseline justify-between gap-4">
-        <div>
-          <span className="font-mono text-xs uppercase tracking-widest text-[#0071e3] font-bold">
-            Search Engine Optimization & Instant Indexation
-          </span>
-          <h1 className="font-serif font-black text-2xl sm:text-3xl text-ink dark:text-dark-ink mt-1 tracking-tight">
-            SEO & Search Engine Indexing
+    <div className="space-y-6 font-apple text-[#1d1d1f] dark:text-white pb-16">
+      {/* APPLE MINIMALIST TOP ROW */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-3.5 flex-wrap">
+          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-[#1d1d1f] dark:text-white">
+            SEO
           </h1>
-          <p className="font-serif italic text-xs sm:text-sm text-ink-mute dark:text-dark-mute mt-1">
-            Real-time feed monitoring, IndexNow instant syndication, and search crawler management for Singh Monster.
-          </p>
+
+          {/* Unified Status Capsule Box */}
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full backdrop-blur-xl bg-white/70 dark:bg-white/[0.06] border border-black/[0.06] dark:border-white/[0.08] text-xs font-medium shadow-2xs">
+            <span className="text-[#0071e3] dark:text-[#2997ff] font-semibold">
+              IndexNow & Sitemaps
+            </span>
+            <span className="text-black/20 dark:text-white/20">•</span>
+            <span className="text-[#1d1d1f]/60 dark:text-white/60">
+              5 Active Feeds
+            </span>
+          </div>
         </div>
 
+        {/* Action: Ping All Engines Button */}
         <button
+          type="button"
           onClick={handlePingAll}
           disabled={pinging}
-          className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-[#0071e3] text-white font-sans text-xs font-semibold hover:bg-[#0077ed] disabled:opacity-50 transition shadow-xs shrink-0 cursor-pointer active:scale-95"
+          className="h-9 px-4 rounded-full bg-[#0071e3] hover:bg-[#0077ed] text-white text-xs font-semibold tracking-tight transition shadow-[0_2px_8px_rgba(0,113,227,0.35)] flex items-center gap-2 active:scale-95 cursor-pointer disabled:opacity-50 self-start sm:self-auto"
         >
           {pinging ? (
             <>
-              <svg className="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-              </svg>
-              <span>Broadcasting URLs...</span>
+              <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <span>Broadcasting…</span>
             </>
           ) : (
             <>
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
               </svg>
-              <span>Ping All Engines & IndexNow</span>
+              <span>Ping Search Engines</span>
             </>
           )}
         </button>

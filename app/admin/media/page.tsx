@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo, useRef } from 'react'
+import { useState, useEffect, useMemo, useRef, useDeferredValue } from 'react'
 import AdminToast, { ToastMessage } from '@/components/admin/AdminToast'
 import {
   IconMedia,
@@ -175,21 +175,37 @@ export default function AdminMediaVaultPage() {
     }
   }
 
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (selectedItem) {
+      const original = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
+      return () => {
+        document.body.style.overflow = original
+      }
+    }
+  }, [selectedItem])
+
+  const deferredSearch = useDeferredValue(search)
+
   const filteredItems = useMemo(() => {
-    if (!search.trim()) return mediaItems
-    const q = search.toLowerCase()
+    if (!deferredSearch.trim()) return mediaItems
+    const q = deferredSearch.toLowerCase()
     return mediaItems.filter((item) => {
       const filename = getFilename(item.url, item.title).toLowerCase()
       return filename.includes(q) || item.url.toLowerCase().includes(q)
     })
-  }, [mediaItems, search])
+  }, [mediaItems, deferredSearch])
 
   return (
     <div
-      className="space-y-6 font-sans text-[#1d1d1f] dark:text-white"
+      className="space-y-6 font-apple text-[#1d1d1f] dark:text-white"
       onDrop={handleDrop}
-      onDragOver={(e) => { e.preventDefault(); setIsDragging(true) }}
-      onDragLeave={(e) => { e.preventDefault(); setIsDragging(false) }}
+      onDragOver={(e) => {
+        e.preventDefault()
+        setIsDragging(true)
+      }}
+      onDragLeave={() => setIsDragging(false)}
     >
       <AdminToast toasts={toasts} onDismiss={removeToast} />
 
@@ -202,40 +218,42 @@ export default function AdminMediaVaultPage() {
         className="hidden"
       />
 
-      {/* HEADER BAR */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2.5">
-            <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[#1d1d1f] dark:text-white">
-              Media Vault
-            </h1>
-            <span className="px-2.5 py-0.5 text-xs font-semibold text-[#0071e3] dark:text-[#2997ff] bg-[#0071e3]/10 dark:bg-[#2997ff]/15 rounded-full">
-              Cloudflare R2
+      {/* APPLE MINIMALIST HEADER BAR */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-3.5 flex-wrap">
+          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-[#1d1d1f] dark:text-white">
+            Media
+          </h1>
+
+          {/* Unified Status Capsule Box */}
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full backdrop-blur-xl bg-white/70 dark:bg-white/[0.06] border border-black/[0.06] dark:border-white/[0.08] text-xs font-medium shadow-2xs">
+            <span className="text-[#0071e3] dark:text-[#2997ff] font-semibold">
+              {mediaItems.length} Assets
             </span>
+            <span className="text-black/20 dark:text-white/20">•</span>
+            <span className="text-[#1d1d1f]/60 dark:text-white/60">Cloudflare R2</span>
           </div>
-          <p className="text-xs sm:text-sm text-[#1d1d1f]/60 dark:text-white/60 mt-1">
-            Browse and manage edge-cached photographic dispatches with instant CDN link copying.
-          </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        {/* Action Controls */}
+        <div className="flex items-center gap-2 self-start sm:self-auto">
           <button
             type="button"
             onClick={fetchMedia}
             disabled={loading}
-            className="w-10 h-10 rounded-full backdrop-blur-md bg-white/80 dark:bg-white/[0.08] hover:bg-white dark:hover:bg-white/15 border border-black/[0.08] dark:border-white/[0.1] text-[#1d1d1f] dark:text-white flex items-center justify-center transition shadow-xs active:scale-95"
+            className="w-9 h-9 rounded-full backdrop-blur-md bg-white/70 dark:bg-white/[0.06] hover:bg-black/5 dark:hover:bg-white/10 border border-black/[0.06] dark:border-white/[0.08] text-[#1d1d1f] dark:text-white flex items-center justify-center transition shadow-2xs active:scale-95 cursor-pointer"
             title="Refresh assets"
           >
-            <IconRefresh className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            <IconRefresh className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
           </button>
 
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={isUploading}
-            className="h-10 px-5 rounded-full bg-[#0071e3] hover:bg-[#0077ed] text-white text-xs font-semibold tracking-tight transition shadow-[0_2px_8px_rgba(0,113,227,0.35)] flex items-center gap-2 active:scale-95 cursor-pointer"
+            className="h-9 px-4 rounded-full bg-[#0071e3] hover:bg-[#0077ed] text-white text-xs font-semibold tracking-tight transition shadow-[0_2px_8px_rgba(0,113,227,0.35)] flex items-center gap-2 active:scale-95 cursor-pointer"
           >
-            <IconPlus className="w-4 h-4 stroke-[2.5]" />
+            <IconPlus className="w-3.5 h-3.5 stroke-[2.5]" />
             <span>{isUploading ? 'Uploading…' : 'Upload Asset'}</span>
           </button>
         </div>
@@ -500,7 +518,12 @@ export default function AdminMediaVaultPage() {
             onClick={() => setSelectedItem(null)}
           />
 
-          <div className="relative w-full sm:max-w-lg backdrop-blur-2xl bg-white/95 dark:bg-[#1c1c1e]/95 border border-black/[0.08] dark:border-white/[0.1] rounded-t-3xl sm:rounded-3xl shadow-2xl p-6 space-y-4 z-10 animate-in slide-in-from-bottom duration-200">
+          <div className="relative w-full sm:max-w-lg backdrop-blur-2xl bg-white/95 dark:bg-[#1c1c1e]/95 border border-black/[0.08] dark:border-white/[0.1] rounded-t-3xl sm:rounded-3xl shadow-2xl p-5 sm:p-6 space-y-4 z-10 animate-in slide-in-from-bottom duration-200">
+            {/* iOS Drag Handle on Mobile */}
+            <div className="sm:hidden pt-0.5 pb-2 flex justify-center">
+              <div className="w-10 h-1 rounded-full bg-black/20 dark:bg-white/20" />
+            </div>
+
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
                 <h3 className="font-semibold text-base text-[#1d1d1f] dark:text-white tracking-tight truncate">

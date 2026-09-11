@@ -243,40 +243,37 @@ export default function AdminAboutPage() {
   ]
 
   return (
-    <div className="space-y-6 font-sans text-ink dark:text-dark-ink pb-16">
-      {/* 1. TOP HEADER & TOOLBAR */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-black/[0.06] dark:border-white/[0.08]">
-        {/* Desktop-only Page Title (Zero duplicate heading on mobile) */}
-        <div className="hidden md:block">
-          <div className="flex items-center gap-2.5">
-            <h1 className="font-serif font-black text-xl sm:text-2xl text-ink dark:text-dark-ink tracking-tight">
-              About Us Editor
-            </h1>
-            <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-black/[0.04] dark:bg-white/10 border border-black/[0.06] dark:border-white/10 text-ink-mute dark:text-dark-mute font-medium">
+    <div className="space-y-6 font-apple text-[#1d1d1f] dark:text-white pb-16">
+      {/* 1. APPLE MINIMALIST TOP ROW */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-3.5 flex-wrap">
+          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-[#1d1d1f] dark:text-white">
+            About
+          </h1>
+
+          {/* Unified Status Capsule Box */}
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full backdrop-blur-xl bg-white/70 dark:bg-white/[0.06] border border-black/[0.06] dark:border-white/[0.08] text-xs font-medium shadow-2xs">
+            <span className="text-[#0071e3] dark:text-[#2997ff] font-semibold">
               Institutional Charter
             </span>
-            {isDirty && (
-              <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 font-semibold animate-pulse">
-                Unsaved Edits
-              </span>
-            )}
+            <span className="text-black/20 dark:text-white/20">•</span>
+            <span className={isDirty ? "text-amber-600 dark:text-amber-400 font-semibold" : "text-[#1d1d1f]/60 dark:text-white/60"}>
+              {isDirty ? 'Unsaved Edits' : 'Up to date'}
+            </span>
           </div>
-          <p className="text-xs text-ink-mute dark:text-dark-mute mt-0.5 font-serif italic">
-            Edit all text, masthead credentials, editorial tenets, colophon, and mobile variants
-          </p>
         </div>
 
-        {/* Primary Controls (Responsive on Mobile) */}
-        <div className="flex items-center justify-between md:justify-end gap-2 w-full md:w-auto">
+        {/* Primary Action Controls */}
+        <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
           {/* View Mode Toggle: Form vs Live Preview */}
-          <div className="flex items-center p-0.5 bg-black/[0.04] dark:bg-white/[0.06] border border-black/[0.06] dark:border-white/10 rounded-full shadow-xs">
+          <div className="flex items-center p-1 bg-black/[0.04] dark:bg-white/[0.06] border border-black/[0.03] dark:border-white/[0.05] rounded-full">
             <button
               type="button"
               onClick={() => setViewMode('editor')}
-              className={`px-3.5 py-1 text-xs rounded-full transition cursor-pointer font-medium active:scale-95 ${
+              className={`h-7 px-3.5 text-xs rounded-full transition-all duration-150 active:scale-95 cursor-pointer font-semibold ${
                 viewMode === 'editor'
-                  ? 'bg-white dark:bg-[#2c2c2e] text-[#0071e3] shadow-xs font-semibold'
-                  : 'text-ink-mute dark:text-dark-mute hover:text-ink'
+                  ? 'bg-white dark:bg-[#2c2c2e] text-[#0071e3] dark:text-[#2997ff] shadow-2xs'
+                  : 'text-[#1d1d1f]/60 dark:text-white/60 hover:text-[#1d1d1f] dark:hover:text-white'
               }`}
             >
               Editor
@@ -284,10 +281,10 @@ export default function AdminAboutPage() {
             <button
               type="button"
               onClick={() => setViewMode('preview')}
-              className={`px-3.5 py-1 text-xs rounded-full transition cursor-pointer flex items-center gap-1 font-medium active:scale-95 ${
+              className={`h-7 px-3.5 text-xs rounded-full transition-all duration-150 active:scale-95 cursor-pointer flex items-center gap-1 font-semibold ${
                 viewMode === 'preview'
-                  ? 'bg-white dark:bg-[#2c2c2e] text-[#0071e3] shadow-xs font-semibold'
-                  : 'text-ink-mute dark:text-dark-mute hover:text-ink'
+                  ? 'bg-white dark:bg-[#2c2c2e] text-[#0071e3] dark:text-[#2997ff] shadow-2xs'
+                  : 'text-[#1d1d1f]/60 dark:text-white/60 hover:text-[#1d1d1f] dark:hover:text-white'
               }`}
             >
               <IconDeviceMobile className="w-3 h-3" />
@@ -295,54 +292,49 @@ export default function AdminAboutPage() {
             </button>
           </div>
 
-          <div className="flex items-center gap-1.5">
-            {/* Reset Defaults Button */}
-            <button
-              type="button"
-              onClick={handleReset}
-              disabled={saving}
-              className="h-8 px-3.5 border border-black/[0.08] dark:border-white/10 hover:border-red-400/60 rounded-full text-ink-mute hover:text-red-600 dark:hover:text-red-400 text-xs font-semibold transition cursor-pointer bg-white/80 dark:bg-white/[0.04] shadow-xs active:scale-95"
-              title="Reset to default broadsheet text"
-            >
-              Reset
-            </button>
+          <button
+            type="button"
+            onClick={handleReset}
+            disabled={saving}
+            className="h-9 px-3.5 border border-black/[0.08] dark:border-white/10 hover:border-red-400/60 rounded-full text-[#1d1d1f]/70 dark:text-white/70 hover:text-red-600 dark:hover:text-red-400 text-xs font-semibold transition cursor-pointer bg-white/70 dark:bg-white/[0.06] shadow-2xs active:scale-95"
+            title="Reset to default broadsheet text"
+          >
+            Reset
+          </button>
 
-            {/* Live Page Link */}
-            <Link
-              href="/about"
-              target="_blank"
-              rel="noreferrer"
-              className="h-8 px-3.5 border border-black/[0.08] dark:border-white/10 hover:border-[#0071e3] rounded-full text-ink-mute hover:text-ink dark:hover:text-white text-xs font-semibold transition inline-flex items-center gap-1 bg-white/80 dark:bg-white/[0.04] shadow-xs active:scale-95"
-              title="Open public About Us page in new tab"
-            >
-              <span>Live</span>
-              <IconExternalLink className="w-3 h-3" />
-            </Link>
+          <Link
+            href="/about"
+            target="_blank"
+            rel="noreferrer"
+            className="h-9 px-3.5 border border-black/[0.08] dark:border-white/10 hover:border-[#0071e3] rounded-full text-[#1d1d1f]/70 hover:text-[#1d1d1f] dark:text-white/70 dark:hover:text-white text-xs font-semibold transition inline-flex items-center gap-1 bg-white/70 dark:bg-white/[0.06] shadow-2xs active:scale-95"
+            title="Open public About Us page"
+          >
+            <span>Live</span>
+            <IconExternalLink className="w-3 h-3" />
+          </Link>
 
-            {/* Save Changes Button */}
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={saving || !isDirty}
-              className={`h-8 px-4 rounded-full text-xs font-bold transition cursor-pointer shadow-xs inline-flex items-center gap-1.5 shrink-0 ${
-                isDirty
-                  ? 'bg-[#0071e3] hover:bg-[#0077ed] text-white active:scale-95 shadow-md'
-                  : 'bg-black/[0.04] dark:bg-white/10 text-ink-mute/50 dark:text-dark-mute/50 border border-black/[0.06] dark:border-white/10 cursor-not-allowed'
-              }`}
-            >
-              {saving ? (
-                <>
-                  <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span className="hidden sm:inline">Saving…</span>
-                </>
-              ) : (
-                <>
-                  <IconCheck className="w-3.5 h-3.5" />
-                  <span>Save</span>
-                </>
-              )}
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={saving || !isDirty}
+            className={`h-9 px-4 rounded-full text-xs font-semibold transition cursor-pointer shadow-2xs inline-flex items-center gap-1.5 shrink-0 ${
+              isDirty
+                ? 'bg-[#0071e3] hover:bg-[#0077ed] text-white active:scale-95'
+                : 'bg-black/[0.04] dark:bg-white/10 text-[#1d1d1f]/40 dark:text-white/40 border border-black/[0.06] dark:border-white/10 cursor-not-allowed'
+            }`}
+          >
+            {saving ? (
+              <>
+                <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span>Saving…</span>
+              </>
+            ) : (
+              <>
+                <IconCheck className="w-3.5 h-3.5" />
+                <span>Save</span>
+              </>
+            )}
+          </button>
         </div>
       </div>
 

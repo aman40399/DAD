@@ -417,23 +417,30 @@ export default function AnalyticsDashboard() {
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      {/* Top Header Row — Heading is hidden on mobile because top app nav bar already displays it */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-        {/* Desktop-only Page Title (Zero duplicate heading on mobile) */}
-        <div className="hidden md:block">
-          <h2 className="font-serif font-black text-2xl text-ink dark:text-dark-ink leading-tight">
-            Visitor Intelligence
-          </h2>
-          <p className="text-xs text-ink-mute dark:text-dark-mute font-serif italic mt-0.5">
-            Privacy-preserving readership telemetry aggregated from edge network routing
-          </p>
+    <div className="space-y-6 font-apple">
+      {/* APPLE MINIMALIST TOP ROW */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-3.5 flex-wrap">
+          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-[#1d1d1f] dark:text-white">
+            Analytics
+          </h1>
+
+          {/* Unified Status Capsule Box */}
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full backdrop-blur-xl bg-white/70 dark:bg-white/[0.06] border border-black/[0.06] dark:border-white/[0.08] text-xs font-medium shadow-2xs">
+            <span className="text-[#0071e3] dark:text-[#2997ff] font-semibold">
+              {(stats?.totalViews || 0).toLocaleString()} Views
+            </span>
+            <span className="text-black/20 dark:text-white/20">•</span>
+            <span className="text-[#1d1d1f]/60 dark:text-white/60">
+              {(stats?.uniqueVisitors || 0).toLocaleString()} Uniques
+            </span>
+          </div>
         </div>
 
         {/* Range Filter & Clear Actions */}
-        <div className="flex items-center gap-2 w-full md:w-auto">
-          {/* Range Filter Pills: Apple full-pill segmented control */}
-          <div className="flex-1 md:flex-initial flex items-center p-1 bg-black/[0.04] dark:bg-white/[0.06] border border-black/[0.06] dark:border-white/10 rounded-full shadow-xs">
+        <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+          {/* Range Filter Pills: Apple segmented track */}
+          <div className="flex items-center p-1 bg-black/[0.04] dark:bg-white/[0.06] border border-black/[0.03] dark:border-white/[0.05] rounded-full">
             {[
               { id: 'today', label: '1D' },
               { id: '7d', label: '7D' },
@@ -444,10 +451,10 @@ export default function AnalyticsDashboard() {
                 key={item.id}
                 type="button"
                 onClick={() => setRange(item.id as any)}
-                className={`flex-1 md:flex-initial px-4 py-1.5 text-xs font-semibold rounded-full transition cursor-pointer text-center active:scale-95 ${
+                className={`h-7 px-3 sm:px-3.5 text-xs font-semibold rounded-full transition-all duration-150 cursor-pointer text-center active:scale-95 ${
                   range === item.id
-                    ? 'bg-white dark:bg-[#2c2c2e] text-[#0071e3] shadow-xs'
-                    : 'text-ink-mute dark:text-dark-mute hover:text-ink dark:hover:text-white'
+                    ? 'bg-white dark:bg-[#2c2c2e] text-[#0071e3] dark:text-[#2997ff] shadow-2xs'
+                    : 'text-[#1d1d1f]/60 dark:text-white/60 hover:text-[#1d1d1f] dark:hover:text-white'
                 }`}
               >
                 {item.label}
@@ -459,12 +466,11 @@ export default function AnalyticsDashboard() {
           <button
             type="button"
             onClick={() => setShowClearModal(true)}
-            className="px-3.5 py-2 text-xs font-mono font-medium text-ink-mute dark:text-dark-mute hover:text-red-600 dark:hover:text-red-400 bg-white/80 dark:bg-white/[0.05] border border-black/[0.06] dark:border-white/10 hover:border-red-500/40 rounded-full transition cursor-pointer flex items-center gap-1.5 shrink-0 shadow-xs active:scale-95"
+            className="h-9 px-3.5 text-xs font-semibold text-[#1d1d1f]/70 dark:text-white/70 hover:text-red-600 dark:hover:text-red-400 bg-white/70 dark:bg-white/[0.06] border border-black/[0.06] dark:border-white/[0.08] hover:border-red-200 dark:hover:border-red-900/40 rounded-full transition cursor-pointer flex items-center gap-1.5 shadow-2xs active:scale-95"
             title="Reset telemetry database"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
-            <span className="hidden sm:inline">Clear Data</span>
-            <span className="sm:hidden">Clear</span>
+            <span>Reset Data</span>
           </button>
         </div>
       </div>
