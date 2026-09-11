@@ -100,11 +100,6 @@ export default function AdminArticlesPage() {
           setArticles((prev) => prev.filter((a) => a.id !== targetId))
           setDisintegratingId(null)
         }, 480)
-        addToast(
-          'success',
-          'Story Retracted',
-          `"${targetTitle}" was permanently removed.`
-        )
       } else {
         setDisintegratingId(null)
         addToast('error', 'Retraction Failed', 'Could not delete story from server.')

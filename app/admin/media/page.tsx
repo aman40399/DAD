@@ -226,8 +226,6 @@ export default function AdminMediaVaultPage() {
         setMediaItems((prev) => prev.filter((m) => m.id !== targetId && m.url !== targetItem.url))
         setDeletingId(null)
       }, 400)
-
-      addToast('success', 'Asset Deleted', `"${getFilename(targetItem.url, targetItem.title)}" removed permanently from Cloudflare R2.`)
     } catch (err: any) {
       addToast('error', 'Deletion Error', err.message || 'Could not delete asset from storage.')
     } finally {
