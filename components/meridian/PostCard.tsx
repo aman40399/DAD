@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useBookmarks } from '@/lib/bookmarks'
@@ -49,6 +49,12 @@ function SafeCardImage({
 }) {
   const [imgSrc, setImgSrc] = useState(src)
   const [hasError, setHasError] = useState(false)
+  const [loaded, setLoaded] = useState(priority)
+
+  useEffect(() => {
+    setImgSrc(src)
+    setHasError(false)
+  }, [src])
 
   return (
     <Image
@@ -58,7 +64,8 @@ function SafeCardImage({
       priority={priority}
       sizes={sizes}
       quality={quality}
-      className={className}
+      className={`${className || ''} transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+      onLoad={() => setLoaded(true)}
       onError={() => {
         if (!hasError) {
           setHasError(true)

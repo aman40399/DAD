@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import NavigationDrawer from './NavigationDrawer'
 import BookmarkPanel from './BookmarkPanel'
 import ThemeToggle from './ThemeToggle'
+import LiveClock from './LiveClock'
 
 interface MastheadProps {
   brandName?: string
@@ -16,29 +17,6 @@ export default function Masthead({
   tagline = 'Sharp reporting. Deep analysis. No agenda but the truth.',
 }: MastheadProps) {
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const [currentDate, setCurrentDate] = useState('Sunday, 6 September 2026')
-
-  useEffect(() => {
-    const updateTime = () => {
-      const now = new Date()
-      const dateOptions: Intl.DateTimeFormatOptions = {
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-      }
-      const timeStr = now.toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false,
-      })
-      setCurrentDate(`${now.toLocaleDateString('en-US', dateOptions)} • ${timeStr}`)
-    }
-    updateTime()
-    const timer = setInterval(updateTime, 1000)
-    return () => clearInterval(timer)
-  }, [])
 
   return (
     <>
@@ -111,9 +89,7 @@ export default function Masthead({
                 </svg>
               </button>
 
-              <span className="tracking-wide" suppressHydrationWarning>
-                {currentDate || 'Sunday, 6 September 2026'}
-              </span>
+              <LiveClock />
             </div>
 
             {/* Right: Search, Bookmarks, Theme Toggle, Auth, Subscribe */}

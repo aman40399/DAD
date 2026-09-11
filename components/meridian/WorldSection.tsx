@@ -66,18 +66,19 @@ export default function WorldSection({
   secondaryArticles = DEFAULT_SECONDARY,
 }: WorldSectionProps) {
   return (
-    <section className="py-8 border-b border-rule dark:border-dark-rule" aria-labelledby="section-heading">
+    <section className="py-8 border-b border-rule dark:border-dark-rule content-auto" aria-labelledby="section-heading">
       {/* Header */}
       <div className="flex items-baseline justify-between pb-2 border-b-2 border-ink dark:border-dark-ink mb-6">
         <h2 id="section-heading" className="font-serif font-black text-2xl sm:text-3xl text-ink dark:text-dark-ink">
           {title}
         </h2>
-        <a
+        <Link
           href={moreUrl}
-          className="font-sans text-[11px] sm:text-[12px] font-bold tracking-wider uppercase text-accent dark:text-dark-accent hover:underline"
+          prefetch={true}
+          className="font-sans text-[11px] sm:text-[12px] font-bold tracking-wider uppercase text-accent dark:text-dark-accent hover:underline transition-colors"
         >
           More in {title} →
-        </a>
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">

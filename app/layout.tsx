@@ -188,6 +188,8 @@ export default function RootLayout({
         <meta name="theme-color" content="#8a5e1f" />
         <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://images.unsplash.com" />
+        <link rel="preconnect" href="https://pub-f105b5c2551040e1b44a90da84ffa541.r2.dev" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://pub-f105b5c2551040e1b44a90da84ffa541.r2.dev" />
         <link rel="alternate" type="application/rss+xml" title="Singh Monster RSS 2.0 Feed" href={`${baseUrl}/feed.xml`} />
         <script
           type="application/ld+json"

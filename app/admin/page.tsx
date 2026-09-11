@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useDeferredValue } from 'react'
 import Link from 'next/link'
 import { Article } from '@/types'
 import DeleteArticleModal from '@/components/admin/DeleteArticleModal'
@@ -145,13 +145,15 @@ export default function AdminArticlesPage() {
     return ['all', ...Array.from(set)]
   }, [articles])
 
+  const deferredSearch = useDeferredValue(search)
+
   const filteredArticles = useMemo(() => {
+    const q = deferredSearch.trim().toLowerCase()
     const result = articles.filter((a) => {
       if (filter !== 'all' && a.status !== filter) return false
       if (categoryFilter !== 'all' && a.category !== categoryFilter) return false
 
-      if (search.trim()) {
-        const q = search.toLowerCase()
+      if (q) {
         return (
           a.title.toLowerCase().includes(q) ||
           (a.author && a.author.toLowerCase().includes(q)) ||
@@ -169,7 +171,7 @@ export default function AdminArticlesPage() {
     })
 
     return result
-  }, [articles, filter, categoryFilter, search])
+  }, [articles, filter, categoryFilter, deferredSearch])
 
   const publishedCount = articles.filter((a) => a.status === 'published').length
   const draftCount = articles.filter((a) => a.status === 'draft').length

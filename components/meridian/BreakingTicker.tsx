@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import Link from 'next/link'
 
 interface TickerItem {
   id: string
@@ -88,12 +89,13 @@ export default function BreakingTicker({ items = DEFAULT_ITEMS }: BreakingTicker
           <div className="flex items-center shrink-0">
             {items.map((item, idx) => (
               <span key={`a-${item.id}-${idx}`} className="inline-flex items-center">
-                <a
+                <Link
                   href={item.url || '#'}
+                  prefetch={true}
                   className="hover:underline underline-offset-2 text-ink/90 hover:text-ink dark:text-white/90 dark:hover:text-white transition-colors"
                 >
                   {item.title}
-                </a>
+                </Link>
                 <span className="mx-6 text-accent dark:text-dark-accent" aria-hidden="true">
                   ●
                 </span>
@@ -104,13 +106,14 @@ export default function BreakingTicker({ items = DEFAULT_ITEMS }: BreakingTicker
           <div className="flex items-center shrink-0" aria-hidden="true">
             {items.map((item, idx) => (
               <span key={`b-${item.id}-${idx}`} className="inline-flex items-center">
-                <a
+                <Link
                   href={item.url || '#'}
+                  prefetch={true}
                   tabIndex={-1}
                   className="hover:underline underline-offset-2 text-ink/90 hover:text-ink dark:text-white/90 dark:hover:text-white transition-colors"
                 >
                   {item.title}
-                </a>
+                </Link>
                 <span className="mx-6 text-accent dark:text-dark-accent" aria-hidden="true">
                   ●
                 </span>

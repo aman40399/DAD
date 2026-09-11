@@ -60,7 +60,7 @@ export default function EditorsPicks({ articles = DEFAULT_PICKS }: EditorsPicksP
   }
 
   return (
-    <section className="py-8 border-b border-rule dark:border-dark-rule" aria-labelledby="editors-picks-title">
+    <section className="py-8 border-b border-rule dark:border-dark-rule content-auto" aria-labelledby="editors-picks-title">
       <div className="flex items-end justify-between mb-4">
         <div>
           <h2 id="editors-picks-title" className="font-serif font-black text-2xl sm:text-3xl text-ink dark:text-dark-ink leading-tight">

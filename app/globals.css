@@ -8,6 +8,7 @@
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
     text-rendering: optimizeLegibility;
+    touch-action: manipulation;
   }
 
   body {
@@ -16,6 +17,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
   }
 
   /* Professional broadsheet selection colors */
@@ -28,9 +30,10 @@
     @apply outline-2 outline-offset-2 outline-accent;
   }
   
-  /* Performance: GPU acceleration for transforms */
-  img, video {
-    transform: translateZ(0);
+  /* Below-the-fold content visibility optimization for 60/120fps scrolling */
+  .content-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 400px;
   }
 }
 
