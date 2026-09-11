@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     const positionParam = searchParams.get('homepage_position') || searchParams.get('homepagePosition')
 
     const limitParam = parseInt(searchParams.get('limit') || '10', 10)
-    const limit = isNaN(limitParam) ? 10 : Math.min(Math.max(1, limitParam), 100)
+    const limit = isNaN(limitParam) ? 10 : Math.min(Math.max(1, limitParam), 1000)
 
     const offsetParam = searchParams.get('offset')
     const pageParam = searchParams.get('page')

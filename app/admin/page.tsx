@@ -71,6 +71,8 @@ export default function AdminArticlesPage() {
     }
   }
 
+  const [disintegratingId, setDisintegratingId] = useState<string | null>(null)
+
   useEffect(() => {
     fetchArticles()
   }, [])
@@ -81,24 +83,35 @@ export default function AdminArticlesPage() {
 
   const confirmDelete = async () => {
     if (!deleteTarget) return
+    const targetId = deleteTarget.id
+    const targetTitle = deleteTarget.title
     setIsDeleting(true)
+
+    // Trigger the smooth disintegrate & swipe animation on the article card
+    setDisintegratingId(targetId)
+    setDeleteTarget(null)
+    setIsDeleting(false)
+
     try {
-      const res = await fetch(`/api/articles/${deleteTarget.id}`, { method: 'DELETE' })
+      const res = await fetch(`/api/articles/${targetId}`, { method: 'DELETE' })
       if (res.ok) {
-        setArticles((prev) => prev.filter((a) => a.id !== deleteTarget.id))
+        // Let the 480ms disintegration animation complete smoothly before removing from state
+        setTimeout(() => {
+          setArticles((prev) => prev.filter((a) => a.id !== targetId))
+          setDisintegratingId(null)
+        }, 480)
         addToast(
           'success',
           'Story Retracted',
-          `"${deleteTarget.title}" was permanently removed.`
+          `"${targetTitle}" was permanently removed.`
         )
-        setDeleteTarget(null)
       } else {
+        setDisintegratingId(null)
         addToast('error', 'Retraction Failed', 'Could not delete story from server.')
       }
     } catch (e) {
+      setDisintegratingId(null)
       addToast('error', 'Network Error', 'Failed to communicate with newsroom API.')
-    } finally {
-      setIsDeleting(false)
     }
   }
 
@@ -353,12 +366,15 @@ export default function AdminArticlesPage() {
               day: 'numeric',
               year: 'numeric',
             })
+            const isDisintegrating = art.id === disintegratingId
 
             return (
               <article
                 key={art.id}
                 style={{ animationDelay: `${idx * 40}ms` }}
-                className="group p-4 sm:p-5 rounded-3xl apple-glass-card hover:border-black/[0.12] dark:hover:border-white/[0.16] hover:shadow-[0_12px_36px_rgba(0,0,0,0.06)] dark:hover:shadow-[0_12px_36px_rgba(0,0,0,0.35)] hover:-translate-y-0.5 transition-all duration-300 flex flex-col md:flex-row gap-5 items-start"
+                className={`group p-4 sm:p-5 rounded-3xl apple-glass-card hover:border-black/[0.12] dark:hover:border-white/[0.16] hover:shadow-[0_12px_36px_rgba(0,0,0,0.06)] dark:hover:shadow-[0_12px_36px_rgba(0,0,0,0.35)] hover:-translate-y-0.5 transition-all duration-300 flex flex-col md:flex-row gap-5 items-start ${
+                  isDisintegrating ? 'article-disintegrate-swipe' : ''
+                }`}
               >
                 {/* BIGGER PREMIUM 16:9 IMAGE DISPLAY */}
                 <div className="w-full md:w-64 lg:w-72 h-44 sm:h-48 md:h-44 rounded-2xl overflow-hidden relative shrink-0 bg-black/[0.04] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08]">
