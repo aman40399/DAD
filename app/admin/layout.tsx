@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import dynamic from 'next/dynamic'
 import ThemeToggle from '@/components/meridian/ThemeToggle'
 import {
   BookOpen,
@@ -17,6 +18,9 @@ import {
   LogOut,
   ArrowUpRight,
 } from 'lucide-react'
+
+const AcidSquares = dynamic(() => import('@/components/admin/AcidSquares'), { ssr: false })
+
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -118,7 +122,35 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="h-dvh md:min-h-screen bg-[#f5f5f7] dark:bg-[#000000] text-[#1d1d1f] dark:text-white font-apple flex flex-col md:flex-row antialiased overflow-hidden md:overflow-visible">
+    <div className="h-dvh md:min-h-screen bg-[#f5f5f7] dark:bg-[#000000] text-[#1d1d1f] dark:text-white font-apple flex flex-col md:flex-row antialiased overflow-hidden md:overflow-visible relative">
+      {/* Subtle AcidSquares 3D Ambient Lattice Background from React Bits */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-20 dark:opacity-30 select-none">
+        <AcidSquares
+          color1="#0071e3"
+          color2="#5e5ce6"
+          color3="#30b0c7"
+          detail="medium"
+          speed={0.4}
+          waveDepth={0.8}
+          zoom={1.25}
+          density={8.0}
+          glow={0.75}
+          exposure={3200}
+          spread={0.25}
+          stepSize={0.003}
+          colorShift={0.15}
+          contrast={1.05}
+          brightness={0.9}
+          opacity={0.7}
+          mouseInteraction={true}
+          mouseStrength={0.08}
+          mouseRadius={0.3}
+          blur={0}
+          grain={true}
+          grainIntensity={0.03}
+        />
+      </div>
+
       {/* MOBILE APP TOP BAR (Apple Frosted Glass) */}
       <header className="md:hidden shrink-0 z-40 backdrop-blur-2xl bg-white/80 dark:bg-[#161617]/80 border-b border-black/[0.05] dark:border-white/[0.06] px-4 py-3 flex items-center justify-between select-none">
         <div className="flex items-center gap-3">
@@ -287,7 +319,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* Main Admin Content Pane */}
-      <main className="flex-1 min-w-0 p-3 sm:p-7 lg:p-8 overflow-y-auto flex flex-col pb-28 md:pb-12">
+      <main className="flex-1 min-w-0 p-3 sm:p-7 lg:p-8 overflow-y-auto flex flex-col pb-28 md:pb-12 relative z-10">
         <div className="max-w-[1360px] mx-auto w-full flex-1 flex flex-col min-h-0">
           {children}
         </div>
