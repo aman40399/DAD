@@ -24,8 +24,9 @@ function getCleanSpeechChunks(title: string, content: string): string[] {
     .trim()
 
   const fullText = `${title}. ${cleanBody}`
+  // Split on punctuation including Devanagari danda (।) and double danda (॥)
   const rawSentences = fullText.split(/(?<=[.!?।॥\n])\s+/)
-  const maxChunkLen = 180
+  const maxChunkLen = 160
   const chunks: string[] = []
   let current = ''
 
@@ -57,35 +58,10 @@ function getCleanSpeechChunks(title: string, content: string): string[] {
   return chunks
 }
 
-function findBestVoice(allVoices: SpeechSynthesisVoice[], isHindi: boolean): SpeechSynthesisVoice | null {
-  if (isHindi) {
-    return (
-      allVoices.find((v) => v.lang.toLowerCase().replace('_', '-').startsWith('hi')) ||
-      allVoices.find((v) => v.name.toLowerCase().includes('hindi')) ||
-      null
-    )
-  }
-  return (
-    allVoices.find(
-      (v) =>
-        v.lang.toLowerCase().replace('_', '-').startsWith('en') &&
-        (v.name.includes('Natural') ||
-          v.name.includes('Google') ||
-          v.name.includes('Samantha') ||
-          v.name.includes('Daniel') ||
-          v.name.includes('Karen'))
-    ) ||
-    allVoices.find((v) => v.lang.toLowerCase().replace('_', '-').startsWith('en')) ||
-    null
-  )
-}
-
 export default function ArticleAudioPlayer({ title, content, language }: ArticleAudioPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
-  const [supported, setSupported] = useState(true)
   const [rate, setRate] = useState<1 | 1.25 | 1.5>(1)
-  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([])
   const [activeChunk, setActiveChunk] = useState<number>(0)
   const [totalChunks, setTotalChunks] = useState<number>(0)
 
@@ -93,139 +69,170 @@ export default function ArticleAudioPlayer({ title, content, language }: Article
     language === 'hindi' ||
     /[\u0900-\u097F]/.test(title + ' ' + (content || ''))
 
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+  const nextAudioRef = useRef<HTMLAudioElement | null>(null)
   const chunksRef = useRef<string[]>([])
   const chunkIndexRef = useRef<number>(0)
-  const isCancelledRef = useRef<boolean>(false)
+  const isPlayingRef = useRef<boolean>(false)
   const isPausedRef = useRef<boolean>(false)
-  const rateRef = useRef<1 | 1.25 | 1.5>(1)
+  const rateRef = useRef<number>(1)
 
   useEffect(() => {
     rateRef.current = rate
   }, [rate])
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      if (!('speechSynthesis' in window)) {
-        setSupported(false)
-        return
-      }
+  const handleStop = () => {
+    isPlayingRef.current = false
+    isPausedRef.current = false
 
-      const loadVoices = () => {
-        const available = window.speechSynthesis.getVoices()
-        if (available && available.length > 0) {
-          setVoices(available)
-        }
-      }
-
-      loadVoices()
-      window.speechSynthesis.onvoiceschanged = loadVoices
+    if (audioRef.current) {
+      audioRef.current.onended = null
+      audioRef.current.onerror = null
+      audioRef.current.pause()
+      audioRef.current = null
+    }
+    if (nextAudioRef.current) {
+      nextAudioRef.current = null
+    }
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel()
     }
 
+    setIsPlaying(false)
+    setIsPaused(false)
+    chunkIndexRef.current = 0
+    setActiveChunk(0)
+  }
+
+  useEffect(() => {
     return () => {
-      isCancelledRef.current = true
-      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-        window.speechSynthesis.cancel()
-        window.speechSynthesis.onvoiceschanged = null
-      }
+      handleStop()
     }
   }, [])
 
-  if (!supported) return null
+  const fallbackSpeechSynthesis = (text: string, hindi: boolean, onDone: () => void) => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+      onDone()
+      return
+    }
+    try {
+      const utterance = new SpeechSynthesisUtterance(text)
+      utterance.lang = hindi ? 'hi-IN' : 'en-US'
+      utterance.rate = rateRef.current
+      utterance.onend = onDone
+      utterance.onerror = onDone
+      window.speechSynthesis.speak(utterance)
+    } catch {
+      onDone()
+    }
+  }
 
-  const speakChunk = (index: number) => {
-    if (isCancelledRef.current || typeof window === 'undefined' || !('speechSynthesis' in window)) return
+  const playChunk = (index: number) => {
+    if (!isPlayingRef.current) return
     const chunks = chunksRef.current
     if (index >= chunks.length) {
-      setIsPlaying(false)
-      setIsPaused(false)
-      isPausedRef.current = false
-      chunkIndexRef.current = 0
-      setActiveChunk(0)
+      handleStop()
       return
     }
 
     chunkIndexRef.current = index
     setActiveChunk(index + 1)
-    const text = chunks[index]
-    const utterance = new SpeechSynthesisUtterance(text)
-    utterance.rate = rateRef.current
 
-    const currentVoices = voices.length > 0 ? voices : window.speechSynthesis.getVoices()
-    const voice = findBestVoice(currentVoices, isHindi)
-    if (voice) {
-      utterance.voice = voice
+    const chunkText = chunks[index]
+    const langParam = isHindi ? 'hi' : 'en'
+    const audioUrl = `/api/tts?text=${encodeURIComponent(chunkText)}&lang=${langParam}`
+
+    // Stop current audio instance if any
+    if (audioRef.current) {
+      audioRef.current.onended = null
+      audioRef.current.onerror = null
+      audioRef.current.pause()
     }
-    utterance.lang = isHindi ? 'hi-IN' : (voice?.lang || 'en-US')
 
-    utterance.onstart = () => {
-      if (isCancelledRef.current) {
-        window.speechSynthesis.cancel()
-        return
+    let audio: HTMLAudioElement
+    if (nextAudioRef.current && nextAudioRef.current.src.includes(encodeURIComponent(chunkText))) {
+      audio = nextAudioRef.current
+      nextAudioRef.current = null
+    } else {
+      audio = new Audio(audioUrl)
+    }
+
+    audio.playbackRate = rateRef.current
+    audioRef.current = audio
+
+    audio.onended = () => {
+      if (!isPlayingRef.current || isPausedRef.current) return
+      playChunk(index + 1)
+    }
+
+    audio.onerror = () => {
+      // If streaming fails, fall back to browser Web Speech
+      if (isPlayingRef.current && !isPausedRef.current) {
+        fallbackSpeechSynthesis(chunkText, isHindi, () => {
+          if (isPlayingRef.current && !isPausedRef.current) {
+            playChunk(index + 1)
+          }
+        })
       }
-      setIsPlaying(true)
-      setIsPaused(false)
-      isPausedRef.current = false
     }
 
-    utterance.onend = () => {
-      if (isCancelledRef.current || isPausedRef.current) return
-      speakChunk(index + 1)
-    }
+    audio.play().catch(() => {
+      // Browser autoplay policy or media error fallback
+      fallbackSpeechSynthesis(chunkText, isHindi, () => {
+        if (isPlayingRef.current && !isPausedRef.current) {
+          playChunk(index + 1)
+        }
+      })
+    })
 
-    utterance.onerror = (e) => {
-      if (e.error === 'canceled' || e.error === 'interrupted') return
-      if (!isCancelledRef.current && !isPausedRef.current) {
-        speakChunk(index + 1)
-      }
+    // Preload next chunk for smooth gapless streaming
+    if (index + 1 < chunks.length) {
+      const nextText = chunks[index + 1]
+      const nextUrl = `/api/tts?text=${encodeURIComponent(nextText)}&lang=${langParam}`
+      const nextAudio = new Audio(nextUrl)
+      nextAudio.preload = 'auto'
+      nextAudioRef.current = nextAudio
     }
-
-    window.speechSynthesis.speak(utterance)
   }
 
   const handlePlayPause = () => {
-    if (!('speechSynthesis' in window)) return
-
     if (isPlaying) {
       if (isPaused) {
-        isPausedRef.current = false
         setIsPaused(false)
-        if (!window.speechSynthesis.speaking) {
-          speakChunk(chunkIndexRef.current)
+        isPausedRef.current = false
+        if (audioRef.current) {
+          audioRef.current.play().catch(() => {})
         } else {
-          window.speechSynthesis.resume()
+          playChunk(chunkIndexRef.current)
         }
       } else {
-        isPausedRef.current = true
         setIsPaused(true)
-        window.speechSynthesis.pause()
+        isPausedRef.current = true
+        if (audioRef.current) {
+          audioRef.current.pause()
+        }
+        if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+          window.speechSynthesis.pause()
+        }
       }
       return
     }
 
-    isCancelledRef.current = false
-    isPausedRef.current = false
-    window.speechSynthesis.cancel()
-    window.speechSynthesis.resume()
+    // Fresh start
+    handleStop()
 
     const chunks = getCleanSpeechChunks(title, content)
     chunksRef.current = chunks
     setTotalChunks(chunks.length)
     if (chunks.length === 0) return
 
+    setIsPlaying(true)
+    setIsPaused(false)
+    isPlayingRef.current = true
+    isPausedRef.current = false
     chunkIndexRef.current = 0
-    speakChunk(0)
-  }
 
-  const handleStop = () => {
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      isCancelledRef.current = true
-      isPausedRef.current = false
-      window.speechSynthesis.cancel()
-      setIsPlaying(false)
-      setIsPaused(false)
-      chunkIndexRef.current = 0
-      setActiveChunk(0)
-    }
+    playChunk(0)
   }
 
   const cycleRate = () => {
@@ -233,9 +240,8 @@ export default function ArticleAudioPlayer({ title, content, language }: Article
     const newRate = nextRate[rate]
     setRate(newRate)
     rateRef.current = newRate
-    if (isPlaying && !isPaused) {
-      window.speechSynthesis.cancel()
-      speakChunk(chunkIndexRef.current)
+    if (audioRef.current) {
+      audioRef.current.playbackRate = newRate
     }
   }
 
