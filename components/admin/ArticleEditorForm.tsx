@@ -3,8 +3,9 @@
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import WordEditor from './WordEditor'
-import { IconChevronLeft, IconChevronDown, IconSettings, IconMedia } from './AdminIcons'
+import { IconChevronLeft, IconChevronDown, IconSettings, IconMedia, IconRefresh } from './AdminIcons'
 import { Article } from '@/types'
+import { generateSlug } from '@/lib/utils'
 
 interface ArticleEditorFormProps {
   initialArticle?: Partial<Article>
@@ -80,17 +81,18 @@ export default function ArticleEditorForm({
   // Imperative insert ref to place media at active cursor in WordEditor
   const insertHtmlRef = useRef<((html: string) => void) | null>(null)
 
-  // Auto-generate slug when title changes (if not editing)
+  // Auto-generate slug when title changes (if not editing or slug is empty)
   const handleTitleChange = (newTitle: string) => {
     setTitle(newTitle)
     if (!isEditing || !slug) {
-      const generated = newTitle
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-')
-        .slice(0, 60)
-      setSlug(generated)
+      setSlug(generateSlug(newTitle, { maxLength: 70 }))
+    }
+  }
+
+  // Interactive manual slug generation / refresh from current title
+  const handleRegenerateSlug = () => {
+    if (title.trim()) {
+      setSlug(generateSlug(title, { maxLength: 70 }))
     }
   }
 
@@ -603,9 +605,21 @@ export default function ArticleEditorForm({
 
               {/* URL Slug */}
               <div className="w-full min-w-0">
-                <label className="block text-[10px] font-semibold text-ink-mute dark:text-dark-mute mb-1">
-                  URL Slug
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-[10px] font-semibold text-ink-mute dark:text-dark-mute">
+                    URL Slug
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleRegenerateSlug}
+                    disabled={!title.trim()}
+                    className="inline-flex items-center gap-1 text-[10px] font-medium text-[#0071e3] hover:underline disabled:opacity-40 disabled:hover:no-underline cursor-pointer"
+                    title="Auto-generate URL slug from headline (supports Hindi & English transliteration)"
+                  >
+                    <IconRefresh className="w-3 h-3" />
+                    <span>Auto-generate</span>
+                  </button>
+                </div>
                 <div className="flex items-center px-3.5 py-2.5 bg-black/[0.02] dark:bg-white/[0.04] border border-black/[0.08] dark:border-white/10 rounded-full text-xs font-mono">
                   <span className="text-ink-mute select-none mr-1">/article/</span>
                   <input

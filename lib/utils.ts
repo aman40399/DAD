@@ -18,8 +18,8 @@ export interface SlugOptions {
 export function transliterateDevanagari(text: string): string {
   if (!text) return ''
 
-  // Normalize Unicode to NFC
-  let s = text.normalize('NFC')
+  // Normalize Unicode to NFC and strip zero-width characters (ZWNJ, ZWJ, BOM, ZWSP)
+  let s = text.normalize('NFC').replace(/[\u200B-\u200D\uFEFF]/g, '')
 
   // Replace dandas, double dandas, and abbreviation signs with spaces
   s = s.replace(/[।॥॰]/g, ' ')
@@ -206,6 +206,8 @@ export function generateSlug(title: string, options?: SlugOptions): string {
   const fallback = options?.fallback ?? 'article'
 
   let processed = title
+    .replace(/[\u200B-\u200D\uFEFF]/g, '')
+    .replace(/₹/g, ' rs ')
 
   // 1. Transliterate Devanagari if present
   if (/[\u0900-\u097F]/.test(processed)) {
