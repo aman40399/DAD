@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect } from 'react'
-import { IconAlert } from '@/components/admin/AdminIcons'
+import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
+import { IconAlert, IconTrash } from '@/components/admin/AdminIcons'
 
 interface DeleteArticleModalProps {
   isOpen: boolean
@@ -18,6 +19,12 @@ export default function DeleteArticleModal({
   onConfirm,
   onCancel,
 }: DeleteArticleModalProps) {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   useEffect(() => {
     if (!isOpen) return
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -29,22 +36,22 @@ export default function DeleteArticleModal({
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [isOpen, isDeleting, onCancel])
 
-  if (!isOpen) return null
+  if (!isOpen || !mounted) return null
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md p-4 animate-in fade-in duration-200"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-md p-4 animate-in fade-in duration-200 select-none"
       onClick={() => !isDeleting && onCancel()}
       role="dialog"
       aria-modal="true"
     >
       <div
-        className="backdrop-blur-2xl bg-white/95 dark:bg-[#1c1c1e]/95 border border-black/[0.08] dark:border-white/[0.1] max-w-sm w-full p-6 rounded-3xl shadow-[0_16px_48px_rgba(0,0,0,0.15)] text-center space-y-4"
+        className="backdrop-blur-2xl bg-white/95 dark:bg-[#1c1c1e]/95 border border-black/[0.08] dark:border-white/[0.1] max-w-sm w-full p-6 rounded-3xl shadow-[0_16px_48px_rgba(0,0,0,0.25)] text-center space-y-4 animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Warning Icon Badge */}
-        <div className="w-12 h-12 rounded-full bg-red-500/10 text-red-600 dark:bg-red-500/15 dark:text-red-400 mx-auto flex items-center justify-center">
-          <IconAlert className="w-6 h-6" />
+        <div className="w-12 h-12 rounded-full bg-red-500/10 text-red-600 dark:bg-red-500/15 dark:text-red-400 mx-auto flex items-center justify-center border border-red-500/20">
+          <IconAlert className="w-6 h-6 stroke-[2.2]" />
         </div>
 
         {/* Title & Description */}
@@ -68,7 +75,7 @@ export default function DeleteArticleModal({
             type="button"
             disabled={isDeleting}
             onClick={onConfirm}
-            className="w-full h-10 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-full transition shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 active:scale-[0.98]"
+            className="w-full h-10 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-full transition shadow-[0_2px_8px_rgba(220,38,38,0.3)] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 active:scale-[0.98]"
           >
             {isDeleting ? (
               <>
@@ -76,7 +83,10 @@ export default function DeleteArticleModal({
                 <span>Retracting…</span>
               </>
             ) : (
-              <span>Retract &amp; Delete</span>
+              <>
+                <IconTrash className="w-3.5 h-3.5" />
+                <span>Retract &amp; Delete</span>
+              </>
             )}
           </button>
 
@@ -90,6 +100,7 @@ export default function DeleteArticleModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }

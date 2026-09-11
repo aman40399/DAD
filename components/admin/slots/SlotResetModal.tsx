@@ -1,6 +1,7 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { IconAlert } from '@/components/admin/AdminIcons'
 
 interface SlotResetModalProps {
@@ -18,10 +19,16 @@ export default function SlotResetModal({
   onConfirm,
   onCancel,
 }: SlotResetModalProps) {
-  if (!isOpen) return null
+  const [mounted, setMounted] = useState(false)
 
-  return (
-    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-md flex items-center justify-center p-4">
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!isOpen || !mounted) return null
+
+  return createPortal(
+    <div className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-md flex items-center justify-center p-4 select-none">
       <div className="w-full max-w-md backdrop-blur-2xl bg-white/85 dark:bg-[#1c1c1e]/85 border border-black/[0.08] dark:border-white/[0.1] rounded-3xl shadow-[0_16px_50px_rgba(0,0,0,0.15)] p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
         <div className="flex items-center gap-3.5">
           <div className="w-11 h-11 rounded-full bg-red-500/10 flex items-center justify-center shrink-0">
@@ -55,6 +62,7 @@ export default function SlotResetModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
