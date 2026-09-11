@@ -138,28 +138,28 @@ export default function SlotListView({
         return (
           <div
             key={section.id}
-            className="bg-paper dark:bg-dark-paper border border-rule/80 dark:border-white/10 rounded-2xl md:rounded-3xl overflow-hidden shadow-xs transition-shadow"
+            className="backdrop-blur-xl bg-white/70 dark:bg-[#1c1c1e]/75 border border-black/[0.06] dark:border-white/[0.08] rounded-3xl overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.03)] transition-all"
           >
             {/* SECTION HEADER */}
-            <div className="p-4 sm:p-6 bg-paper-subtle/70 dark:bg-white/[0.03] border-b border-rule/60 dark:border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="p-4 sm:p-5 bg-black/[0.02] dark:bg-white/[0.02] border-b border-black/[0.06] dark:border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-start sm:items-center gap-3">
-                <span className="shrink-0 w-7 h-7 rounded-xl bg-ink/5 dark:bg-white/10 text-ink dark:text-dark-ink text-xs font-mono font-bold flex items-center justify-center">
+                <span className="shrink-0 w-8 h-8 rounded-full bg-black/5 dark:bg-white/10 text-ink dark:text-dark-ink text-xs font-mono font-bold flex items-center justify-center">
                   0{secIdx + 1}
                 </span>
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h2 className="font-serif font-black text-base sm:text-lg text-ink dark:text-dark-ink">
+                    <h2 className="font-serif font-black text-base sm:text-lg text-ink dark:text-dark-ink tracking-tight">
                       {section.title}
                     </h2>
-                    <span className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-paper dark:bg-white/10 border border-rule/60 dark:border-white/10 text-ink-mute dark:text-dark-mute font-medium">
+                    <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-black/[0.04] dark:bg-white/10 border border-black/[0.06] dark:border-white/10 text-ink-mute dark:text-dark-mute font-medium">
                       {slotsInSec.length} Slots
                     </span>
                     {pinnedInSec > 0 ? (
-                      <span className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-accent/10 border border-accent/20 text-accent font-semibold">
+                      <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-[#0071e3]/10 border border-[#0071e3]/20 text-[#0071e3] font-semibold">
                         {pinnedInSec} Pinned
                       </span>
                     ) : (
-                      <span className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-medium">
+                      <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-medium">
                         All Auto-flow
                       </span>
                     )}
@@ -172,12 +172,12 @@ export default function SlotListView({
 
               {/* Section Controls (Move Up / Down / Collapse) */}
               <div className="flex items-center gap-1.5 self-end sm:self-auto shrink-0">
-                <div className="flex items-center bg-paper dark:bg-white/5 border border-rule/60 dark:border-white/10 rounded-xl p-0.5 shadow-xs">
+                <div className="flex items-center bg-black/[0.04] dark:bg-white/5 border border-black/[0.06] dark:border-white/10 rounded-full p-0.5 shadow-xs">
                   <button
                     type="button"
                     onClick={() => handleMoveSectionUp(secIdx)}
                     disabled={secIdx === 0}
-                    className="p-1.5 rounded-lg text-ink-mute hover:text-ink dark:hover:text-white disabled:opacity-30 disabled:hover:text-ink-mute transition cursor-pointer"
+                    className="p-1.5 rounded-full text-ink-mute hover:text-ink dark:hover:text-white disabled:opacity-30 disabled:hover:text-ink-mute transition cursor-pointer active:scale-95"
                     title="Move Section Up"
                     aria-label="Move Section Up"
                   >
@@ -187,7 +187,7 @@ export default function SlotListView({
                     type="button"
                     onClick={() => handleMoveSectionDown(secIdx)}
                     disabled={secIdx === orderedSections.length - 1}
-                    className="p-1.5 rounded-lg text-ink-mute hover:text-ink dark:hover:text-white disabled:opacity-30 disabled:hover:text-ink-mute transition cursor-pointer"
+                    className="p-1.5 rounded-full text-ink-mute hover:text-ink dark:hover:text-white disabled:opacity-30 disabled:hover:text-ink-mute transition cursor-pointer active:scale-95"
                     title="Move Section Down"
                     aria-label="Move Section Down"
                   >
@@ -198,7 +198,7 @@ export default function SlotListView({
                 <button
                   type="button"
                   onClick={() => toggleSectionCollapse(section.id)}
-                  className="p-2 bg-paper dark:bg-white/5 border border-rule/60 dark:border-white/10 rounded-xl text-ink-mute hover:text-ink dark:hover:text-white transition cursor-pointer shadow-xs"
+                  className="p-2 bg-black/[0.04] dark:bg-white/5 border border-black/[0.06] dark:border-white/10 rounded-full text-ink-mute hover:text-ink dark:hover:text-white transition cursor-pointer shadow-xs active:scale-95"
                   title={isCollapsed ? 'Expand Section' : 'Collapse Section'}
                   aria-label={isCollapsed ? 'Expand Section' : 'Collapse Section'}
                 >
@@ -213,7 +213,7 @@ export default function SlotListView({
 
             {/* SECTION SLOTS LIST */}
             {!isCollapsed && (
-              <div className="divide-y divide-rule/60 dark:divide-white/[0.06]">
+              <div className="divide-y divide-black/[0.05] dark:divide-white/[0.06]">
                 {matchingSlots.map((slotNum, slotIdxInSec) => {
                   const def: SlotDef = SLOTS.find((s) => s.slot === slotNum) || {
                     slot: slotNum,
@@ -237,8 +237,8 @@ export default function SlotListView({
                       key={slotNum}
                       className={`p-4 sm:p-5 transition-colors ${
                         isPinned
-                          ? 'bg-accent/[0.02] hover:bg-accent/[0.04]'
-                          : 'hover:bg-paper-subtle/50 dark:hover:bg-white/[0.02]'
+                          ? 'bg-[#0071e3]/[0.02] hover:bg-[#0071e3]/[0.05]'
+                          : 'hover:bg-black/[0.015] dark:hover:bg-white/[0.02]'
                       }`}
                     >
                       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -250,7 +250,7 @@ export default function SlotListView({
                               type="button"
                               disabled={isFirstInSec || isSaving}
                               onClick={() => onSwapSlots(slotNum, matchingSlots[slotIdxInSec - 1])}
-                              className="w-7 h-7 rounded-lg border border-rule/70 dark:border-white/10 bg-paper dark:bg-white/5 hover:bg-paper-subtle dark:hover:bg-white/10 text-ink-mute hover:text-ink dark:hover:text-white disabled:opacity-25 disabled:cursor-not-allowed transition flex items-center justify-center cursor-pointer active:scale-95 shadow-xs"
+                              className="w-7 h-7 rounded-full border border-black/[0.08] dark:border-white/10 bg-white/90 dark:bg-white/5 hover:bg-black/5 dark:hover:bg-white/10 text-ink-mute hover:text-ink dark:hover:text-white disabled:opacity-25 disabled:cursor-not-allowed transition flex items-center justify-center cursor-pointer active:scale-95 shadow-xs"
                               title="Move story up (swap with previous slot)"
                               aria-label="Move story up"
                             >
@@ -260,7 +260,7 @@ export default function SlotListView({
                               type="button"
                               disabled={isLastInSec || isSaving}
                               onClick={() => onSwapSlots(slotNum, matchingSlots[slotIdxInSec + 1])}
-                              className="w-7 h-7 rounded-lg border border-rule/70 dark:border-white/10 bg-paper dark:bg-white/5 hover:bg-paper-subtle dark:hover:bg-white/10 text-ink-mute hover:text-ink dark:hover:text-white disabled:opacity-25 disabled:cursor-not-allowed transition flex items-center justify-center cursor-pointer active:scale-95 shadow-xs"
+                              className="w-7 h-7 rounded-full border border-black/[0.08] dark:border-white/10 bg-white/90 dark:bg-white/5 hover:bg-black/5 dark:hover:bg-white/10 text-ink-mute hover:text-ink dark:hover:text-white disabled:opacity-25 disabled:cursor-not-allowed transition flex items-center justify-center cursor-pointer active:scale-95 shadow-xs"
                               title="Move story down (swap with next slot)"
                               aria-label="Move story down"
                             >
@@ -271,11 +271,11 @@ export default function SlotListView({
                           {/* Slot Tag & Thumbnail */}
                           <div className="flex flex-col items-start gap-2 shrink-0">
                             <div className="flex items-center gap-1.5">
-                              <span className="text-xs font-mono font-bold px-2.5 py-0.5 rounded-md bg-ink dark:bg-white text-white dark:text-black shadow-xs">
+                              <span className="text-xs font-mono font-bold px-2.5 py-0.5 rounded-full bg-black dark:bg-white text-white dark:text-black shadow-xs">
                                 Slot {String(slotNum).padStart(2, '0')}
                               </span>
                               {def.rank && (
-                                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/5 dark:bg-white/10 text-ink-mute font-bold">
+                                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-ink-mute font-bold">
                                   #{def.rank}
                                 </span>
                               )}
@@ -286,10 +286,10 @@ export default function SlotListView({
                               <img
                                 src={article.image_url || article.imageUrl}
                                 alt=""
-                                className="w-20 h-14 sm:w-24 sm:h-16 object-cover rounded-xl border border-rule/70 dark:border-white/10 shadow-xs shrink-0"
+                                className="w-20 h-14 sm:w-24 sm:h-16 object-cover rounded-2xl border border-black/[0.06] dark:border-white/10 shadow-xs shrink-0"
                               />
                             ) : (
-                              <div className="w-20 h-14 sm:w-24 sm:h-16 rounded-xl border border-dashed border-rule dark:border-white/10 bg-paper-subtle/50 dark:bg-white/5 flex flex-col items-center justify-center text-ink-mute/50 shrink-0">
+                              <div className="w-20 h-14 sm:w-24 sm:h-16 rounded-2xl border border-dashed border-black/15 dark:border-white/10 bg-black/[0.02] dark:bg-white/5 flex flex-col items-center justify-center text-ink-mute/50 shrink-0">
                                 <IconMedia className="w-4 h-4 mb-0.5" />
                                 <span className="text-[9px] font-mono">No Image</span>
                               </div>
@@ -310,15 +310,15 @@ export default function SlotListView({
 
                             {article ? (
                               <>
-                                <h3 className="font-serif font-bold text-sm sm:text-base text-ink dark:text-dark-ink hover:text-accent transition line-clamp-2 leading-snug">
-                                  <Link href={`/admin/articles/${article.id}`}>
+                                <h3 className="font-serif font-bold text-sm sm:text-base text-ink dark:text-dark-ink hover:text-[#0071e3] transition line-clamp-2 leading-snug">
+                                  <Link href={`/admin/articles/${article.id}/edit`}>
                                     {article.title}
                                   </Link>
                                 </h3>
 
                                 <div className="flex items-center gap-2 text-xs text-ink-mute dark:text-dark-mute flex-wrap">
                                   {article.category && (
-                                    <span className="font-semibold text-accent text-[11px]">
+                                    <span className="font-semibold text-[#0071e3] text-[11px]">
                                       {article.category}
                                     </span>
                                   )}
@@ -350,7 +350,7 @@ export default function SlotListView({
                             {/* Status Badge */}
                             <div className="pt-0.5">
                               {isPinned ? (
-                                <span className="inline-flex items-center gap-1.5 text-[10px] font-mono font-bold text-accent bg-accent/10 border border-accent/30 px-2.5 py-0.5 rounded-full">
+                                <span className="inline-flex items-center gap-1.5 text-[10px] font-mono font-bold text-[#0071e3] bg-[#0071e3]/10 border border-[#0071e3]/30 px-2.5 py-0.5 rounded-full">
                                   <IconPin className="w-3 h-3" />
                                   <span>PINNED POSITION</span>
                                 </span>
@@ -364,13 +364,13 @@ export default function SlotListView({
                         </div>
 
                         {/* RIGHT: Action Buttons */}
-                        <div className="flex items-center gap-2 shrink-0 self-end md:self-center pt-2 md:pt-0 w-full md:w-auto justify-end border-t md:border-t-0 border-rule/50">
+                        <div className="flex items-center gap-2 shrink-0 self-end md:self-center pt-2 md:pt-0 w-full md:w-auto justify-end border-t md:border-t-0 border-black/[0.05] dark:border-white/[0.08]">
                           {/* Change / Select Story Button */}
                           <button
                             type="button"
                             onClick={() => onOpenDrawer(slotNum)}
                             disabled={isSaving}
-                            className="h-9 px-3 text-xs font-semibold bg-paper dark:bg-white/5 border border-rule/80 dark:border-white/15 text-ink dark:text-dark-ink hover:bg-paper-subtle dark:hover:bg-white/10 rounded-xl transition cursor-pointer shadow-xs active:scale-95 disabled:opacity-50"
+                            className="h-9 px-4 text-xs font-semibold bg-white/80 dark:bg-white/5 border border-black/[0.08] dark:border-white/15 text-ink dark:text-dark-ink hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition cursor-pointer shadow-xs active:scale-95 disabled:opacity-50"
                           >
                             {article ? 'Change' : 'Select'}
                           </button>
@@ -381,10 +381,10 @@ export default function SlotListView({
                               type="button"
                               onClick={() => onAssignSlot(slotNum, isPinned ? null : article.id)}
                               disabled={isSaving}
-                              className={`h-9 px-3 text-xs font-semibold rounded-xl transition cursor-pointer shadow-xs active:scale-95 disabled:opacity-50 flex items-center gap-1.5 ${
+                              className={`h-9 px-4 text-xs font-semibold rounded-full transition cursor-pointer shadow-xs active:scale-95 disabled:opacity-50 flex items-center gap-1.5 ${
                                 isPinned
-                                  ? 'border border-rule dark:border-white/10 text-ink-mute hover:text-red-600 hover:border-red-300 dark:hover:border-red-900 bg-paper dark:bg-white/5'
-                                  : 'bg-accent text-white hover:bg-accent/90'
+                                  ? 'border border-black/[0.08] dark:border-white/10 text-ink-mute hover:text-red-600 hover:border-red-300 dark:hover:border-red-900 bg-white/80 dark:bg-white/5'
+                                  : 'bg-[#0071e3] text-white hover:bg-[#0077ed]'
                               }`}
                               title={isPinned ? 'Revert slot to dynamic auto-flow' : 'Lock this story to this slot'}
                             >
@@ -407,8 +407,8 @@ export default function SlotListView({
                           {/* Edit Article Link */}
                           {article && (
                             <Link
-                              href={`/admin/articles/${article.id}`}
-                              className="h-9 w-9 flex items-center justify-center rounded-xl border border-rule/60 dark:border-white/10 text-ink-mute hover:text-ink dark:hover:text-white bg-paper dark:bg-white/5 transition shadow-xs"
+                              href={`/admin/articles/${article.id}/edit`}
+                              className="h-9 w-9 flex items-center justify-center rounded-full border border-black/[0.08] dark:border-white/10 text-ink-mute hover:text-ink dark:hover:text-white bg-white/80 dark:bg-white/5 transition shadow-xs active:scale-95"
                               title="Edit Article in Editor"
                               aria-label="Edit Article"
                             >

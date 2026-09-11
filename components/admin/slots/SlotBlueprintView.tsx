@@ -205,7 +205,7 @@ function SlotToolbar({
   onAssignSlot: (slot: number, articleId: string | null) => void
 }) {
   return (
-    <div className="flex items-center justify-between gap-1.5 pb-1 mb-2 border-b border-rule/60 dark:border-white/10 text-[10px] font-mono select-none">
+    <div className="flex items-center justify-between gap-1.5 pb-1 mb-2 border-b border-black/[0.06] dark:border-white/[0.08] text-[10px] font-mono select-none">
       <div className="flex items-center gap-1.5 min-w-0">
         <span className="font-bold text-ink dark:text-white uppercase tracking-wider text-[10px] shrink-0">
           Slot {String(slotNum).padStart(2, '0')}
@@ -239,7 +239,7 @@ function SlotToolbar({
               e.preventDefault()
               onAssignSlot(slotNum, articleId)
             }}
-            className="px-1.5 py-0.5 text-[9px] font-mono font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 rounded transition cursor-pointer"
+            className="px-2 py-0.5 text-[9px] font-mono font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 rounded-full transition cursor-pointer active:scale-95"
             title="Lock current story to slot"
           >
             Lock
@@ -253,7 +253,7 @@ function SlotToolbar({
               e.preventDefault()
               onAssignSlot(slotNum, null)
             }}
-            className="px-1.5 py-0.5 text-[9px] font-mono font-semibold text-red-600 dark:text-red-400 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 rounded transition cursor-pointer"
+            className="px-2 py-0.5 text-[9px] font-mono font-semibold text-red-600 dark:text-red-400 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 rounded-full transition cursor-pointer active:scale-95"
             title="Release to auto-flow"
           >
             Release
@@ -265,7 +265,7 @@ function SlotToolbar({
             e.preventDefault()
             onOpenDrawer(slotNum)
           }}
-          className="px-2 py-0.5 text-[9px] font-mono font-bold uppercase tracking-wider bg-ink text-paper hover:bg-accent dark:bg-white dark:text-black dark:hover:bg-accent dark:hover:text-white rounded transition cursor-pointer"
+          className="px-2.5 py-0.5 text-[9px] font-mono font-bold uppercase tracking-wider bg-black text-white hover:bg-[#0071e3] dark:bg-white dark:text-black dark:hover:bg-[#0071e3] dark:hover:text-white rounded-full transition cursor-pointer active:scale-95"
         >
           Curate
         </button>
@@ -388,13 +388,13 @@ export default function SlotBlueprintView({
       {/* ------------------------------------------------------------ */}
       {/* 1. SLOT 01: BREAKING NEWS TICKER BAR (EXACT BROADSHEET FORMAT) */}
       {/* ------------------------------------------------------------ */}
-      <section className="border border-rule/70 dark:border-white/10 rounded-2xl bg-[#f5f3ec] dark:bg-[#0c0c0b] p-3.5 shadow-xs">
+      <section className="backdrop-blur-xl bg-white/70 dark:bg-[#1c1c1e]/75 border border-black/[0.06] dark:border-white/[0.08] rounded-3xl p-4 shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 min-w-0">
-            <span className="px-2.5 py-1 bg-accent text-white font-mono uppercase tracking-[0.14em] text-[10px] font-bold rounded-md shrink-0">
+            <span className="px-3 py-1 bg-[#0071e3] text-white font-mono uppercase tracking-[0.14em] text-[10px] font-bold rounded-full shrink-0">
               Breaking
             </span>
-            <span className="font-mono text-[10.5px] font-black px-2 py-0.5 rounded-full bg-ink text-paper dark:bg-white dark:text-black shrink-0">
+            <span className="font-mono text-[10.5px] font-bold px-2.5 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-black dark:text-white shrink-0">
               SLOT 01
             </span>
             <span
@@ -413,7 +413,7 @@ export default function SlotBlueprintView({
                 type="button"
                 disabled={savingSlot === 1}
                 onClick={() => onAssignSlot(1, slot1.article!.id)}
-                className="px-2.5 py-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 rounded-full transition cursor-pointer border border-emerald-500/20"
+                className="px-3 py-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 rounded-full transition cursor-pointer border border-emerald-500/20 active:scale-95"
               >
                 Lock Current
               </button>
@@ -423,7 +423,7 @@ export default function SlotBlueprintView({
                 type="button"
                 disabled={savingSlot === 1}
                 onClick={() => onAssignSlot(1, null)}
-                className="px-2.5 py-1 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-500/10 rounded-full transition cursor-pointer border border-red-500/20"
+                className="px-3 py-1 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-500/10 rounded-full transition cursor-pointer border border-red-500/20 active:scale-95"
               >
                 Release
               </button>
@@ -431,7 +431,7 @@ export default function SlotBlueprintView({
             <button
               type="button"
               onClick={() => onOpenDrawer(1)}
-              className="px-3.5 py-1 text-xs font-bold uppercase tracking-wider bg-accent hover:bg-accent/90 text-white rounded-full transition cursor-pointer shadow-xs"
+              className="px-4 py-1.5 text-xs font-semibold bg-[#0071e3] hover:bg-[#0077ed] text-white rounded-full transition cursor-pointer shadow-xs active:scale-95"
             >
               Curate Slot 01
             </button>

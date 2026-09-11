@@ -254,9 +254,9 @@ export default function AnalyticsDashboard() {
         >
           <defs>
             <linearGradient id="meridianAreaGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#8a5e1f" stopOpacity="0.28" />
-              <stop offset="85%" stopColor="#8a5e1f" stopOpacity="0.04" />
-              <stop offset="100%" stopColor="#8a5e1f" stopOpacity="0.0" />
+              <stop offset="0%" stopColor="#0071e3" stopOpacity="0.22" />
+              <stop offset="85%" stopColor="#0071e3" stopOpacity="0.02" />
+              <stop offset="100%" stopColor="#0071e3" stopOpacity="0.0" />
             </linearGradient>
           </defs>
 
@@ -272,7 +272,7 @@ export default function AnalyticsDashboard() {
                   x2={width - padding.right}
                   y2={y}
                   stroke="currentColor"
-                  className="text-rule/60 dark:text-dark-rule/60"
+                  className="text-black/[0.06] dark:text-white/[0.06]"
                   strokeDasharray="3 3"
                 />
                 <text
@@ -292,7 +292,7 @@ export default function AnalyticsDashboard() {
           <path
             d={viewsPath}
             fill="none"
-            stroke="#8a5e1f"
+            stroke="#0071e3"
             strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -301,7 +301,7 @@ export default function AnalyticsDashboard() {
           <path
             d={uniquesPath}
             fill="none"
-            stroke="#10b981"
+            stroke="#34c759"
             strokeWidth="1.5"
             strokeDasharray="4 4"
             strokeLinecap="round"
@@ -316,7 +316,7 @@ export default function AnalyticsDashboard() {
                 y1={padding.top}
                 x2={hoveredPoint.x}
                 y2={padding.top + chartH}
-                stroke="#8a5e1f"
+                stroke="#0071e3"
                 strokeWidth="1"
                 strokeDasharray="3 3"
                 className="opacity-70"
@@ -325,13 +325,13 @@ export default function AnalyticsDashboard() {
                 cx={hoveredPoint.x}
                 cy={hoveredPoint.viewY}
                 r="5"
-                className="fill-paper dark:fill-dark-paper stroke-accent stroke-2"
+                className="fill-white dark:fill-[#1c1c1e] stroke-[#0071e3] stroke-2"
               />
               <circle
                 cx={hoveredPoint.x}
                 cy={hoveredPoint.uniqueY}
                 r="4"
-                className="fill-paper dark:fill-dark-paper stroke-emerald-500 stroke-2"
+                className="fill-white dark:fill-[#1c1c1e] stroke-[#34c759] stroke-2"
               />
             </g>
           )}
@@ -343,7 +343,7 @@ export default function AnalyticsDashboard() {
               cx={pt.x}
               cy={pt.viewY}
               r="3"
-              className="fill-paper dark:fill-dark-paper stroke-accent stroke-1.5 transition-all duration-150"
+              className="fill-white dark:fill-[#1c1c1e] stroke-[#0071e3] stroke-1.5 transition-all duration-150"
             />
           ))}
 
@@ -432,8 +432,8 @@ export default function AnalyticsDashboard() {
 
         {/* Range Filter & Clear Actions */}
         <div className="flex items-center gap-2 w-full md:w-auto">
-          {/* Range Filter Pills: full-width segmented control on mobile, compact on desktop */}
-          <div className="flex-1 md:flex-initial flex items-center p-1 bg-paper-subtle dark:bg-white/[0.05] border border-rule/60 dark:border-white/10 rounded-2xl shadow-xs">
+          {/* Range Filter Pills: Apple full-pill segmented control */}
+          <div className="flex-1 md:flex-initial flex items-center p-1 bg-black/[0.04] dark:bg-white/[0.06] border border-black/[0.06] dark:border-white/10 rounded-full shadow-xs">
             {[
               { id: 'today', label: '1D' },
               { id: '7d', label: '7D' },
@@ -444,9 +444,9 @@ export default function AnalyticsDashboard() {
                 key={item.id}
                 type="button"
                 onClick={() => setRange(item.id as any)}
-                className={`flex-1 md:flex-initial px-4 py-1.5 text-xs font-bold uppercase tracking-wider rounded-xl transition cursor-pointer text-center ${
+                className={`flex-1 md:flex-initial px-4 py-1.5 text-xs font-semibold rounded-full transition cursor-pointer text-center active:scale-95 ${
                   range === item.id
-                    ? 'bg-ink text-white dark:bg-white dark:text-black shadow-xs'
+                    ? 'bg-white dark:bg-[#2c2c2e] text-[#0071e3] shadow-xs'
                     : 'text-ink-mute dark:text-dark-mute hover:text-ink dark:hover:text-white'
                 }`}
               >
@@ -459,7 +459,7 @@ export default function AnalyticsDashboard() {
           <button
             type="button"
             onClick={() => setShowClearModal(true)}
-            className="px-3 py-2 text-xs font-mono font-medium text-ink-mute dark:text-dark-mute hover:text-red-600 dark:hover:text-red-400 bg-paper-subtle dark:bg-white/[0.05] border border-rule/60 dark:border-white/10 hover:border-red-500/40 rounded-2xl transition cursor-pointer flex items-center gap-1.5 shrink-0 shadow-xs active:scale-95"
+            className="px-3.5 py-2 text-xs font-mono font-medium text-ink-mute dark:text-dark-mute hover:text-red-600 dark:hover:text-red-400 bg-white/80 dark:bg-white/[0.05] border border-black/[0.06] dark:border-white/10 hover:border-red-500/40 rounded-full transition cursor-pointer flex items-center gap-1.5 shrink-0 shadow-xs active:scale-95"
             title="Reset telemetry database"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
@@ -472,14 +472,14 @@ export default function AnalyticsDashboard() {
       {/* 4 Metric Cards — Sleek 2x2 on mobile, 4-col on desktop */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         {/* Card 1: Views */}
-        <div className="p-3.5 sm:p-4 bg-paper dark:bg-white/[0.03] border border-rule/60 dark:border-white/10 rounded-2xl space-y-1.5 shadow-xs">
+        <div className="p-4 sm:p-5 backdrop-blur-xl bg-white/70 dark:bg-[#1c1c1e]/75 border border-black/[0.06] dark:border-white/[0.08] rounded-3xl space-y-1.5 shadow-[0_4px_24px_rgba(0,0,0,0.03)]">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-mono uppercase tracking-wider text-ink-mute dark:text-dark-mute font-bold">
               Views
             </span>
             {renderTrendPill(stats?.trends?.views)}
           </div>
-          <div className="font-serif font-black text-2xl sm:text-3xl text-ink dark:text-dark-ink">
+          <div className="font-serif font-black text-2xl sm:text-3xl text-ink dark:text-dark-ink tracking-tight">
             {loading ? '…' : (stats?.totalViews.toLocaleString() || '0')}
           </div>
           <p className="hidden sm:block text-[10px] text-ink-mute dark:text-dark-mute font-serif italic">
@@ -488,14 +488,14 @@ export default function AnalyticsDashboard() {
         </div>
 
         {/* Card 2: Uniques */}
-        <div className="p-3.5 sm:p-4 bg-paper dark:bg-white/[0.03] border border-rule/60 dark:border-white/10 rounded-2xl space-y-1.5 shadow-xs">
+        <div className="p-4 sm:p-5 backdrop-blur-xl bg-white/70 dark:bg-[#1c1c1e]/75 border border-black/[0.06] dark:border-white/[0.08] rounded-3xl space-y-1.5 shadow-[0_4px_24px_rgba(0,0,0,0.03)]">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-mono uppercase tracking-wider text-ink-mute dark:text-dark-mute font-bold">
               Uniques
             </span>
             {renderTrendPill(stats?.trends?.uniques)}
           </div>
-          <div className="font-serif font-black text-2xl sm:text-3xl text-ink dark:text-dark-ink">
+          <div className="font-serif font-black text-2xl sm:text-3xl text-ink dark:text-dark-ink tracking-tight">
             {loading ? '…' : (stats?.uniqueVisitors.toLocaleString() || '0')}
           </div>
           <p className="hidden sm:block text-[10px] text-ink-mute dark:text-dark-mute font-serif italic">
@@ -504,7 +504,7 @@ export default function AnalyticsDashboard() {
         </div>
 
         {/* Card 3: Avg Time */}
-        <div className="p-3.5 sm:p-4 bg-paper dark:bg-white/[0.03] border border-rule/60 dark:border-white/10 rounded-2xl space-y-1.5 shadow-xs">
+        <div className="p-4 sm:p-5 backdrop-blur-xl bg-white/70 dark:bg-[#1c1c1e]/75 border border-black/[0.06] dark:border-white/[0.08] rounded-3xl space-y-1.5 shadow-[0_4px_24px_rgba(0,0,0,0.03)]">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-mono uppercase tracking-wider text-ink-mute dark:text-dark-mute font-bold">
               Avg Time
@@ -512,7 +512,7 @@ export default function AnalyticsDashboard() {
             {renderTrendPill(stats?.trends?.readingTime)}
           </div>
           <div className="flex items-baseline gap-1">
-            <span className="font-serif font-black text-2xl sm:text-3xl text-accent">
+            <span className="font-serif font-black text-2xl sm:text-3xl text-[#0071e3] tracking-tight">
               {loading ? '…' : `${stats?.avgReadingTimeMinutes ?? stats?.avgReadingTime ?? 0}m`}
             </span>
             <span className="text-[10px] font-mono text-ink-mute dark:text-dark-mute">/ dispatch</span>
@@ -523,16 +523,16 @@ export default function AnalyticsDashboard() {
         </div>
 
         {/* Card 4: Published */}
-        <div className="p-3.5 sm:p-4 bg-paper dark:bg-white/[0.03] border border-rule/60 dark:border-white/10 rounded-2xl space-y-1.5 shadow-xs">
+        <div className="p-4 sm:p-5 backdrop-blur-xl bg-white/70 dark:bg-[#1c1c1e]/75 border border-black/[0.06] dark:border-white/[0.08] rounded-3xl space-y-1.5 shadow-[0_4px_24px_rgba(0,0,0,0.03)]">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-mono uppercase tracking-wider text-ink-mute dark:text-dark-mute font-bold">
               Published
             </span>
-            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border border-accent/30 bg-accent/10 text-accent">
+            <span className="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full border border-[#0071e3]/30 bg-[#0071e3]/10 text-[#0071e3]">
               {stats?.pinnedSlotsCount || 0} pinned
             </span>
           </div>
-          <div className="font-serif font-black text-2xl sm:text-3xl text-ink dark:text-dark-ink">
+          <div className="font-serif font-black text-2xl sm:text-3xl text-ink dark:text-dark-ink tracking-tight">
             {loading ? '…' : (stats?.publishedArticlesCount || stats?.activeArticles || 0)}
           </div>
           <p className="hidden sm:block text-[10px] text-ink-mute dark:text-dark-mute font-serif italic">
@@ -544,10 +544,10 @@ export default function AnalyticsDashboard() {
       {/* Main Analytics Grid: Time-series Chart & Regional Breakdown */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
         {/* Left Column (7 cols): Readership Velocity Catmull-Rom Spline */}
-        <div className="lg:col-span-7 p-4 sm:p-5 bg-paper dark:bg-white/[0.03] border border-rule/60 dark:border-white/10 rounded-2xl space-y-3 shadow-xs">
-          <div className="flex items-center justify-between pb-2.5 border-b border-rule/60 dark:border-white/[0.08]">
+        <div className="lg:col-span-7 p-5 sm:p-6 backdrop-blur-xl bg-white/70 dark:bg-[#1c1c1e]/75 border border-black/[0.06] dark:border-white/[0.08] rounded-3xl space-y-3 shadow-[0_4px_24px_rgba(0,0,0,0.03)]">
+          <div className="flex items-center justify-between pb-2.5 border-b border-black/[0.05] dark:border-white/[0.08]">
             <div>
-              <h3 className="font-serif font-bold text-sm sm:text-base text-ink dark:text-dark-ink">
+              <h3 className="font-serif font-bold text-sm sm:text-base text-ink dark:text-dark-ink tracking-tight">
                 Readership Velocity
               </h3>
               <p className="text-[11px] text-ink-mute dark:text-dark-mute font-mono">

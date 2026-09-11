@@ -41,17 +41,17 @@ export default function SlotCuratorDrawer({
     <div className="fixed inset-0 z-50 overflow-hidden">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
 
-      <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
-        <div className="w-screen max-w-md bg-paper dark:bg-dark-paper border-l border-rule dark:border-dark-rule shadow-2xl flex flex-col sm:rounded-l-3xl overflow-hidden">
+      <div className="fixed inset-y-0 right-0 max-w-full flex pl-6 sm:pl-10">
+        <div className="w-screen max-w-md backdrop-blur-2xl bg-white/90 dark:bg-[#1c1c1e]/90 border-l border-black/[0.08] dark:border-white/[0.1] shadow-2xl flex flex-col sm:rounded-l-3xl overflow-hidden">
           {/* Drawer Header */}
-          <div className="p-6 border-b border-rule/60 dark:border-white/[0.08] bg-paper-subtle/80 dark:bg-white/[0.04] space-y-2.5">
+          <div className="p-5 sm:p-6 border-b border-black/[0.06] dark:border-white/[0.08] bg-white/50 dark:bg-white/[0.02] space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="font-mono text-xs font-bold px-3 py-0.5 bg-accent text-white rounded-full shadow-xs">
+                <span className="font-mono text-xs font-bold px-3 py-1 bg-[#0071e3] text-white rounded-full shadow-xs">
                   Slot {String(activeDrawerSlotDef.slot).padStart(2, '0')}
                 </span>
                 <span className="text-xs font-mono font-bold uppercase tracking-wider text-ink-mute dark:text-dark-mute">
@@ -61,21 +61,21 @@ export default function SlotCuratorDrawer({
               <button
                 type="button"
                 onClick={onClose}
-                className="p-1.5 text-ink-mute hover:text-ink dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition cursor-pointer"
+                className="w-8 h-8 flex items-center justify-center text-ink-mute hover:text-ink dark:hover:text-white bg-black/5 dark:bg-white/10 rounded-full transition cursor-pointer active:scale-95"
                 aria-label="Close drawer"
               >
                 <IconClose className="w-4 h-4" />
               </button>
             </div>
 
-            <h3 className="font-serif font-black text-xl text-ink dark:text-white">
+            <h3 className="font-serif font-black text-xl text-ink dark:text-white tracking-tight">
               {activeDrawerSlotDef.name}
             </h3>
             <p className="text-xs text-ink-mute dark:text-dark-mute font-serif italic">
               {activeDrawerSlotDef.description}
             </p>
 
-            <div className="pt-2 flex items-center justify-between text-xs font-mono">
+            <div className="pt-2 flex items-center justify-between text-xs font-mono border-t border-black/[0.04] dark:border-white/[0.06]">
               <span className="text-ink-mute dark:text-dark-mute">Recommended Format:</span>
               <span className="font-bold text-ink dark:text-white">
                 {activeDrawerSlotDef.recommendedAspect}
@@ -84,7 +84,7 @@ export default function SlotCuratorDrawer({
           </div>
 
           {/* Current Status & Release Option */}
-          <div className="p-5 border-b border-rule/60 dark:border-white/[0.08] bg-paper/50 dark:bg-white/[0.02]">
+          <div className="p-4 sm:p-5 border-b border-black/[0.06] dark:border-white/[0.08] bg-black/[0.015] dark:bg-white/[0.01]">
             <div className="flex items-center justify-between mb-2.5">
               <span className="text-[10.5px] font-mono font-bold uppercase tracking-wider text-ink-mute dark:text-dark-mute">
                 Current Assignment
@@ -101,12 +101,12 @@ export default function SlotCuratorDrawer({
             </div>
 
             {activeDrawerResolved?.article ? (
-              <div className="flex items-center gap-3 p-3.5 bg-paper dark:bg-white/[0.04] border border-rule/60 dark:border-white/10 rounded-2xl shadow-xs">
+              <div className="flex items-center gap-3 p-3 bg-white/80 dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/10 rounded-2xl shadow-xs">
                 {activeDrawerResolved.article.image_url || (activeDrawerResolved.article as any).imageUrl ? (
                   <img
                     src={activeDrawerResolved.article.image_url || (activeDrawerResolved.article as any).imageUrl}
                     alt=""
-                    className="w-14 h-10 object-cover rounded-xl border border-rule/60 dark:border-white/10 shrink-0 shadow-xs"
+                    className="w-14 h-10 object-cover rounded-xl border border-black/[0.06] dark:border-white/10 shrink-0 shadow-xs"
                   />
                 ) : null}
                 <div className="min-w-0 flex-1">
@@ -126,7 +126,7 @@ export default function SlotCuratorDrawer({
               <button
                 type="button"
                 onClick={() => onAssignSlot(activeDrawerSlotDef.slot, null)}
-                className="w-full mt-3 py-2 text-xs font-bold uppercase tracking-wider text-red-600 dark:text-red-400 border border-red-300/80 dark:border-red-900/60 hover:bg-red-500/10 rounded-full transition cursor-pointer shadow-xs"
+                className="w-full mt-3 py-2 text-xs font-semibold text-red-600 dark:text-red-400 border border-red-300/80 dark:border-red-900/60 hover:bg-red-500/10 rounded-full transition cursor-pointer shadow-xs active:scale-[0.97]"
               >
                 Release to Dynamic Auto-Flow
               </button>
@@ -134,7 +134,7 @@ export default function SlotCuratorDrawer({
           </div>
 
           {/* Drawer Search & Filter */}
-          <div className="p-4 border-b border-rule/60 dark:border-white/[0.08] space-y-3 bg-paper-subtle/80 dark:bg-white/[0.04]">
+          <div className="p-4 border-b border-black/[0.06] dark:border-white/[0.08] space-y-3 bg-white/40 dark:bg-white/[0.02]">
             <div className="relative">
               <IconSearch className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-mute dark:text-dark-mute pointer-events-none" />
               <input
@@ -142,7 +142,7 @@ export default function SlotCuratorDrawer({
                 value={drawerSearch}
                 onChange={(e) => onDrawerSearchChange(e.target.value)}
                 placeholder="Search published dispatches to pin..."
-                className="w-full text-xs pl-9 pr-8 py-2 bg-paper dark:bg-white/[0.06] border border-rule/60 dark:border-white/10 text-ink dark:text-white placeholder:text-ink-mute dark:placeholder:text-dark-mute focus:outline-none focus:border-accent rounded-full transition-colors shadow-xs"
+                className="w-full text-xs pl-9 pr-8 py-2 bg-black/[0.04] dark:bg-white/[0.06] border border-black/[0.06] dark:border-white/10 text-ink dark:text-white placeholder:text-ink-mute dark:placeholder:text-dark-mute focus:outline-none focus:ring-2 focus:ring-[#0071e3]/30 rounded-full transition-colors shadow-xs"
               />
               {drawerSearch && (
                 <button
@@ -162,10 +162,10 @@ export default function SlotCuratorDrawer({
                   key={cat}
                   type="button"
                   onClick={() => onDrawerCategoryChange(cat)}
-                  className={`px-3 py-1 text-[10.5px] font-mono uppercase rounded-full transition cursor-pointer ${
+                  className={`px-3 py-1 text-[11px] font-mono rounded-full transition cursor-pointer active:scale-95 ${
                     drawerCategory === cat
-                      ? 'bg-accent text-white font-bold shadow-xs'
-                      : 'bg-paper dark:bg-white/[0.06] border border-rule/60 dark:border-white/10 text-ink-mute dark:text-dark-mute hover:text-ink dark:hover:text-white'
+                      ? 'bg-[#0071e3] text-white font-bold shadow-xs'
+                      : 'bg-black/[0.04] dark:bg-white/[0.06] border border-black/[0.06] dark:border-white/10 text-ink-mute dark:text-dark-mute hover:text-ink dark:hover:text-white'
                   }`}
                 >
                   {cat}
@@ -175,7 +175,7 @@ export default function SlotCuratorDrawer({
           </div>
 
           {/* Story List */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-2.5">
+          <div className="flex-1 overflow-y-auto p-4 space-y-2.5 apple-scrollbar">
             {drawerArticlesList.length === 0 ? (
               <div className="py-12 text-center text-xs font-mono text-ink-mute">
                 No matching published dispatches found.
@@ -191,8 +191,8 @@ export default function SlotCuratorDrawer({
                     key={art.id}
                     className={`p-4 border rounded-2xl transition-all duration-200 space-y-3 shadow-xs hover:shadow-md ${
                       isAssignedHere
-                        ? 'border-accent/80 bg-accent/[0.05]'
-                        : 'border-rule/60 dark:border-white/[0.08] bg-paper dark:bg-white/[0.04] hover:border-accent/40'
+                        ? 'border-[#0071e3]/80 bg-[#0071e3]/[0.05]'
+                        : 'border-black/[0.06] dark:border-white/[0.08] bg-white/70 dark:bg-white/[0.04] hover:border-[#0071e3]/40'
                     }`}
                   >
                     <div className="flex gap-3.5">
@@ -200,17 +200,17 @@ export default function SlotCuratorDrawer({
                         <img
                           src={art.image_url || (art as any).imageUrl}
                           alt=""
-                          className="w-16 h-11 object-cover rounded-xl border border-rule/60 dark:border-white/10 shrink-0 shadow-xs"
+                          className="w-16 h-11 object-cover rounded-xl border border-black/[0.06] dark:border-white/10 shrink-0 shadow-xs"
                         />
                       ) : (
-                        <div className="w-16 h-11 bg-paper-subtle dark:bg-white/[0.06] border border-rule/60 dark:border-white/10 shrink-0 flex items-center justify-center text-[10px] font-mono text-ink-mute rounded-xl">
+                        <div className="w-16 h-11 bg-black/[0.04] dark:bg-white/[0.06] border border-black/[0.06] dark:border-white/10 shrink-0 flex items-center justify-center text-[10px] font-mono text-ink-mute rounded-xl">
                           Text
                         </div>
                       )}
 
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-1.5 mb-1">
-                          <span className="text-[10px] font-mono uppercase font-bold text-accent truncate">
+                          <span className="text-[10px] font-mono uppercase font-bold text-[#0071e3] truncate">
                             {art.category}
                           </span>
                           {isAssignedElsewhere && (
@@ -225,7 +225,7 @@ export default function SlotCuratorDrawer({
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between pt-2.5 border-t border-rule/50 dark:border-white/[0.08] text-xs">
+                    <div className="flex items-center justify-between pt-2.5 border-t border-black/[0.05] dark:border-white/[0.08] text-xs">
                       <span className="text-[10px] font-mono text-ink-mute dark:text-dark-mute">
                         By Dhananjay Singh
                       </span>
@@ -239,7 +239,7 @@ export default function SlotCuratorDrawer({
                         <button
                           type="button"
                           onClick={() => onAssignSlot(activeDrawerSlotDef.slot, art.id)}
-                          className="px-3.5 py-1.5 bg-accent hover:bg-accent/90 text-white font-mono text-xs font-bold uppercase rounded-full transition cursor-pointer shadow-xs"
+                          className="px-3.5 py-1.5 bg-[#0071e3] hover:bg-[#0077ed] text-white font-mono text-xs font-semibold rounded-full transition cursor-pointer shadow-xs active:scale-95"
                         >
                           Pin to Slot {String(activeDrawerSlotDef.slot).padStart(2, '0')}
                         </button>

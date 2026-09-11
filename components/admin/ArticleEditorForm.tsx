@@ -253,19 +253,19 @@ export default function ArticleEditorForm({
   return (
     <div className="flex-1 min-h-0 flex flex-col space-y-3 sm:space-y-4 md:space-y-6 font-sans">
       {/* DESKTOP TOP ACTION BAR (hidden on mobile) */}
-      <div className="hidden md:flex p-4 bg-paper-subtle/80 dark:bg-dark-subtle/80 backdrop-blur-md border border-rule dark:border-dark-rule rounded-2xl sm:items-center justify-between gap-4 shadow-xs shrink-0">
+      <div className="hidden md:flex p-4 sm:p-5 backdrop-blur-xl bg-white/75 dark:bg-[#161617]/75 border border-black/[0.06] dark:border-white/[0.08] rounded-3xl sm:items-center justify-between gap-4 shadow-[0_4px_24px_rgba(0,0,0,0.03)] shrink-0">
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={() => router.push('/admin')}
-            className="p-2 text-ink-mute hover:text-ink dark:hover:text-dark-ink hover:bg-black/5 dark:hover:bg-white/5 rounded-xl transition cursor-pointer text-xs font-semibold"
+            className="px-3.5 py-1.5 text-ink-mute hover:text-ink dark:hover:text-white bg-black/5 dark:bg-white/10 hover:bg-black/10 rounded-full transition cursor-pointer text-xs font-semibold active:scale-95"
             title="Return to dispatches"
           >
             ← Stories
           </button>
-          <div className="h-4 w-px bg-rule dark:bg-dark-rule" />
+          <div className="h-4 w-px bg-black/[0.06] dark:bg-white/[0.08]" />
           <div>
-            <h2 className="font-serif font-bold text-xl text-ink dark:text-dark-ink leading-tight">
+            <h2 className="font-serif font-black text-xl text-ink dark:text-dark-ink leading-tight tracking-tight">
               {isEditing ? 'Edit Story' : 'New Story'}
             </h2>
             <p className="text-[11px] text-ink-mute dark:text-dark-mute">
@@ -274,12 +274,12 @@ export default function ArticleEditorForm({
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => handleSubmit('draft')}
             disabled={saving}
-            className="px-4 py-2 border border-rule dark:border-dark-rule text-ink dark:text-dark-ink text-xs font-bold uppercase tracking-wider hover:bg-paper-subtle dark:hover:bg-white/5 transition disabled:opacity-50 rounded-xl cursor-pointer"
+            className="px-4 py-2 border border-black/[0.08] dark:border-white/10 text-ink dark:text-dark-ink text-xs font-semibold rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition disabled:opacity-50 cursor-pointer active:scale-95 shadow-xs"
           >
             Save Draft
           </button>
@@ -287,33 +287,33 @@ export default function ArticleEditorForm({
             type="button"
             onClick={() => handleSubmit('published')}
             disabled={saving}
-            className="px-5 py-2 bg-accent hover:bg-accent/90 text-white text-xs font-bold uppercase tracking-wider transition disabled:opacity-50 rounded-xl shadow-xs cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+            className="px-5 py-2 bg-[#0071e3] hover:bg-[#0077ed] text-white text-xs font-semibold rounded-full transition disabled:opacity-50 shadow-xs cursor-pointer active:scale-95"
           >
             {saving ? 'Publishing…' : 'Publish Story'}
           </button>
         </div>
       </div>
 
-      {/* MOBILE TOP ACTION STRIP (Substack / Apple Notes native feel) */}
-      <div className="md:hidden flex items-center justify-between gap-2 p-2 bg-paper/90 dark:bg-[#0c0c0e]/90 backdrop-blur-xl border border-rule/60 dark:border-white/10 rounded-2xl shadow-xs shrink-0">
+      {/* MOBILE TOP ACTION STRIP (Apple Notes native feel) */}
+      <div className="md:hidden flex items-center justify-between gap-2 p-2.5 backdrop-blur-2xl bg-white/85 dark:bg-[#1c1c1e]/85 border border-black/[0.08] dark:border-white/10 rounded-full shadow-xs shrink-0">
         <button
           type="button"
           onClick={() => router.push('/admin')}
-          className="h-8 w-8 flex items-center justify-center text-ink-mute dark:text-dark-mute hover:text-ink dark:hover:text-white bg-paper-subtle dark:bg-white/5 rounded-xl border border-rule/50 dark:border-white/10 transition cursor-pointer active:scale-95 shrink-0"
+          className="h-8 w-8 flex items-center justify-center text-ink-mute dark:text-dark-mute hover:text-ink dark:hover:text-white bg-black/5 dark:bg-white/10 rounded-full transition cursor-pointer active:scale-95 shrink-0"
           title="Back to stories"
         >
           <IconChevronLeft className="w-4 h-4 stroke-[2.2]" />
         </button>
 
         {/* Segmented Pill: [ Write ] · [ Settings Icon ] */}
-        <div className="flex items-center bg-black/5 dark:bg-white/5 p-0.5 rounded-xl border border-rule/40 dark:border-white/10">
+        <div className="flex items-center bg-black/5 dark:bg-white/10 p-0.5 rounded-full">
           <button
             type="button"
             id="tab-write-btn"
             onClick={() => handleTabSwitch('write')}
-            className={`px-3 py-1 text-[11px] font-bold rounded-lg transition cursor-pointer ${
+            className={`px-3 py-1 text-[11px] font-semibold rounded-full transition cursor-pointer active:scale-95 ${
               mobileTab === 'write'
-                ? 'bg-paper dark:bg-[#18181b] text-ink dark:text-white shadow-xs'
+                ? 'bg-white dark:bg-[#2c2c2e] text-[#0071e3] shadow-xs'
                 : 'text-ink-mute dark:text-dark-mute hover:text-ink dark:hover:text-white'
             }`}
             title="Write Story"
@@ -324,16 +324,16 @@ export default function ArticleEditorForm({
             type="button"
             id="tab-settings-btn"
             onClick={() => handleTabSwitch('settings')}
-            className={`px-2.5 py-1 text-[11px] font-bold rounded-lg transition cursor-pointer flex items-center justify-center gap-1 relative ${
+            className={`px-2.5 py-1 text-[11px] font-semibold rounded-full transition cursor-pointer flex items-center justify-center gap-1 relative active:scale-95 ${
               mobileTab === 'settings'
-                ? 'bg-paper dark:bg-[#18181b] text-ink dark:text-white shadow-xs'
+                ? 'bg-white dark:bg-[#2c2c2e] text-[#0071e3] shadow-xs'
                 : 'text-ink-mute dark:text-dark-mute hover:text-ink dark:hover:text-white'
             }`}
             title="Settings & Placement"
           >
             <IconSettings className="w-3.5 h-3.5" />
             {images.length > 0 && (
-              <span className="w-1.5 h-1.5 rounded-full bg-accent absolute top-1 right-1" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#0071e3] absolute top-1 right-1" />
             )}
           </button>
         </div>
@@ -344,7 +344,7 @@ export default function ArticleEditorForm({
             type="button"
             onClick={() => handleSubmit('draft')}
             disabled={saving}
-            className="h-8 px-2.5 border border-rule/60 dark:border-white/10 text-ink dark:text-dark-ink text-[11px] font-bold rounded-xl hover:bg-paper-subtle dark:hover:bg-white/5 transition disabled:opacity-50 cursor-pointer active:scale-95"
+            className="h-8 px-3 border border-black/[0.08] dark:border-white/10 text-ink dark:text-dark-ink text-[11px] font-semibold rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition disabled:opacity-50 cursor-pointer active:scale-95"
           >
             Draft
           </button>
@@ -352,7 +352,7 @@ export default function ArticleEditorForm({
             type="button"
             onClick={() => handleSubmit('published')}
             disabled={saving}
-            className="h-8 px-3 bg-accent hover:bg-accent/90 text-white text-[11px] font-bold rounded-xl transition disabled:opacity-50 shadow-xs cursor-pointer active:scale-95"
+            className="h-8 px-3.5 bg-[#0071e3] hover:bg-[#0077ed] text-white text-[11px] font-semibold rounded-full transition disabled:opacity-50 shadow-xs cursor-pointer active:scale-95"
           >
             {saving ? 'Saving…' : 'Publish'}
           </button>
@@ -360,7 +360,7 @@ export default function ArticleEditorForm({
       </div>
 
       {error && (
-        <div className="p-3.5 bg-red-500/10 border border-red-500/30 text-red-700 dark:text-red-300 text-xs font-semibold rounded-2xl shadow-xs shrink-0">
+        <div className="p-3.5 backdrop-blur-xl bg-red-500/10 border border-red-500/30 text-red-700 dark:text-red-300 text-xs font-semibold rounded-2xl shadow-xs shrink-0">
           {error}
         </div>
       )}
@@ -376,7 +376,7 @@ export default function ArticleEditorForm({
           <div
             className={`${
               mobileTab === 'write' ? 'block' : 'hidden'
-            } md:block lg:col-span-8 bg-paper dark:bg-dark-paper border border-rule dark:border-dark-rule rounded-2xl md:rounded-3xl p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 shadow-xs`}
+            } md:block lg:col-span-8 backdrop-blur-xl bg-white/70 dark:bg-[#1c1c1e]/75 border border-black/[0.06] dark:border-white/[0.08] rounded-3xl p-5 sm:p-7 lg:p-8 space-y-4 sm:space-y-6 shadow-[0_4px_24px_rgba(0,0,0,0.03)]`}
           >
             {/* Headline (Article Title) */}
             <div>
@@ -389,7 +389,7 @@ export default function ArticleEditorForm({
                 value={title}
                 onChange={(e) => handleTitleChange(e.target.value)}
                 placeholder="Story headline"
-                className="w-full text-xl sm:text-2xl lg:text-3xl font-serif font-black px-3.5 sm:px-4 py-2.5 sm:py-3 bg-paper-subtle/50 dark:bg-dark-subtle/50 border border-rule dark:border-dark-rule text-ink dark:text-dark-ink focus:outline-none focus:border-accent rounded-xl sm:rounded-2xl placeholder:text-ink-mute/40 transition"
+                className="w-full text-xl sm:text-2xl lg:text-3xl font-serif font-black px-4 py-3 bg-black/[0.02] dark:bg-white/[0.04] border border-black/[0.08] dark:border-white/10 text-ink dark:text-dark-ink focus:outline-none focus:ring-2 focus:ring-[#0071e3]/20 focus:border-[#0071e3] rounded-2xl placeholder:text-ink-mute/40 transition tracking-tight"
               />
             </div>
 
@@ -403,7 +403,7 @@ export default function ArticleEditorForm({
                 value={subtitle}
                 onChange={(e) => setSubtitle(e.target.value)}
                 placeholder="Story summary or deck (italic subtitle shown on cards & article header)"
-                className="w-full text-xs sm:text-sm md:text-base font-serif italic px-3.5 sm:px-4 py-2.5 sm:py-3 bg-paper-subtle/50 dark:bg-dark-subtle/50 border border-rule dark:border-dark-rule text-ink dark:text-dark-ink focus:outline-none focus:border-accent rounded-xl sm:rounded-2xl placeholder:text-ink-mute/40 transition leading-relaxed resize-none"
+                className="w-full text-xs sm:text-sm md:text-base font-serif italic px-4 py-3 bg-black/[0.02] dark:bg-white/[0.04] border border-black/[0.08] dark:border-white/10 text-ink dark:text-dark-ink focus:outline-none focus:ring-2 focus:ring-[#0071e3]/20 focus:border-[#0071e3] rounded-2xl placeholder:text-ink-mute/40 transition leading-relaxed resize-none"
               />
             </div>
 
@@ -413,10 +413,10 @@ export default function ArticleEditorForm({
                 <label className="block text-[11px] font-bold uppercase tracking-wider text-ink-mute dark:text-dark-mute">
                   Story Content *
                 </label>
-                <div className="flex items-center gap-2 text-[10px] sm:text-[11px] font-mono text-ink-mute dark:text-dark-mute bg-black/5 dark:bg-white/5 px-2 py-0.5 rounded-md">
+                <div className="flex items-center gap-2 text-[10px] sm:text-[11px] font-mono text-ink-mute dark:text-dark-mute bg-black/5 dark:bg-white/5 px-2.5 py-0.5 rounded-full">
                   <span>{wordCount} words</span>
                   <span>•</span>
-                  <span className="text-accent font-semibold">{readingTimeMinutes} min read</span>
+                  <span className="text-[#0071e3] font-semibold">{readingTimeMinutes} min read</span>
                 </div>
               </div>
 
@@ -436,13 +436,13 @@ export default function ArticleEditorForm({
             } md:block lg:col-span-4 min-w-0 w-full space-y-4 sm:space-y-5`}
           >
             {/* FEATURED MEDIA CARD */}
-            <div className="p-4 sm:p-5 bg-paper-subtle/70 dark:bg-dark-subtle/70 border border-rule dark:border-dark-rule rounded-2xl space-y-3.5 shadow-xs min-w-0">
+            <div className="p-5 sm:p-6 backdrop-blur-xl bg-white/70 dark:bg-[#1c1c1e]/75 border border-black/[0.06] dark:border-white/[0.08] rounded-3xl space-y-4 shadow-[0_4px_24px_rgba(0,0,0,0.03)] min-w-0">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold text-xs tracking-wide text-ink dark:text-dark-ink">
                   Featured Media
                 </h3>
                 {images.length > 0 && (
-                  <span className="text-[10px] font-mono text-ink-mute dark:text-dark-mute">
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-ink-mute dark:text-dark-mute">
                     {images.length} asset{images.length > 1 ? 's' : ''}
                   </span>
                 )}
@@ -462,16 +462,16 @@ export default function ArticleEditorForm({
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploadingMedia}
-                  className="w-full flex items-center justify-center gap-2 py-3 px-4 border border-dashed border-rule/80 dark:border-white/15 bg-paper hover:bg-paper-subtle dark:bg-[#18181b] dark:hover:bg-white/5 text-ink dark:text-dark-ink text-xs font-semibold rounded-xl transition cursor-pointer active:scale-[0.99] disabled:opacity-50 shadow-xs"
+                  className="w-full flex items-center justify-center gap-2 py-3 px-4 border border-dashed border-black/20 dark:border-white/15 bg-white/80 hover:bg-black/5 dark:bg-white/[0.04] dark:hover:bg-white/10 text-ink dark:text-dark-ink text-xs font-semibold rounded-2xl transition cursor-pointer active:scale-[0.98] disabled:opacity-50 shadow-xs"
                 >
                   {uploadingMedia ? (
                     <>
-                      <span className="w-3.5 h-3.5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+                      <span className="w-3.5 h-3.5 border-2 border-[#0071e3] border-t-transparent rounded-full animate-spin" />
                       <span>Uploading media...</span>
                     </>
                   ) : (
                     <>
-                      <IconMedia className="w-4 h-4 text-ink-mute dark:text-dark-mute" />
+                      <IconMedia className="w-4 h-4 text-[#0071e3]" />
                       <span>Upload Media</span>
                     </>
                   )}
@@ -483,29 +483,29 @@ export default function ArticleEditorForm({
 
               {/* Uploaded Images List */}
               {images.length > 0 && (
-                <div className="space-y-2.5 pt-3 border-t border-rule/60 dark:border-white/10">
+                <div className="space-y-2.5 pt-3 border-t border-black/[0.06] dark:border-white/10">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-ink-mute">
                     Media Library
                   </p>
 
-                  <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                  <div className="space-y-2 max-h-72 overflow-y-auto pr-1 apple-scrollbar">
                     {images.map((img, idx) => {
                       const isMain = selectedMainImageUrl === img.url
 
                       return (
                         <div
                           key={idx}
-                          className={`p-2.5 border rounded-xl transition space-y-2 shadow-xs ${
+                          className={`p-3 border rounded-2xl transition space-y-2 shadow-xs ${
                             isMain
-                              ? 'border-accent bg-accent/5'
-                              : 'border-rule dark:border-dark-rule bg-paper dark:bg-dark-paper'
+                              ? 'border-[#0071e3] bg-[#0071e3]/[0.05]'
+                              : 'border-black/[0.06] dark:border-white/10 bg-white/80 dark:bg-white/[0.04]'
                           }`}
                         >
                           <div className="flex gap-2.5 items-start">
                             <img
                               src={img.url}
                               alt=""
-                              className="w-14 h-11 object-cover border border-rule dark:border-dark-rule shrink-0 rounded-lg"
+                              className="w-14 h-11 object-cover border border-black/[0.06] dark:border-white/10 shrink-0 rounded-xl"
                             />
                             <div className="flex-1 min-w-0">
                               <label className="flex items-center gap-1.5 cursor-pointer">
@@ -514,7 +514,7 @@ export default function ArticleEditorForm({
                                   name="mainImageRadio"
                                   checked={isMain}
                                   onChange={() => setSelectedMainImageUrl(img.url)}
-                                  className="accent-accent"
+                                  className="accent-[#0071e3]"
                                 />
                                 <span className="text-xs font-semibold text-ink dark:text-dark-ink truncate">
                                   {isMain ? 'Primary Hero Image' : 'Set as Primary'}
@@ -528,11 +528,11 @@ export default function ArticleEditorForm({
                             </div>
                           </div>
 
-                          <div className="flex items-center justify-between pt-1.5 border-t border-rule/50 text-[11px]">
+                          <div className="flex items-center justify-between pt-1.5 border-t border-black/[0.05] dark:border-white/10 text-[11px]">
                             <button
                               type="button"
                               onClick={() => insertImageIntoContent(img.url, img.caption)}
-                              className="text-accent hover:underline font-medium cursor-pointer"
+                              className="text-[#0071e3] hover:underline font-medium cursor-pointer"
                             >
                               Insert in story
                             </button>
@@ -553,7 +553,7 @@ export default function ArticleEditorForm({
             </div>
 
             {/* HOMEPAGE SLOT PLACEMENT */}
-            <div className="p-4 sm:p-5 bg-paper-subtle/70 dark:bg-dark-subtle/70 border border-rule dark:border-dark-rule rounded-2xl space-y-3 shadow-xs min-w-0">
+            <div className="p-5 sm:p-6 backdrop-blur-xl bg-white/70 dark:bg-[#1c1c1e]/75 border border-black/[0.06] dark:border-white/[0.08] rounded-3xl space-y-3.5 shadow-[0_4px_24px_rgba(0,0,0,0.03)] min-w-0">
               <h3 className="font-semibold text-xs tracking-wide text-ink dark:text-dark-ink">
                 Homepage Placement
               </h3>
@@ -566,19 +566,19 @@ export default function ArticleEditorForm({
                   <select
                     value={slotPosition}
                     onChange={(e) => setSlotPosition(e.target.value)}
-                    className="w-full max-w-full min-w-0 h-11 appearance-none pl-3.5 pr-10 bg-paper dark:bg-[#18181b] border border-rule/80 dark:border-white/10 text-ink dark:text-dark-ink text-xs sm:text-sm font-medium focus:outline-none focus:border-accent rounded-xl cursor-pointer shadow-xs truncate"
+                    className="w-full max-w-full min-w-0 h-11 appearance-none pl-4 pr-10 bg-black/[0.02] dark:bg-white/[0.04] border border-black/[0.08] dark:border-white/10 text-ink dark:text-dark-ink text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0071e3]/20 focus:border-[#0071e3] rounded-full cursor-pointer shadow-xs truncate"
                   >
                     {HOMEPAGE_SLOTS.map((slot) => (
                       <option
                         key={slot.value}
                         value={slot.value}
-                        className="bg-paper dark:bg-[#18181b] text-ink dark:text-white py-1"
+                        className="bg-white dark:bg-[#1c1c1e] text-ink dark:text-white py-1"
                       >
                         {slot.label}
                       </option>
                     ))}
                   </select>
-                  <IconChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-mute/70 dark:text-white/40" />
+                  <IconChevronDown className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-mute/70 dark:text-white/40" />
                 </div>
               </div>
 
@@ -587,7 +587,7 @@ export default function ArticleEditorForm({
                   type="checkbox"
                   checked={isBreaking}
                   onChange={(e) => setIsBreaking(e.target.checked)}
-                  className="w-4 h-4 accent-accent rounded cursor-pointer"
+                  className="w-4 h-4 accent-[#0071e3] rounded cursor-pointer"
                 />
                 <span className="font-semibold text-ink dark:text-dark-ink">
                   Breaking News Dispatch
@@ -596,7 +596,7 @@ export default function ArticleEditorForm({
             </div>
 
             {/* TAXONOMY & BYLINES */}
-            <div className="p-4 sm:p-5 bg-paper-subtle/70 dark:bg-dark-subtle/70 border border-rule dark:border-dark-rule rounded-2xl space-y-3.5 shadow-xs min-w-0">
+            <div className="p-5 sm:p-6 backdrop-blur-xl bg-white/70 dark:bg-[#1c1c1e]/75 border border-black/[0.06] dark:border-white/[0.08] rounded-3xl space-y-4 shadow-[0_4px_24px_rgba(0,0,0,0.03)] min-w-0">
               <h3 className="font-semibold text-xs tracking-wide text-ink dark:text-dark-ink">
                 Taxonomy &amp; Metadata
               </h3>
@@ -606,7 +606,7 @@ export default function ArticleEditorForm({
                 <label className="block text-[10px] font-semibold text-ink-mute dark:text-dark-mute mb-1">
                   URL Slug
                 </label>
-                <div className="flex items-center px-3 py-2 bg-paper dark:bg-dark-paper border border-rule dark:border-dark-rule rounded-xl text-xs font-mono">
+                <div className="flex items-center px-3.5 py-2.5 bg-black/[0.02] dark:bg-white/[0.04] border border-black/[0.08] dark:border-white/10 rounded-full text-xs font-mono">
                   <span className="text-ink-mute select-none mr-1">/article/</span>
                   <input
                     type="text"
@@ -626,19 +626,19 @@ export default function ArticleEditorForm({
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="w-full max-w-full min-w-0 h-11 appearance-none pl-3.5 pr-10 bg-paper dark:bg-[#18181b] border border-rule/80 dark:border-white/10 text-ink dark:text-dark-ink text-xs sm:text-sm font-medium focus:outline-none focus:border-accent rounded-xl cursor-pointer shadow-xs truncate"
+                    className="w-full max-w-full min-w-0 h-11 appearance-none pl-4 pr-10 bg-black/[0.02] dark:bg-white/[0.04] border border-black/[0.08] dark:border-white/10 text-ink dark:text-dark-ink text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0071e3]/20 focus:border-[#0071e3] rounded-full cursor-pointer shadow-xs truncate"
                   >
                     {CATEGORIES.map((cat) => (
                       <option
                         key={cat}
                         value={cat}
-                        className="bg-paper dark:bg-[#18181b] text-ink dark:text-white py-1"
+                        className="bg-white dark:bg-[#1c1c1e] text-ink dark:text-white py-1"
                       >
                         {cat}
                       </option>
                     ))}
                   </select>
-                  <IconChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-mute/70 dark:text-white/40" />
+                  <IconChevronDown className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-mute/70 dark:text-white/40" />
                 </div>
               </div>
 
@@ -646,7 +646,7 @@ export default function ArticleEditorForm({
                 <label className="block text-[10px] font-semibold text-ink-mute dark:text-dark-mute mb-1">
                   Author
                 </label>
-                <div className="flex items-center justify-between px-3 py-2 bg-paper dark:bg-dark-paper border border-rule dark:border-dark-rule text-ink dark:text-dark-ink text-xs font-medium rounded-xl">
+                <div className="flex items-center justify-between px-4 py-2.5 bg-black/[0.02] dark:bg-white/[0.04] border border-black/[0.08] dark:border-white/10 text-ink dark:text-dark-ink text-xs font-medium rounded-full">
                   <span className="font-semibold">Dhananjay Singh</span>
                   <span className="text-[10px] font-mono text-ink-mute dark:text-dark-mute">Lead Correspondent</span>
                 </div>
@@ -661,18 +661,18 @@ export default function ArticleEditorForm({
                   value={tags}
                   onChange={(e) => setTags(e.target.value)}
                   placeholder="Comma-separated tags"
-                  className="w-full text-xs px-3 py-2 bg-paper dark:bg-dark-paper border border-rule dark:border-dark-rule text-ink dark:text-dark-ink focus:outline-none focus:border-accent rounded-xl"
+                  className="w-full text-xs px-4 py-2.5 bg-black/[0.02] dark:bg-white/[0.04] border border-black/[0.08] dark:border-white/10 text-ink dark:text-dark-ink focus:outline-none focus:ring-2 focus:ring-[#0071e3]/20 focus:border-[#0071e3] rounded-full"
                 />
               </div>
 
               {/* Push Notification Toggle */}
-              <div className="pt-2 border-t border-rule/60 dark:border-white/10">
+              <div className="pt-2 border-t border-black/[0.06] dark:border-white/10">
                 <label className="flex items-center gap-2 cursor-pointer select-none">
                   <input
                     type="checkbox"
                     checked={pushAlert}
                     onChange={(e) => setPushAlert(e.target.checked)}
-                    className="w-4 h-4 accent-accent rounded cursor-pointer"
+                    className="w-4 h-4 accent-[#0071e3] rounded cursor-pointer"
                   />
                   <span className="text-xs font-semibold text-ink dark:text-dark-ink">
                     Send push notification to subscribers

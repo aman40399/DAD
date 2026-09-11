@@ -102,14 +102,14 @@ export default function AdminSeoPage() {
   ]
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-8 max-w-6xl mx-auto">
+    <div className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-8 max-w-6xl mx-auto font-sans">
       {/* Page Title */}
-      <div className="border-b border-rule/60 dark:border-white/10 pb-5 flex flex-col sm:flex-row sm:items-baseline justify-between gap-4">
+      <div className="border-b border-black/[0.06] dark:border-white/[0.08] pb-5 flex flex-col sm:flex-row sm:items-baseline justify-between gap-4">
         <div>
-          <span className="font-mono text-xs uppercase tracking-widest text-accent font-bold">
+          <span className="font-mono text-xs uppercase tracking-widest text-[#0071e3] font-bold">
             Search Engine Optimization & Instant Indexation
           </span>
-          <h1 className="font-serif font-black text-2xl sm:text-4xl text-ink dark:text-dark-ink mt-1">
+          <h1 className="font-serif font-black text-2xl sm:text-3xl text-ink dark:text-dark-ink mt-1 tracking-tight">
             SEO & Search Engine Indexing
           </h1>
           <p className="font-serif italic text-xs sm:text-sm text-ink-mute dark:text-dark-mute mt-1">
@@ -120,7 +120,7 @@ export default function AdminSeoPage() {
         <button
           onClick={handlePingAll}
           disabled={pinging}
-          className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-accent text-white font-mono text-xs font-bold uppercase tracking-wider hover:opacity-90 disabled:opacity-50 transition shadow-sm shrink-0 cursor-pointer"
+          className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-[#0071e3] text-white font-sans text-xs font-semibold hover:bg-[#0077ed] disabled:opacity-50 transition shadow-xs shrink-0 cursor-pointer active:scale-95"
         >
           {pinging ? (
             <>
@@ -143,7 +143,7 @@ export default function AdminSeoPage() {
 
       {/* Ping Results Notification Box */}
       {pingResult && (
-        <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-6 space-y-4">
+        <div className="backdrop-blur-xl bg-emerald-500/10 border border-emerald-500/25 rounded-3xl p-6 space-y-4 animate-in fade-in zoom-in-95 duration-200">
           <div className="flex items-center justify-between">
             <h3 className="font-serif font-bold text-emerald-700 dark:text-emerald-400 text-base flex items-center gap-2">
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -151,18 +151,18 @@ export default function AdminSeoPage() {
               </svg>
               <span>Instant Indexation Broadcast Dispatched</span>
             </h3>
-            <span className="font-mono text-xs text-emerald-700 dark:text-emerald-400">
+            <span className="font-mono text-xs text-emerald-700 dark:text-emerald-400 font-bold px-3 py-1 bg-emerald-500/10 rounded-full border border-emerald-500/20">
               {pingResult.totalUrlsSubmitted} URLs Dispatched
             </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-xs font-mono">
             {pingResult.indexNow.map((inRes, idx) => (
-              <div key={idx} className="p-3 bg-paper dark:bg-white/[0.04] rounded-xl border border-emerald-500/20">
+              <div key={idx} className="p-3 bg-white/70 dark:bg-white/[0.04] rounded-2xl border border-emerald-500/20 shadow-xs">
                 <div className="text-ink-mute dark:text-dark-mute text-[10px] uppercase">{inRes.engine}</div>
                 <div className="font-bold text-ink dark:text-dark-ink mt-0.5 flex items-center justify-between">
                   <span>{inRes.message || (inRes.ok ? 'Success' : 'Failed')}</span>
-                  <span className={`px-1.5 py-0.5 rounded-sm text-[9px] ${inRes.ok ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-red-500/20 text-red-600'}`}>
+                  <span className={`px-2 py-0.5 rounded-full text-[9px] ${inRes.ok ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-red-500/20 text-red-600'}`}>
                     HTTP {inRes.status}
                   </span>
                 </div>
@@ -170,11 +170,11 @@ export default function AdminSeoPage() {
             ))}
 
             {pingResult.sitemaps.map((smRes, idx) => (
-              <div key={idx} className="p-3 bg-paper dark:bg-white/[0.04] rounded-xl border border-emerald-500/20">
+              <div key={idx} className="p-3 bg-white/70 dark:bg-white/[0.04] rounded-2xl border border-emerald-500/20 shadow-xs">
                 <div className="text-ink-mute dark:text-dark-mute text-[10px] uppercase">{smRes.engine}</div>
                 <div className="font-bold text-ink dark:text-dark-ink mt-0.5 flex items-center justify-between">
                   <span>{smRes.ok ? 'Notified' : 'Unreachable'}</span>
-                  <span className={`px-1.5 py-0.5 rounded-sm text-[9px] ${smRes.ok ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-amber-500/20 text-amber-600'}`}>
+                  <span className={`px-2 py-0.5 rounded-full text-[9px] ${smRes.ok ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 'bg-amber-500/20 text-amber-600'}`}>
                     HTTP {smRes.status}
                   </span>
                 </div>
@@ -185,30 +185,33 @@ export default function AdminSeoPage() {
       )}
 
       {error && (
-        <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-4 text-xs font-mono text-red-600 dark:text-red-400">
+        <div className="backdrop-blur-xl bg-red-500/10 border border-red-500/25 rounded-3xl p-5 text-xs font-mono text-red-600 dark:text-red-400">
           Error broadcasting to search engines: {error}
         </div>
       )}
 
       {/* Live Sitemaps & Feeds Cards */}
-      <div className="space-y-3">
-        <h2 className="font-serif font-black text-xl text-ink dark:text-dark-ink">
+      <div className="space-y-4">
+        <h2 className="font-serif font-black text-xl text-ink dark:text-dark-ink tracking-tight">
           Active Live Sitemaps & Crawl Feeds
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {sitemaps.map((item) => (
             <div
               key={item.path}
-              className="bg-paper-subtle dark:bg-dark-subtle border border-rule/60 dark:border-white/10 rounded-2xl p-5 flex flex-col justify-between hover:border-accent transition"
+              className="backdrop-blur-xl bg-white/70 dark:bg-[#1c1c1e]/75 border border-black/[0.06] dark:border-white/[0.08] rounded-3xl p-5 flex flex-col justify-between hover:border-[#0071e3]/40 transition shadow-[0_4px_24px_rgba(0,0,0,0.02)]"
             >
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-accent px-2 py-0.5 rounded-full bg-accent/10">
+                <div className="flex items-center justify-between mb-2.5">
+                  <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#0071e3] px-2.5 py-0.5 rounded-full bg-[#0071e3]/10 border border-[#0071e3]/20">
                     {item.badge}
                   </span>
-                  <span className="w-2 h-2 rounded-full bg-emerald-500" title="Active & Live" />
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                    <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-medium">Live</span>
+                  </div>
                 </div>
-                <h3 className="font-serif font-bold text-base text-ink dark:text-dark-ink mb-1.5">
+                <h3 className="font-serif font-bold text-base text-ink dark:text-dark-ink mb-1.5 tracking-tight">
                   {item.title}
                 </h3>
                 <p className="font-serif text-xs text-ink-mute dark:text-dark-mute leading-relaxed mb-4">
@@ -216,15 +219,15 @@ export default function AdminSeoPage() {
                 </p>
               </div>
 
-              <div className="border-t border-rule/60 dark:border-white/10 pt-3 flex items-center justify-between">
-                <code className="font-mono text-[11px] text-ink/80 dark:text-dark-ink/80">
+              <div className="border-t border-black/[0.05] dark:border-white/[0.08] pt-3 flex items-center justify-between">
+                <code className="font-mono text-[11px] text-ink/80 dark:text-dark-ink/80 bg-black/[0.03] dark:bg-white/[0.05] px-2 py-0.5 rounded-md">
                   {item.path}
                 </code>
                 <a
                   href={item.path}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-mono text-[11px] text-accent hover:underline font-bold"
+                  className="font-mono text-[11px] text-[#0071e3] hover:underline font-semibold"
                 >
                   Inspect &rarr;
                 </a>
@@ -236,10 +239,10 @@ export default function AdminSeoPage() {
 
       {/* Official Search Console & Verification Directory */}
       <div className="space-y-4">
-        <h2 className="font-serif font-black text-xl text-ink dark:text-dark-ink">
+        <h2 className="font-serif font-black text-xl text-ink dark:text-dark-ink tracking-tight">
           Search Console & Schema Diagnostics
         </h2>
-        <div className="bg-paper-subtle dark:bg-dark-subtle border border-rule/60 dark:border-white/10 rounded-2xl divide-y divide-rule/60 dark:divide-white/10">
+        <div className="backdrop-blur-xl bg-white/70 dark:bg-[#1c1c1e]/75 border border-black/[0.06] dark:border-white/[0.08] rounded-3xl divide-y divide-black/[0.05] dark:divide-white/[0.08] shadow-[0_4px_24px_rgba(0,0,0,0.02)] overflow-hidden">
           {diagnosticTools.map((tool) => (
             <div key={tool.name} className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="space-y-1">
@@ -247,7 +250,7 @@ export default function AdminSeoPage() {
                   <h3 className="font-serif font-bold text-base text-ink dark:text-dark-ink">
                     {tool.name}
                   </h3>
-                  <span className="font-mono text-[10px] uppercase text-ink-mute dark:text-dark-mute px-1.5 py-0.5 rounded bg-paper dark:bg-white/[0.05] border border-rule/60 dark:border-white/10">
+                  <span className="font-mono text-[10px] uppercase text-ink-mute dark:text-dark-mute px-2 py-0.5 rounded-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/[0.06] dark:border-white/10">
                     {tool.action}
                   </span>
                 </div>
@@ -260,7 +263,7 @@ export default function AdminSeoPage() {
                 href={tool.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-rule/60 dark:border-white/10 hover:border-accent font-mono text-xs text-ink dark:text-dark-ink hover:text-accent font-semibold transition shrink-0 self-start sm:self-center"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-black/[0.08] dark:border-white/10 hover:border-[#0071e3] font-mono text-xs text-ink dark:text-dark-ink hover:text-[#0071e3] font-semibold transition shrink-0 self-start sm:self-center bg-white/80 dark:bg-white/[0.04] active:scale-95 shadow-xs"
               >
                 <span>Launch Tool</span>
                 <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -275,36 +278,36 @@ export default function AdminSeoPage() {
       </div>
 
       {/* Actionable Playbook to Rank #1 */}
-      <div className="bg-paper-subtle dark:bg-dark-subtle border border-rule/60 dark:border-white/10 rounded-2xl p-6 sm:p-8 space-y-6">
+      <div className="backdrop-blur-xl bg-white/70 dark:bg-[#1c1c1e]/75 border border-black/[0.06] dark:border-white/[0.08] rounded-3xl p-6 sm:p-8 space-y-6 shadow-[0_4px_24px_rgba(0,0,0,0.02)]">
         <div>
-          <span className="font-mono text-[11px] uppercase tracking-widest text-accent font-bold">
+          <span className="font-mono text-[11px] uppercase tracking-widest text-[#0071e3] font-bold">
             Editorial Playbook
           </span>
-          <h2 className="font-serif font-black text-2xl text-ink dark:text-dark-ink mt-1">
+          <h2 className="font-serif font-black text-2xl text-ink dark:text-dark-ink mt-1 tracking-tight">
             How to Rank #1 on Google News & Search
           </h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs font-serif leading-relaxed text-ink/90 dark:text-dark-ink/90">
-          <div className="space-y-2 border-l-2 border-accent pl-4">
+          <div className="space-y-2 border-l-2 border-[#0071e3] pl-4">
             <h4 className="font-sans font-bold text-ink dark:text-dark-ink text-sm">
               1. Submit Both Sitemaps to Google Search Console
             </h4>
             <p>
-              Log in to Google Search Console for <strong className="text-accent">https://www.singh.monster</strong>. In the left menu under <em>Sitemaps</em>, enter both <code className="font-mono">sitemap.xml</code> and <code className="font-mono">sitemap-news.xml</code>. Googlebot will immediately index your site structure and fresh stories.
+              Log in to Google Search Console for <strong className="text-[#0071e3]">https://www.singh.monster</strong>. In the left menu under <em>Sitemaps</em>, enter both <code className="font-mono bg-black/[0.04] px-1 py-0.5 rounded">sitemap.xml</code> and <code className="font-mono bg-black/[0.04] px-1 py-0.5 rounded">sitemap-news.xml</code>. Googlebot will immediately index your site structure and fresh stories.
             </p>
           </div>
 
-          <div className="space-y-2 border-l-2 border-accent pl-4">
+          <div className="space-y-2 border-l-2 border-[#0071e3] pl-4">
             <h4 className="font-sans font-bold text-ink dark:text-dark-ink text-sm">
               2. Add RSS Feed to Google Publisher Center
             </h4>
             <p>
-              Open <a href="https://publishercenter.google.com/" target="_blank" rel="noopener noreferrer" className="text-accent underline font-semibold">Google Publisher Center</a>, add your publication <em>Singh Monster</em>, and under Content Sections, paste <code className="font-mono">https://www.singh.monster/feed.xml</code>. This qualifies you for Google News badges and Google Discover recommendation cards.
+              Open <a href="https://publishercenter.google.com/" target="_blank" rel="noopener noreferrer" className="text-[#0071e3] underline font-semibold">Google Publisher Center</a>, add your publication <em>Singh Monster</em>, and under Content Sections, paste <code className="font-mono bg-black/[0.04] px-1 py-0.5 rounded">https://www.singh.monster/feed.xml</code>. This qualifies you for Google News badges and Google Discover recommendation cards.
             </p>
           </div>
 
-          <div className="space-y-2 border-l-2 border-accent pl-4">
+          <div className="space-y-2 border-l-2 border-[#0071e3] pl-4">
             <h4 className="font-sans font-bold text-ink dark:text-dark-ink text-sm">
               3. Automatic Instant Indexing with IndexNow
             </h4>
@@ -313,12 +316,12 @@ export default function AdminSeoPage() {
             </p>
           </div>
 
-          <div className="space-y-2 border-l-2 border-accent pl-4">
+          <div className="space-y-2 border-l-2 border-[#0071e3] pl-4">
             <h4 className="font-sans font-bold text-ink dark:text-dark-ink text-sm">
               4. Complete E-E-A-T Author & Policy Trust Signals
             </h4>
             <p>
-              Google rewards authentic journalism. Your site now features comprehensive public transparency pages: <Link href="/about" className="text-accent underline">About Us</Link>, <Link href="/editorial-guidelines" className="text-accent underline">Editorial Guidelines</Link>, <Link href="/fact-checking" className="text-accent underline">Fact-Checking Policy</Link>, <Link href="/corrections" className="text-accent underline">Corrections</Link>, <Link href="/contact" className="text-accent underline">Grievance Desk</Link>, and <Link href="/author/dhananjay-singh" className="text-accent underline">Author Profiles</Link>.
+              Google rewards authentic journalism. Your site now features comprehensive public transparency pages: <Link href="/about" className="text-[#0071e3] underline font-medium">About Us</Link>, <Link href="/editorial-guidelines" className="text-[#0071e3] underline font-medium">Editorial Guidelines</Link>, <Link href="/fact-checking" className="text-[#0071e3] underline font-medium">Fact-Checking Policy</Link>, <Link href="/corrections" className="text-[#0071e3] underline font-medium">Corrections</Link>, <Link href="/contact" className="text-[#0071e3] underline font-medium">Grievance Desk</Link>, and <Link href="/author/dhananjay-singh" className="text-[#0071e3] underline font-medium">Author Profiles</Link>.
             </p>
           </div>
         </div>

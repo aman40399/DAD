@@ -79,7 +79,6 @@ export default function AdminMediaVaultPage() {
         cache: 'no-store',
         headers: {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
         },
       })
       if (res.ok) {
@@ -87,7 +86,6 @@ export default function AdminMediaVaultPage() {
         setMediaItems(data.media || [])
       }
     } catch (e) {
-      console.error('Failed to load media assets:', e)
       addToast('error', 'Storage Access Error', 'Could not retrieve media assets from Cloudflare.')
     } finally {
       setLoading(false)
@@ -104,7 +102,7 @@ export default function AdminMediaVaultPage() {
       : `${window.location.origin}${url}`
     navigator.clipboard.writeText(absoluteUrl)
     setCopiedId(id)
-    addToast('info', 'Link Copied', 'Direct media URL copied to clipboard.')
+    addToast('info', 'Link Copied', 'Direct CDN URL copied to clipboard.')
     setTimeout(() => setCopiedId(null), 2000)
   }
 
@@ -132,7 +130,6 @@ export default function AdminMediaVaultPage() {
 
       const uploadData = await res.json()
 
-      // Optimistically insert newly uploaded asset immediately into view
       if (uploadData && uploadData.url) {
         const rawName = (uploadData.key || file.name)
           .replace(/^news\//, '')
@@ -152,7 +149,7 @@ export default function AdminMediaVaultPage() {
         setMediaItems((prev) => [optimisticItem, ...prev.filter((m) => m.url !== optimisticItem.url)])
       }
 
-      addToast('success', 'File Uploaded', `${file.name} saved to Cloudflare R2.`)
+      addToast('success', 'File Uploaded', `${file.name} saved permanently to Cloudflare R2.`)
       await fetchMedia()
     } catch (err: any) {
       addToast('error', 'Upload Error', err.message || 'Could not upload file to Cloudflare.')
@@ -178,16 +175,6 @@ export default function AdminMediaVaultPage() {
     }
   }
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(true)
-  }
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(false)
-  }
-
   const filteredItems = useMemo(() => {
     if (!search.trim()) return mediaItems
     const q = search.toLowerCase()
@@ -199,12 +186,13 @@ export default function AdminMediaVaultPage() {
 
   return (
     <div
-      className="space-y-5 font-sans text-ink dark:text-dark-ink"
+      className="space-y-6 font-sans text-[#1d1d1f] dark:text-white"
       onDrop={handleDrop}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
+      onDragOver={(e) => { e.preventDefault(); setIsDragging(true) }}
+      onDragLeave={(e) => { e.preventDefault(); setIsDragging(false) }}
     >
-      {/* Hidden File Input */}
+      <AdminToast toasts={toasts} onDismiss={removeToast} />
+
       <input
         ref={fileInputRef}
         type="file"
@@ -215,54 +203,81 @@ export default function AdminMediaVaultPage() {
       />
 
       {/* HEADER BAR */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-2 border-b border-rule/60 dark:border-white/[0.08]">
-        {/* Desktop-only Page Title (Zero Duplicate Heading on Mobile) */}
-        <div className="hidden md:block">
-          <div className="flex items-center gap-2">
-            <h1 className="font-serif font-bold text-xl sm:text-2xl text-ink dark:text-dark-ink">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[#1d1d1f] dark:text-white">
               Media Vault
             </h1>
-            <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-paper-subtle dark:bg-white/10 border border-rule/60 dark:border-white/10 text-ink-mute dark:text-dark-mute">
+            <span className="px-2.5 py-0.5 text-xs font-semibold text-[#0071e3] dark:text-[#2997ff] bg-[#0071e3]/10 dark:bg-[#2997ff]/15 rounded-full">
               Cloudflare R2
             </span>
           </div>
-          <p className="text-xs text-ink-mute dark:text-dark-mute mt-0.5 font-serif italic">
-            Manage media assets and copy direct CDN links
+          <p className="text-xs sm:text-sm text-[#1d1d1f]/60 dark:text-white/60 mt-1">
+            Browse and manage edge-cached photographic dispatches with instant CDN link copying.
           </p>
         </div>
 
-        {/* Controls: Search, View Mode, Refresh, Upload */}
-        <div className="flex items-center gap-2 w-full md:w-auto">
-          {/* Search Input */}
-          <div className="relative flex-1 md:w-56">
-            <IconSearch className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-ink-mute pointer-events-none" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search files…"
-              className="w-full text-xs pl-8 pr-7 py-2 bg-paper dark:bg-white/[0.06] border border-rule/60 dark:border-white/10 text-ink dark:text-white placeholder:text-ink-mute dark:placeholder:text-dark-mute focus:outline-none focus:border-accent rounded-full transition-colors shadow-xs"
-            />
-            {search && (
-              <button
-                type="button"
-                onClick={() => setSearch('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-mute hover:text-ink cursor-pointer"
-              >
-                <IconClose className="w-3 h-3" />
-              </button>
-            )}
-          </div>
+        <div className="flex items-center gap-2.5">
+          <button
+            type="button"
+            onClick={fetchMedia}
+            disabled={loading}
+            className="w-10 h-10 rounded-full backdrop-blur-md bg-white/80 dark:bg-white/[0.08] hover:bg-white dark:hover:bg-white/15 border border-black/[0.08] dark:border-white/[0.1] text-[#1d1d1f] dark:text-white flex items-center justify-center transition shadow-xs active:scale-95"
+            title="Refresh assets"
+          >
+            <IconRefresh className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          </button>
 
-          {/* View Mode Toggle */}
-          <div className="flex items-center p-0.5 bg-paper-subtle/80 dark:bg-white/[0.05] border border-rule/60 dark:border-white/10 rounded-full shadow-xs shrink-0">
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+            className="h-10 px-5 rounded-full bg-[#0071e3] hover:bg-[#0077ed] text-white text-xs font-semibold tracking-tight transition shadow-[0_2px_8px_rgba(0,113,227,0.35)] flex items-center gap-2 active:scale-95 cursor-pointer"
+          >
+            <IconPlus className="w-4 h-4 stroke-[2.5]" />
+            <span>{isUploading ? 'Uploading…' : 'Upload Asset'}</span>
+          </button>
+        </div>
+      </div>
+
+      {/* CONTROLS BAR: SEARCH & VIEW TOGGLE */}
+      <div className="p-2 sm:p-3 rounded-2xl backdrop-blur-xl bg-white/70 dark:bg-[#1c1c1e]/70 border border-black/[0.06] dark:border-white/[0.08] shadow-xs flex items-center justify-between gap-3">
+        {/* Apple Pill Search Input */}
+        <div className="relative flex-1 sm:max-w-xs">
+          <IconSearch className="absolute left-3.5 top-3 w-4 h-4 text-[#1d1d1f]/40 dark:text-white/40 pointer-events-none" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search media files…"
+            className="w-full text-xs pl-10 pr-8 py-2 bg-black/[0.03] dark:bg-white/[0.06] hover:bg-black/[0.05] dark:hover:bg-white/[0.08] focus:bg-white dark:focus:bg-[#2c2c2e] border border-black/[0.06] dark:border-white/[0.08] focus:border-[#0071e3] text-[#1d1d1f] dark:text-white placeholder:text-[#1d1d1f]/40 dark:placeholder:text-white/40 rounded-full outline-none transition"
+          />
+          {search && (
+            <button
+              type="button"
+              onClick={() => setSearch('')}
+              className="absolute right-3 top-2.5 text-[#1d1d1f]/40 hover:text-[#1d1d1f] dark:text-white/40 dark:hover:text-white"
+            >
+              <IconClose className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-[#1d1d1f]/50 dark:text-white/50 hidden sm:inline">
+            {filteredItems.length} assets
+          </span>
+
+          {/* Segmented View Mode Toggle */}
+          <div className="flex items-center p-1 bg-black/[0.04] dark:bg-white/[0.06] rounded-full border border-black/[0.03] dark:border-white/[0.05]">
             <button
               type="button"
               onClick={() => setViewMode('grid')}
-              className={`h-7 w-7 flex items-center justify-center rounded-full transition cursor-pointer ${
+              className={`w-8 h-7 rounded-full flex items-center justify-center transition active:scale-95 ${
                 viewMode === 'grid'
-                  ? 'bg-paper dark:bg-white/20 text-ink dark:text-white shadow-xs font-bold'
-                  : 'text-ink-mute dark:text-dark-mute hover:text-ink'
+                  ? 'bg-white dark:bg-[#2c2c2e] text-[#0071e3] dark:text-[#2997ff] shadow-xs'
+                  : 'text-[#1d1d1f]/50 dark:text-white/50 hover:text-[#1d1d1f] dark:hover:text-white'
               }`}
               title="Grid View"
             >
@@ -271,87 +286,56 @@ export default function AdminMediaVaultPage() {
             <button
               type="button"
               onClick={() => setViewMode('list')}
-              className={`h-7 w-7 flex items-center justify-center rounded-full transition cursor-pointer ${
+              className={`w-8 h-7 rounded-full flex items-center justify-center transition active:scale-95 ${
                 viewMode === 'list'
-                  ? 'bg-paper dark:bg-white/20 text-ink dark:text-white shadow-xs font-bold'
-                  : 'text-ink-mute dark:text-dark-mute hover:text-ink'
+                  ? 'bg-white dark:bg-[#2c2c2e] text-[#0071e3] dark:text-[#2997ff] shadow-xs'
+                  : 'text-[#1d1d1f]/50 dark:text-white/50 hover:text-[#1d1d1f] dark:hover:text-white'
               }`}
               title="List View"
             >
               <IconListBullet className="w-3.5 h-3.5" />
             </button>
           </div>
-
-          {/* Refresh Button */}
-          <button
-            type="button"
-            onClick={fetchMedia}
-            disabled={loading}
-            className="h-8 w-8 flex items-center justify-center border border-rule/60 dark:border-white/10 hover:border-accent rounded-full text-ink-mute hover:text-ink dark:hover:text-white transition cursor-pointer bg-paper dark:bg-white/[0.04] shadow-xs shrink-0"
-            title="Refresh Files"
-          >
-            <IconRefresh className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-          </button>
-
-          {/* Upload Button */}
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isUploading}
-            className="h-8 px-3.5 bg-accent hover:bg-accent/90 border border-accent text-white text-xs font-bold uppercase tracking-wider rounded-full transition cursor-pointer shadow-xs inline-flex items-center gap-1.5 shrink-0 active:scale-95"
-          >
-            <IconPlus className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">{isUploading ? 'Uploading…' : 'Upload Media'}</span>
-            <span className="sm:hidden">{isUploading ? '…' : 'Upload'}</span>
-          </button>
         </div>
       </div>
 
-      {/* DROPZONE BANNER (ACTIVE ON DRAG) */}
+      {/* DROPZONE BANNER */}
       {isDragging && (
-        <div className="p-8 border-2 border-dashed border-accent bg-accent/5 rounded-3xl text-center space-y-2 animate-in fade-in duration-150">
-          <IconMedia className="w-8 h-8 text-accent mx-auto" />
-          <p className="text-xs font-bold text-ink dark:text-dark-ink">
-            Drop image files here to upload to Cloudflare R2
+        <div className="p-10 border-2 border-dashed border-[#0071e3] bg-[#0071e3]/5 rounded-3xl text-center space-y-2 animate-in fade-in duration-150 backdrop-blur-md">
+          <IconMedia className="w-8 h-8 text-[#0071e3] mx-auto" />
+          <p className="text-xs font-semibold text-[#0071e3]">
+            Release to upload image files to Cloudflare R2
           </p>
         </div>
       )}
 
-      {/* FILE COUNT & STORAGE STATS BAR */}
-      <div className="flex items-center justify-between text-xs text-ink-mute dark:text-dark-mute font-mono px-1">
-        <span>{filteredItems.length} {filteredItems.length === 1 ? 'file' : 'files'}</span>
-        <span className="text-[11px]">Direct Cloudflare CDN Storage</span>
-      </div>
-
-      {/* SCROLLABLE FILES CONTAINER (Files scroll internally instead of whole page) */}
-      <div className="overflow-y-auto max-h-[calc(100vh-220px)] min-h-[450px] p-2.5 sm:p-4 pb-28 sm:pb-6 border border-rule/60 dark:border-white/10 rounded-3xl bg-paper-subtle/20 dark:bg-white/[0.01] shadow-inner overscroll-contain">
+      {/* ASSETS CONTAINER */}
+      <div className="rounded-3xl backdrop-blur-2xl bg-white/70 dark:bg-[#1c1c1e]/70 border border-black/[0.06] dark:border-white/[0.08] shadow-[0_4px_24px_rgba(0,0,0,0.03)] p-4 sm:p-6 min-h-[400px]">
         {loading ? (
-          <div className="py-24 text-center">
-            <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-            <p className="text-xs font-mono uppercase tracking-widest text-ink-mute">
-              Loading Media Assets…
-            </p>
+          <div className="py-24 text-center flex flex-col items-center justify-center gap-3">
+            <span className="w-6 h-6 border-2 border-[#0071e3]/30 border-t-[#0071e3] rounded-full animate-spin" />
+            <p className="text-xs text-[#1d1d1f]/50 dark:text-white/50">Loading cloud assets…</p>
           </div>
         ) : filteredItems.length === 0 ? (
-          <div className="py-20 text-center space-y-3 bg-paper-subtle/50 dark:bg-white/[0.02] border border-rule/60 dark:border-white/10 rounded-3xl p-8">
-            <IconMedia className="w-8 h-8 text-ink-mute mx-auto opacity-40" />
-            <h3 className="font-semibold text-sm text-ink dark:text-dark-ink">
+          <div className="py-20 text-center space-y-3">
+            <IconMedia className="w-10 h-10 text-[#1d1d1f]/30 dark:text-white/30 mx-auto" />
+            <h3 className="font-semibold text-sm text-[#1d1d1f] dark:text-white">
               No media files found
             </h3>
-            <p className="text-xs text-ink-mute dark:text-dark-mute max-w-sm mx-auto">
-              Drop image files here or click Upload Media to store assets on Cloudflare.
+            <p className="text-xs text-[#1d1d1f]/50 dark:text-white/50 max-w-sm mx-auto">
+              Drag and drop image files here or click Upload Asset to store files on Cloudflare.
             </p>
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="px-4 py-2 bg-accent text-white text-xs font-bold uppercase rounded-full hover:opacity-90 transition cursor-pointer shadow-xs"
+              className="px-5 py-2.5 bg-[#0071e3] text-white text-xs font-semibold rounded-full hover:bg-[#0077ed] transition shadow-xs cursor-pointer active:scale-95"
             >
-              Upload First Image
+              Upload First Asset
             </button>
           </div>
         ) : viewMode === 'grid' ? (
-          /* GRID VIEW: CLEAN MOBILE PHOTO TILES + DESKTOP CARDS */
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2.5 sm:gap-4 p-1">
+          /* GRID VIEW: Apple Photos Cards */
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
             {filteredItems.map((item) => {
               const filename = getFilename(item.url, item.title)
               const isCopied = copiedId === item.id
@@ -360,15 +344,14 @@ export default function AdminMediaVaultPage() {
                 <div
                   key={item.id}
                   onClick={() => setSelectedItem(item)}
-                  className="group p-2 sm:p-2.5 bg-paper dark:bg-white/[0.03] border border-rule/60 dark:border-white/10 rounded-2xl shadow-xs hover:border-accent/70 hover:shadow-md transition-all flex flex-col justify-between cursor-pointer active:scale-[0.98]"
+                  className="group p-2.5 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] hover:bg-white dark:hover:bg-[#2c2c2e] border border-black/[0.04] dark:border-white/[0.06] hover:border-black/[0.08] dark:hover:border-white/[0.12] shadow-xs hover:shadow-md transition-all flex flex-col justify-between cursor-pointer active:scale-[0.98]"
                 >
-                  {/* Small Thumbnail */}
-                  <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-paper-subtle dark:bg-white/[0.04] border border-rule/40 dark:border-white/5 mb-1.5 sm:mb-2">
+                  <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-black/[0.05] dark:bg-white/[0.05] mb-2">
                     <img
                       src={item.url}
                       alt={filename}
                       loading="lazy"
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       onError={(e) => {
                         const target = e.currentTarget
                         target.onerror = null
@@ -380,178 +363,163 @@ export default function AdminMediaVaultPage() {
                       target="_blank"
                       rel="noreferrer"
                       onClick={(e) => e.stopPropagation()}
-                      className="absolute top-1.5 right-1.5 p-1 bg-black/60 hover:bg-black text-white rounded-full opacity-0 sm:group-hover:opacity-100 transition-opacity"
+                      className="absolute top-2 right-2 p-1.5 bg-black/60 hover:bg-black text-white rounded-full opacity-0 sm:group-hover:opacity-100 transition-opacity"
                       title="Open in new tab"
                     >
                       <IconExternalLink className="w-3 h-3" />
                     </a>
                   </div>
 
-                  {/* File Details */}
-                  <div className="space-y-0.5 sm:space-y-1 mb-1 sm:mb-2">
-                    <p className="text-[11px] sm:text-xs font-medium text-ink dark:text-dark-ink truncate" title={filename}>
+                  <div className="space-y-0.5 mb-2">
+                    <p className="text-xs font-semibold text-[#1d1d1f] dark:text-white truncate tracking-tight" title={filename}>
                       {filename}
                     </p>
-                    <p className="text-[10px] sm:text-[10.5px] font-mono text-ink-mute dark:text-dark-mute">
+                    <p className="text-[10px] text-[#1d1d1f]/50 dark:text-white/50 font-mono">
                       {formatBytes(item.size)}
                     </p>
                   </div>
 
-                  {/* Desktop-only Copy Link Button (Hidden on mobile where clicking opens bottom sheet) */}
-                  <div className="hidden sm:block">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleCopy(item.url, item.id)
-                      }}
-                      className={`w-full py-1.5 text-xs font-semibold rounded-full border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                        isCopied
-                          ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 shadow-xs'
-                          : 'border-rule/60 dark:border-white/10 hover:border-accent text-ink dark:text-dark-ink hover:bg-paper-subtle dark:hover:bg-white/5 shadow-xs'
-                      }`}
-                    >
-                      {isCopied ? (
-                        <>
-                          <IconCheck className="w-3 h-3 text-emerald-500" />
-                          <span>Copied!</span>
-                        </>
-                      ) : (
-                        <span>Copy Link</span>
-                      )}
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleCopy(item.url, item.id)
+                    }}
+                    className={`w-full py-1.5 text-[11px] font-semibold rounded-full border transition-all cursor-pointer flex items-center justify-center gap-1.5 active:scale-95 ${
+                      isCopied
+                        ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
+                        : 'border-black/[0.08] dark:border-white/[0.1] hover:border-[#0071e3] text-[#1d1d1f] dark:text-white bg-white/80 dark:bg-white/[0.05]'
+                    }`}
+                  >
+                    {isCopied ? (
+                      <>
+                        <IconCheck className="w-3 h-3 text-emerald-500" />
+                        <span>Copied!</span>
+                      </>
+                    ) : (
+                      <span>Copy Link</span>
+                    )}
+                  </button>
                 </div>
               )
             })}
           </div>
         ) : (
-          /* LIST VIEW: COMPACT FILE MANAGER TABLE */
-          <div className="bg-paper dark:bg-white/[0.03] border border-rule/60 dark:border-white/10 rounded-2xl overflow-hidden shadow-xs">
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs font-sans border-collapse text-left">
-                <thead>
-                  <tr className="bg-paper-subtle/60 dark:bg-white/[0.03] border-b border-rule/60 dark:border-white/10 text-ink-mute dark:text-dark-mute font-mono text-[10.5px] uppercase">
-                    <th className="py-2.5 px-4 font-semibold">File</th>
-                    <th className="py-2.5 px-4 font-semibold">Size</th>
-                    <th className="py-2.5 px-4 font-semibold">Direct Link</th>
-                    <th className="py-2.5 px-4 font-semibold text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-rule/40 dark:divide-white/5">
-                  {filteredItems.map((item) => {
-                    const filename = getFilename(item.url, item.title)
-                    const isCopied = copiedId === item.id
+          /* LIST VIEW: Apple macOS Table */
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs font-sans border-collapse text-left">
+              <thead>
+                <tr className="border-b border-black/[0.06] dark:border-white/[0.08] text-[11px] font-semibold text-[#1d1d1f]/50 dark:text-white/50">
+                  <th className="py-3 px-4">Asset</th>
+                  <th className="py-3 px-4">Size</th>
+                  <th className="py-3 px-4">Direct Link</th>
+                  <th className="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-black/[0.04] dark:divide-white/[0.05]">
+                {filteredItems.map((item) => {
+                  const filename = getFilename(item.url, item.title)
+                  const isCopied = copiedId === item.id
 
-                    return (
-                      <tr
-                        key={item.id}
-                        onClick={() => setSelectedItem(item)}
-                        className="hover:bg-paper-subtle/40 dark:hover:bg-white/[0.02] transition cursor-pointer"
-                      >
-                        <td className="py-2.5 px-4">
-                          <div className="flex items-center gap-3">
+                  return (
+                    <tr
+                      key={item.id}
+                      onClick={() => setSelectedItem(item)}
+                      className="hover:bg-black/[0.015] dark:hover:bg-white/[0.02] transition cursor-pointer"
+                    >
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl overflow-hidden bg-black/[0.05] dark:bg-white/[0.05] shrink-0 border border-black/[0.06] dark:border-white/[0.08]">
                             <img
                               src={item.url}
                               alt=""
-                              className="w-10 h-10 rounded-lg object-cover border border-rule/60 dark:border-white/10 shrink-0"
+                              className="w-full h-full object-cover"
                               onError={(e) => {
                                 const target = e.currentTarget
                                 target.onerror = null
                                 target.src = FALLBACK_IMAGE
                               }}
                             />
-                            <span className="font-medium text-ink dark:text-dark-ink truncate max-w-xs sm:max-w-md">
-                              {filename}
-                            </span>
                           </div>
-                        </td>
-                        <td className="py-2.5 px-4 font-mono text-ink-mute dark:text-dark-mute whitespace-nowrap">
-                          {formatBytes(item.size)}
-                        </td>
-                        <td className="py-2.5 px-4 font-mono text-[11px] text-ink-mute dark:text-dark-mute truncate max-w-xs">
-                          {item.url}
-                        </td>
-                        <td className="py-2.5 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                          <div className="inline-flex items-center gap-2">
-                            <button
-                              type="button"
-                              onClick={() => handleCopy(item.url, item.id)}
-                              className={`px-3 py-1 text-[11px] font-semibold rounded-full border transition cursor-pointer inline-flex items-center gap-1 ${
-                                isCopied
-                                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
-                                  : 'border-rule/60 dark:border-white/10 hover:border-accent text-ink dark:text-dark-ink'
-                              }`}
-                            >
-                              {isCopied ? (
-                                <>
-                                  <IconCheck className="w-3 h-3 text-emerald-500" />
-                                  <span>Copied</span>
-                                </>
-                              ) : (
-                                <span>Copy Link</span>
-                              )}
-                            </button>
-                            <a
-                              href={item.url}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="p-1.5 text-ink-mute hover:text-ink dark:hover:text-white rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition"
-                              title="Open file"
-                            >
-                              <IconExternalLink className="w-3.5 h-3.5" />
-                            </a>
-                          </div>
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </div>
+                          <span className="font-semibold text-xs text-[#1d1d1f] dark:text-white tracking-tight truncate max-w-xs sm:max-w-md">
+                            {filename}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 text-[11px] font-mono text-[#1d1d1f]/50 dark:text-white/50 whitespace-nowrap">
+                        {formatBytes(item.size)}
+                      </td>
+                      <td className="py-3 px-4 text-[11px] font-mono text-[#1d1d1f]/50 dark:text-white/50 truncate max-w-xs">
+                        {item.url}
+                      </td>
+                      <td className="py-3 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                        <div className="inline-flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleCopy(item.url, item.id)}
+                            className={`px-3 py-1 text-[11px] font-semibold rounded-full border transition cursor-pointer inline-flex items-center gap-1 active:scale-95 ${
+                              isCopied
+                                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
+                                : 'border-black/[0.08] dark:border-white/[0.1] hover:border-[#0071e3] text-[#1d1d1f] dark:text-white'
+                            }`}
+                          >
+                            {isCopied ? (
+                              <>
+                                <IconCheck className="w-3 h-3 text-emerald-500" />
+                                <span>Copied</span>
+                              </>
+                            ) : (
+                              <span>Copy Link</span>
+                            )}
+                          </button>
+                          <a
+                            href={item.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="p-1.5 text-[#1d1d1f]/50 hover:text-[#1d1d1f] dark:text-white/50 dark:hover:text-white rounded-full transition"
+                            title="Open file"
+                          >
+                            <IconExternalLink className="w-3.5 h-3.5" />
+                          </a>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
 
-      {/* MOBILE BOTTOM SHEET FOR PHOTO DETAILS & DIRECT URL COPY */}
+      {/* APPLE ASSET DETAIL SHEET */}
       {selectedItem && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-          {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
+            className="fixed inset-0 bg-black/40 backdrop-blur-md transition-opacity"
             onClick={() => setSelectedItem(null)}
           />
 
-          {/* Bottom Sheet Card */}
-          <div className="relative w-full sm:max-w-lg bg-paper dark:bg-[#18181b] border-t sm:border border-rule/80 dark:border-white/10 rounded-t-3xl sm:rounded-3xl shadow-2xl p-5 sm:p-6 space-y-4 z-10 max-h-[88vh] overflow-y-auto overscroll-contain animate-in slide-in-from-bottom duration-200">
-            {/* Mobile Drag Handle */}
-            <div
-              className="w-10 h-1 bg-ink-mute/30 dark:bg-white/20 rounded-full mx-auto sm:hidden cursor-pointer"
-              onClick={() => setSelectedItem(null)}
-            />
-
-            {/* Header: Filename & Dismiss */}
+          <div className="relative w-full sm:max-w-lg backdrop-blur-2xl bg-white/95 dark:bg-[#1c1c1e]/95 border border-black/[0.08] dark:border-white/[0.1] rounded-t-3xl sm:rounded-3xl shadow-2xl p-6 space-y-4 z-10 animate-in slide-in-from-bottom duration-200">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
-                <h3 className="font-serif font-bold text-base sm:text-lg text-ink dark:text-dark-ink truncate">
+                <h3 className="font-semibold text-base text-[#1d1d1f] dark:text-white tracking-tight truncate">
                   {getFilename(selectedItem.url, selectedItem.title)}
                 </h3>
-                <p className="text-[11px] font-mono text-ink-mute dark:text-dark-mute mt-0.5">
-                  {formatBytes(selectedItem.size)} • {selectedItem.aspectRatio || '16:10'} • {selectedItem.source === 'upload' ? 'Upload' : 'Story Asset'}
+                <p className="text-[11px] text-[#1d1d1f]/50 dark:text-white/50 font-mono mt-0.5">
+                  {formatBytes(selectedItem.size)} • {selectedItem.aspectRatio || '16:10'}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedItem(null)}
-                className="p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-ink-mute hover:text-ink dark:hover:text-white transition cursor-pointer"
-                aria-label="Close"
+                className="p-1.5 rounded-full hover:bg-black/[0.05] dark:hover:bg-white/[0.08] text-[#1d1d1f]/50 hover:text-[#1d1d1f] dark:text-white/50 dark:hover:text-white transition cursor-pointer"
               >
                 <IconClose className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Large Preview Image */}
-            <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-paper-subtle dark:bg-black/40 border border-rule/60 dark:border-white/10 flex items-center justify-center">
+            <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-black/[0.05] dark:bg-black/40 border border-black/[0.06] dark:border-white/[0.08] flex items-center justify-center">
               <img
                 src={selectedItem.url}
                 alt={selectedItem.title || ''}
@@ -562,53 +530,41 @@ export default function AdminMediaVaultPage() {
                   target.src = FALLBACK_IMAGE
                 }}
               />
-              <a
-                href={selectedItem.url}
-                target="_blank"
-                rel="noreferrer"
-                className="absolute top-2.5 right-2.5 p-2 bg-black/60 hover:bg-black text-white rounded-xl shadow-xs transition cursor-pointer"
-                title="Open original file in new tab"
-              >
-                <IconExternalLink className="w-3.5 h-3.5" />
-              </a>
             </div>
 
-            {/* Direct CDN URL Box */}
             <div className="space-y-1.5">
-              <label className="text-[10px] font-mono font-bold uppercase tracking-wider text-ink-mute dark:text-dark-mute">
-                Direct CDN URL
+              <label className="text-[11px] font-medium text-[#1d1d1f]/60 dark:text-white/60 pl-1">
+                Direct Cloudflare CDN URL
               </label>
-              <div className="flex items-center px-3 py-2.5 bg-paper-subtle dark:bg-white/[0.04] border border-rule/70 dark:border-white/10 rounded-xl">
+              <div className="flex items-center px-4 py-2.5 bg-black/[0.03] dark:bg-white/[0.06] border border-black/[0.06] dark:border-white/[0.08] rounded-full">
                 <input
                   type="text"
                   readOnly
                   value={getAbsoluteUrl(selectedItem.url)}
-                  className="w-full bg-transparent text-xs font-mono text-ink dark:text-white focus:outline-none truncate selection:bg-accent/30"
+                  className="w-full bg-transparent text-xs font-mono text-[#1d1d1f] dark:text-white focus:outline-none truncate"
                 />
               </div>
             </div>
 
-            {/* Bottom Action Buttons: Big Copy URL Primary Button */}
-            <div className="pt-1 flex items-center gap-2.5">
+            <div className="pt-2 flex items-center gap-2.5">
               <button
                 type="button"
-                id="media-bottom-sheet-copy-btn"
                 onClick={() => handleCopy(selectedItem.url, selectedItem.id)}
-                className={`flex-1 h-12 text-xs sm:text-sm font-bold rounded-xl transition cursor-pointer flex items-center justify-center gap-2 shadow-xs active:scale-[0.98] ${
+                className={`flex-1 h-11 text-xs font-semibold rounded-full transition cursor-pointer flex items-center justify-center gap-2 active:scale-[0.98] shadow-xs ${
                   copiedId === selectedItem.id
                     ? 'bg-emerald-600 text-white'
-                    : 'bg-accent hover:bg-accent/90 text-white'
+                    : 'bg-[#0071e3] hover:bg-[#0077ed] text-white'
                 }`}
               >
                 {copiedId === selectedItem.id ? (
                   <>
                     <IconCheck className="w-4 h-4" />
-                    <span>URL Copied to Clipboard!</span>
+                    <span>Copied to Clipboard!</span>
                   </>
                 ) : (
                   <>
                     <IconCopy className="w-4 h-4" />
-                    <span>Copy URL</span>
+                    <span>Copy CDN Link</span>
                   </>
                 )}
               </button>
@@ -617,17 +573,14 @@ export default function AdminMediaVaultPage() {
                 href={selectedItem.url}
                 target="_blank"
                 rel="noreferrer"
-                className="h-12 px-4 border border-rule/80 dark:border-white/15 hover:bg-paper-subtle dark:hover:bg-white/5 rounded-xl text-xs font-semibold flex items-center justify-center text-ink dark:text-dark-ink transition cursor-pointer"
+                className="h-11 px-5 border border-black/[0.08] dark:border-white/[0.1] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] rounded-full text-xs font-semibold flex items-center justify-center text-[#1d1d1f] dark:text-white transition cursor-pointer active:scale-95"
               >
-                Open
+                Open ↗
               </a>
             </div>
           </div>
         </div>
       )}
-
-      {/* FLOATING TOAST MESSAGES */}
-      <AdminToast toasts={toasts} onDismiss={removeToast} />
     </div>
   )
 }

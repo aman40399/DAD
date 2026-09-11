@@ -560,7 +560,7 @@ export default function WordEditor({
   return (
     <div
       ref={containerRef}
-      className={`word-editor border border-rule/80 dark:border-white/10 rounded-2xl bg-paper dark:bg-dark-paper shadow-xs overflow-hidden transition-all ${
+      className={`word-editor border border-black/[0.06] dark:border-white/10 rounded-3xl bg-white/70 dark:bg-[#1c1c1e]/75 backdrop-blur-xl shadow-xs overflow-hidden transition-all ${
         isFullscreen
           ? 'fixed inset-0 z-50 rounded-none border-0 p-4 sm:p-6 bg-black/80 backdrop-blur-md flex flex-col justify-center items-center'
           : 'relative'
@@ -568,22 +568,22 @@ export default function WordEditor({
     >
       {/* WRITING CONTAINER */}
       <div
-        className={`w-full flex flex-col bg-paper dark:bg-dark-paper border border-rule/80 dark:border-white/10 overflow-hidden ${
+        className={`w-full flex flex-col bg-transparent overflow-hidden ${
           isFullscreen
-            ? 'max-w-6xl h-full rounded-2xl shadow-2xl border-white/20'
-            : 'rounded-2xl'
+            ? 'max-w-6xl h-full rounded-3xl shadow-2xl border border-white/20 bg-white/90 dark:bg-[#1c1c1e]/90'
+            : 'rounded-3xl'
         }`}
       >
         {/* COMPREHENSIVE WORD/DOCS RIBBON TOOLBAR (2 Lines on Mobile) */}
-        <div className="bg-paper-subtle/90 dark:bg-dark-subtle/90 border-b border-rule/80 dark:border-white/10 p-1.5 sm:p-2 flex flex-col gap-1.5 text-xs select-none backdrop-blur-xs">
+        <div className="bg-black/[0.02] dark:bg-white/[0.02] border-b border-black/[0.06] dark:border-white/10 p-1.5 sm:p-2 flex flex-col gap-1.5 text-xs select-none backdrop-blur-xs">
           {/* TOOLBAR ROW 1: History, Typography, Style & Emphasis */}
           <div className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar sm:flex-wrap">
             {/* Group 1: History (Undo / Redo) */}
-          <div className="flex items-center gap-0.5 bg-paper/60 dark:bg-white/[0.04] p-0.5 rounded-lg border border-rule/40 dark:border-white/5 shrink-0">
+          <div className="flex items-center gap-0.5 bg-black/[0.03] dark:bg-white/[0.04] p-0.5 rounded-full border border-black/[0.04] dark:border-white/5 shrink-0">
             <button
               type="button"
               onClick={() => executeCmd('undo')}
-              className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-black/5 dark:hover:bg-white/10 text-ink dark:text-dark-ink transition cursor-pointer"
+              className="h-7 w-7 flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-ink dark:text-dark-ink transition cursor-pointer active:scale-95"
               title="Undo (Ctrl+Z)"
             >
               <IconUndo className="w-3.5 h-3.5" />
@@ -591,7 +591,7 @@ export default function WordEditor({
             <button
               type="button"
               onClick={() => executeCmd('redo')}
-              className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-black/5 dark:hover:bg-white/10 text-ink dark:text-dark-ink transition cursor-pointer"
+              className="h-7 w-7 flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 text-ink dark:text-dark-ink transition cursor-pointer active:scale-95"
               title="Redo (Ctrl+Y)"
             >
               <IconRedo className="w-3.5 h-3.5" />
@@ -599,12 +599,12 @@ export default function WordEditor({
           </div>
 
           {/* Group 2: Typography & Style */}
-          <div className="flex items-center gap-1 bg-paper/60 dark:bg-white/[0.04] p-0.5 rounded-lg border border-rule/40 dark:border-white/5 shrink-0">
+          <div className="flex items-center gap-1 bg-black/[0.03] dark:bg-white/[0.04] p-0.5 rounded-full border border-black/[0.04] dark:border-white/5 shrink-0">
             {/* Paragraph / Heading Style */}
             <select
               value={currentBlock}
               onChange={(e) => handleFormatBlock(e.target.value)}
-              className="h-8 px-2.5 bg-paper dark:bg-dark-paper border border-rule/60 dark:border-white/10 rounded-md text-xs font-semibold text-ink dark:text-dark-ink focus:outline-none focus:border-accent cursor-pointer"
+              className="h-7 px-2.5 bg-white dark:bg-[#2c2c2e] border border-black/[0.06] dark:border-white/10 rounded-full text-xs font-semibold text-ink dark:text-dark-ink focus:outline-none focus:ring-1 focus:ring-[#0071e3] cursor-pointer"
               title="Paragraph Style & Heading"
             >
               <option value="p">Normal Text</option>
@@ -620,7 +620,7 @@ export default function WordEditor({
             <select
               value={currentFont}
               onChange={(e) => handleFontChange(e.target.value)}
-              className="h-8 px-2 bg-paper dark:bg-dark-paper border border-rule/60 dark:border-white/10 rounded-md text-xs font-medium text-ink dark:text-dark-ink focus:outline-none focus:border-accent cursor-pointer"
+              className="h-7 px-2 bg-white dark:bg-[#2c2c2e] border border-black/[0.06] dark:border-white/10 rounded-full text-xs font-medium text-ink dark:text-dark-ink focus:outline-none focus:ring-1 focus:ring-[#0071e3] cursor-pointer"
               title="Font Family"
             >
               <option value="serif">Broadsheet Serif</option>
@@ -632,7 +632,7 @@ export default function WordEditor({
             <select
               onChange={(e) => executeCmd('fontSize', e.target.value)}
               defaultValue="3"
-              className="h-8 px-2 bg-paper dark:bg-dark-paper border border-rule/60 dark:border-white/10 rounded-md text-xs font-medium text-ink dark:text-dark-ink focus:outline-none focus:border-accent cursor-pointer"
+              className="h-7 px-2 bg-white dark:bg-[#2c2c2e] border border-black/[0.06] dark:border-white/10 rounded-full text-xs font-medium text-ink dark:text-dark-ink focus:outline-none focus:ring-1 focus:ring-[#0071e3] cursor-pointer"
               title="Font Size"
             >
               <option value="1">10px - Micro</option>
@@ -646,13 +646,13 @@ export default function WordEditor({
           </div>
 
           {/* Group 3: Character Emphasis */}
-          <div className="flex items-center gap-0.5 bg-paper/60 dark:bg-white/[0.04] p-0.5 rounded-lg border border-rule/40 dark:border-white/5 shrink-0">
+          <div className="flex items-center gap-0.5 bg-black/[0.03] dark:bg-white/[0.04] p-0.5 rounded-full border border-black/[0.04] dark:border-white/5 shrink-0">
             <button
               type="button"
               onClick={() => executeCmd('bold')}
-              className={`h-8 w-8 flex items-center justify-center font-bold text-xs rounded-md transition cursor-pointer ${
+              className={`h-7 w-7 flex items-center justify-center font-bold text-xs rounded-full transition cursor-pointer active:scale-95 ${
                 activeFormats.bold
-                  ? 'bg-accent text-white shadow-xs font-black'
+                  ? 'bg-[#0071e3] text-white shadow-xs font-black'
                   : 'hover:bg-black/5 dark:hover:bg-white/10 text-ink dark:text-dark-ink'
               }`}
               title="Bold (Ctrl+B)"
@@ -663,9 +663,9 @@ export default function WordEditor({
             <button
               type="button"
               onClick={() => executeCmd('italic')}
-              className={`h-8 w-8 flex items-center justify-center font-serif italic text-xs rounded-md transition cursor-pointer ${
+              className={`h-7 w-7 flex items-center justify-center font-serif italic text-xs rounded-full transition cursor-pointer active:scale-95 ${
                 activeFormats.italic
-                  ? 'bg-accent text-white shadow-xs'
+                  ? 'bg-[#0071e3] text-white shadow-xs'
                   : 'hover:bg-black/5 dark:hover:bg-white/10 text-ink dark:text-dark-ink'
               }`}
               title="Italic (Ctrl+I)"
@@ -676,9 +676,9 @@ export default function WordEditor({
             <button
               type="button"
               onClick={() => executeCmd('underline')}
-              className={`h-8 w-8 flex items-center justify-center underline text-xs rounded-md transition cursor-pointer ${
+              className={`h-7 w-7 flex items-center justify-center underline text-xs rounded-full transition cursor-pointer active:scale-95 ${
                 activeFormats.underline
-                  ? 'bg-accent text-white shadow-xs'
+                  ? 'bg-[#0071e3] text-white shadow-xs'
                   : 'hover:bg-black/5 dark:hover:bg-white/10 text-ink dark:text-dark-ink'
               }`}
               title="Underline (Ctrl+U)"
@@ -689,9 +689,9 @@ export default function WordEditor({
             <button
               type="button"
               onClick={() => executeCmd('strikeThrough')}
-              className={`h-8 w-8 flex items-center justify-center line-through text-xs rounded-md transition cursor-pointer ${
+              className={`h-7 w-7 flex items-center justify-center line-through text-xs rounded-full transition cursor-pointer active:scale-95 ${
                 activeFormats.strike
-                  ? 'bg-accent text-white shadow-xs'
+                  ? 'bg-[#0071e3] text-white shadow-xs'
                   : 'hover:bg-black/5 dark:hover:bg-white/10 text-ink dark:text-dark-ink'
               }`}
               title="Strikethrough"
@@ -702,9 +702,9 @@ export default function WordEditor({
             <button
               type="button"
               onClick={() => executeCmd('subscript')}
-              className={`h-8 w-8 flex items-center justify-center rounded-md transition cursor-pointer ${
+              className={`h-7 w-7 flex items-center justify-center rounded-full transition cursor-pointer active:scale-95 ${
                 activeFormats.subscript
-                  ? 'bg-accent text-white shadow-xs'
+                  ? 'bg-[#0071e3] text-white shadow-xs'
                   : 'hover:bg-black/5 dark:hover:bg-white/10 text-ink dark:text-dark-ink'
               }`}
               title="Subscript"
@@ -715,9 +715,9 @@ export default function WordEditor({
             <button
               type="button"
               onClick={() => executeCmd('superscript')}
-              className={`h-8 w-8 flex items-center justify-center rounded-md transition cursor-pointer ${
+              className={`h-7 w-7 flex items-center justify-center rounded-full transition cursor-pointer active:scale-95 ${
                 activeFormats.superscript
-                  ? 'bg-accent text-white shadow-xs'
+                  ? 'bg-[#0071e3] text-white shadow-xs'
                   : 'hover:bg-black/5 dark:hover:bg-white/10 text-ink dark:text-dark-ink'
               }`}
               title="Superscript"
@@ -1151,17 +1151,17 @@ export default function WordEditor({
 
       {/* MODAL: EMBED IMAGE */}
       {showImageModal && (
-        <div className="fixed inset-0 z-60 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-paper dark:bg-dark-paper border border-rule dark:border-white/10 rounded-2xl shadow-2xl p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-rule dark:border-white/10 pb-3">
+        <div className="fixed inset-0 z-60 bg-black/40 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="w-full max-w-md backdrop-blur-2xl bg-white/85 dark:bg-[#1c1c1e]/85 border border-black/[0.08] dark:border-white/[0.1] rounded-3xl shadow-2xl p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-black/[0.06] dark:border-white/10 pb-3">
               <h4 className="font-bold text-sm uppercase tracking-wider text-ink dark:text-dark-ink flex items-center gap-2">
-                <IconMedia className="w-4 h-4 text-accent" />
+                <IconMedia className="w-4 h-4 text-[#0071e3]" />
                 <span>Embed Article Illustration</span>
               </h4>
               <button
                 type="button"
                 onClick={() => setShowImageModal(false)}
-                className="text-ink-mute hover:text-ink cursor-pointer p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/5"
+                className="text-ink-mute hover:text-ink cursor-pointer p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/10 active:scale-95"
                 aria-label="Close"
               >
                 <IconClose className="w-4 h-4" />
@@ -1178,7 +1178,7 @@ export default function WordEditor({
                   value={imageUrl}
                   onChange={(e) => setImageUrl(e.target.value)}
                   placeholder="https://images.unsplash.com/... or /uploads/..."
-                  className="w-full text-xs px-3.5 py-2.5 bg-paper-subtle dark:bg-white/[0.04] border border-rule dark:border-white/10 text-ink dark:text-dark-ink focus:outline-none focus:border-accent rounded-xl"
+                  className="w-full text-xs px-4 py-2.5 bg-black/[0.02] dark:bg-white/[0.04] border border-black/[0.08] dark:border-white/10 text-ink dark:text-dark-ink focus:outline-none focus:ring-2 focus:ring-[#0071e3]/20 focus:border-[#0071e3] rounded-full"
                   autoFocus
                 />
               </div>
@@ -1192,7 +1192,7 @@ export default function WordEditor({
                   value={imageCaption}
                   onChange={(e) => setImageCaption(e.target.value)}
                   placeholder="e.g. Photo courtesy of Reuters / Editorial Archives"
-                  className="w-full text-xs px-3.5 py-2.5 bg-paper-subtle dark:bg-white/[0.04] border border-rule dark:border-white/10 text-ink dark:text-dark-ink focus:outline-none focus:border-accent rounded-xl"
+                  className="w-full text-xs px-4 py-2.5 bg-black/[0.02] dark:bg-white/[0.04] border border-black/[0.08] dark:border-white/10 text-ink dark:text-dark-ink focus:outline-none focus:ring-2 focus:ring-[#0071e3]/20 focus:border-[#0071e3] rounded-full"
                 />
               </div>
 
@@ -1206,10 +1206,10 @@ export default function WordEditor({
                       key={mode}
                       type="button"
                       onClick={() => setImageAlign(mode)}
-                      className={`py-2 capitalize rounded-xl border text-xs font-semibold cursor-pointer transition ${
+                      className={`py-1.5 capitalize rounded-full border text-xs font-semibold cursor-pointer transition active:scale-95 ${
                         imageAlign === mode
-                          ? 'bg-accent text-white border-accent shadow-xs'
-                          : 'border-rule dark:border-white/10 text-ink dark:text-dark-ink hover:bg-black/5 dark:hover:bg-white/5'
+                          ? 'bg-[#0071e3] text-white border-[#0071e3] shadow-xs'
+                          : 'border-black/[0.08] dark:border-white/10 text-ink dark:text-dark-ink hover:bg-black/5 dark:hover:bg-white/5'
                       }`}
                     >
                       {mode}
@@ -1219,23 +1219,23 @@ export default function WordEditor({
               </div>
 
               {imageUrl && (
-                <div className="p-2 border border-rule dark:border-white/10 bg-paper-subtle dark:bg-white/[0.04] rounded-xl">
+                <div className="p-2 border border-black/[0.06] dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.04] rounded-2xl">
                   <span className="text-[10px] font-mono text-ink-mute uppercase block mb-1">Live Image Preview</span>
                   <img
                     src={imageUrl}
                     alt="preview"
-                    className="max-h-36 mx-auto object-cover rounded-lg"
+                    className="max-h-36 mx-auto object-cover rounded-xl"
                     onError={(e) => ((e.target as HTMLElement).style.display = 'none')}
                   />
                 </div>
               )}
             </div>
 
-            <div className="flex justify-end gap-2 pt-3 border-t border-rule dark:border-white/10">
+            <div className="flex justify-end gap-2 pt-3 border-t border-black/[0.06] dark:border-white/10">
               <button
                 type="button"
                 onClick={() => setShowImageModal(false)}
-                className="px-4 py-2 text-xs font-semibold text-ink-mute hover:text-ink cursor-pointer rounded-xl hover:bg-black/5"
+                className="px-4 py-2 text-xs font-semibold text-ink-mute hover:text-ink cursor-pointer rounded-full hover:bg-black/5 active:scale-95"
               >
                 Cancel
               </button>
@@ -1243,7 +1243,7 @@ export default function WordEditor({
                 type="button"
                 onClick={handleInsertImage}
                 disabled={!imageUrl.trim()}
-                className="px-4 py-2 bg-accent text-white text-xs font-bold uppercase rounded-xl hover:opacity-90 disabled:opacity-50 cursor-pointer shadow-xs"
+                className="px-5 py-2 bg-[#0071e3] text-white text-xs font-semibold rounded-full hover:bg-[#0077ed] disabled:opacity-50 cursor-pointer shadow-xs active:scale-95"
               >
                 Embed Image
               </button>
@@ -1254,17 +1254,17 @@ export default function WordEditor({
 
       {/* MODAL: EMBED VIDEO */}
       {showVideoModal && (
-        <div className="fixed inset-0 z-60 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-paper dark:bg-dark-paper border border-rule dark:border-white/10 rounded-2xl shadow-2xl p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-rule dark:border-white/10 pb-3">
+        <div className="fixed inset-0 z-60 bg-black/40 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="w-full max-w-md backdrop-blur-2xl bg-white/85 dark:bg-[#1c1c1e]/85 border border-black/[0.08] dark:border-white/[0.1] rounded-3xl shadow-2xl p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-black/[0.06] dark:border-white/10 pb-3">
               <h4 className="font-bold text-sm uppercase tracking-wider text-ink dark:text-dark-ink flex items-center gap-2">
-                <IconVideo className="w-4 h-4 text-accent" />
+                <IconVideo className="w-4 h-4 text-[#0071e3]" />
                 <span>Embed Video Dispatch</span>
               </h4>
               <button
                 type="button"
                 onClick={() => setShowVideoModal(false)}
-                className="text-ink-mute hover:text-ink cursor-pointer p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/5"
+                className="text-ink-mute hover:text-ink cursor-pointer p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/10 active:scale-95"
                 aria-label="Close"
               >
                 <IconClose className="w-4 h-4" />
@@ -1281,7 +1281,7 @@ export default function WordEditor({
                   value={videoUrl}
                   onChange={(e) => setVideoUrl(e.target.value)}
                   placeholder="https://www.youtube.com/watch?v=... or https://vimeo.com/..."
-                  className="w-full text-xs px-3.5 py-2.5 bg-paper-subtle dark:bg-white/[0.04] border border-rule dark:border-white/10 text-ink dark:text-dark-ink focus:outline-none focus:border-accent rounded-xl"
+                  className="w-full text-xs px-4 py-2.5 bg-black/[0.02] dark:bg-white/[0.04] border border-black/[0.08] dark:border-white/10 text-ink dark:text-dark-ink focus:outline-none focus:ring-2 focus:ring-[#0071e3]/20 focus:border-[#0071e3] rounded-full"
                   autoFocus
                 />
               </div>
@@ -1295,16 +1295,16 @@ export default function WordEditor({
                   value={videoCaption}
                   onChange={(e) => setVideoCaption(e.target.value)}
                   placeholder="e.g. Press briefing live footage, Capitol grounds"
-                  className="w-full text-xs px-3.5 py-2.5 bg-paper-subtle dark:bg-white/[0.04] border border-rule dark:border-white/10 text-ink dark:text-dark-ink focus:outline-none focus:border-accent rounded-xl"
+                  className="w-full text-xs px-4 py-2.5 bg-black/[0.02] dark:bg-white/[0.04] border border-black/[0.08] dark:border-white/10 text-ink dark:text-dark-ink focus:outline-none focus:ring-2 focus:ring-[#0071e3]/20 focus:border-[#0071e3] rounded-full"
                 />
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-3 border-t border-rule dark:border-white/10">
+            <div className="flex justify-end gap-2 pt-3 border-t border-black/[0.06] dark:border-white/10">
               <button
                 type="button"
                 onClick={() => setShowVideoModal(false)}
-                className="px-4 py-2 text-xs font-semibold text-ink-mute hover:text-ink cursor-pointer rounded-xl hover:bg-black/5"
+                className="px-4 py-2 text-xs font-semibold text-ink-mute hover:text-ink cursor-pointer rounded-full hover:bg-black/5 active:scale-95"
               >
                 Cancel
               </button>
@@ -1312,7 +1312,7 @@ export default function WordEditor({
                 type="button"
                 onClick={handleInsertVideo}
                 disabled={!videoUrl.trim()}
-                className="px-4 py-2 bg-accent text-white text-xs font-bold uppercase rounded-xl hover:opacity-90 disabled:opacity-50 cursor-pointer shadow-xs"
+                className="px-5 py-2 bg-[#0071e3] text-white text-xs font-semibold rounded-full hover:bg-[#0077ed] disabled:opacity-50 cursor-pointer shadow-xs active:scale-95"
               >
                 Embed Video
               </button>
@@ -1323,17 +1323,17 @@ export default function WordEditor({
 
       {/* MODAL: INSERT HYPERLINK */}
       {showLinkModal && (
-        <div className="fixed inset-0 z-60 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-sm bg-paper dark:bg-dark-paper border border-rule dark:border-white/10 rounded-2xl shadow-2xl p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-rule dark:border-white/10 pb-3">
+        <div className="fixed inset-0 z-60 bg-black/40 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="w-full max-w-sm backdrop-blur-2xl bg-white/85 dark:bg-[#1c1c1e]/85 border border-black/[0.08] dark:border-white/[0.1] rounded-3xl shadow-2xl p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-black/[0.06] dark:border-white/10 pb-3">
               <h4 className="font-bold text-sm uppercase tracking-wider text-ink dark:text-dark-ink flex items-center gap-2">
-                <IconLink className="w-4 h-4 text-accent" />
+                <IconLink className="w-4 h-4 text-[#0071e3]" />
                 <span>Insert Hyperlink</span>
               </h4>
               <button
                 type="button"
                 onClick={() => setShowLinkModal(false)}
-                className="text-ink-mute hover:text-ink cursor-pointer p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/5"
+                className="text-ink-mute hover:text-ink cursor-pointer p-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/10 active:scale-95"
                 aria-label="Close"
               >
                 <IconClose className="w-4 h-4" />
@@ -1350,7 +1350,7 @@ export default function WordEditor({
                   value={linkUrl}
                   onChange={(e) => setLinkUrl(e.target.value)}
                   placeholder="https://example.com/dispatch"
-                  className="w-full text-xs px-3.5 py-2.5 bg-paper-subtle dark:bg-white/[0.04] border border-rule dark:border-white/10 text-ink dark:text-dark-ink focus:outline-none focus:border-accent rounded-xl"
+                  className="w-full text-xs px-4 py-2.5 bg-black/[0.02] dark:bg-white/[0.04] border border-black/[0.08] dark:border-white/10 text-ink dark:text-dark-ink focus:outline-none focus:ring-2 focus:ring-[#0071e3]/20 focus:border-[#0071e3] rounded-full"
                   autoFocus
                 />
               </div>
@@ -1364,16 +1364,16 @@ export default function WordEditor({
                   value={linkText}
                   onChange={(e) => setLinkText(e.target.value)}
                   placeholder="e.g. Read full investigative dossier"
-                  className="w-full text-xs px-3.5 py-2.5 bg-paper-subtle dark:bg-white/[0.04] border border-rule dark:border-white/10 text-ink dark:text-dark-ink focus:outline-none focus:border-accent rounded-xl"
+                  className="w-full text-xs px-4 py-2.5 bg-black/[0.02] dark:bg-white/[0.04] border border-black/[0.08] dark:border-white/10 text-ink dark:text-dark-ink focus:outline-none focus:ring-2 focus:ring-[#0071e3]/20 focus:border-[#0071e3] rounded-full"
                 />
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-3 border-t border-rule dark:border-white/10">
+            <div className="flex justify-end gap-2 pt-3 border-t border-black/[0.06] dark:border-white/10">
               <button
                 type="button"
                 onClick={() => setShowLinkModal(false)}
-                className="px-4 py-2 text-xs font-semibold text-ink-mute hover:text-ink cursor-pointer rounded-xl hover:bg-black/5"
+                className="px-4 py-2 text-xs font-semibold text-ink-mute hover:text-ink cursor-pointer rounded-full hover:bg-black/5 active:scale-95"
               >
                 Cancel
               </button>
@@ -1381,7 +1381,7 @@ export default function WordEditor({
                 type="button"
                 onClick={handleInsertLink}
                 disabled={!linkUrl.trim()}
-                className="px-4 py-2 bg-accent text-white text-xs font-bold uppercase rounded-xl hover:opacity-90 disabled:opacity-50 cursor-pointer shadow-xs"
+                className="px-5 py-2 bg-[#0071e3] text-white text-xs font-semibold rounded-full hover:bg-[#0077ed] disabled:opacity-50 cursor-pointer shadow-xs active:scale-95"
               >
                 Insert Link
               </button>

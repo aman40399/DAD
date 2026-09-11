@@ -31,7 +31,7 @@ export default function AdminToast({ toasts, onDismiss }: AdminToastProps) {
   if (toasts.length === 0) return null
 
   return (
-    <div className="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none">
+    <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2 max-w-md w-full px-4 pointer-events-none">
       {toasts.map((toast) => {
         const isSuccess = toast.type === 'success'
         const isError = toast.type === 'error'
@@ -39,31 +39,25 @@ export default function AdminToast({ toasts, onDismiss }: AdminToastProps) {
         return (
           <div
             key={toast.id}
-            className={`pointer-events-auto bg-paper dark:bg-dark-paper border-2 ${
-              isError
-                ? 'border-red-600 dark:border-red-500'
-                : isSuccess
-                ? 'border-emerald-600 dark:border-emerald-500'
-                : 'border-accent'
-            } p-3.5 rounded-xs shadow-xl transition-all duration-300 transform translate-y-0 opacity-100 flex items-start justify-between gap-3`}
+            className="pointer-events-auto backdrop-blur-2xl bg-white/90 dark:bg-[#1c1c1e]/90 border border-black/[0.08] dark:border-white/[0.1] px-4 py-2.5 rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.12)] flex items-center justify-between gap-3 min-w-[280px] max-w-full animate-in fade-in slide-in-from-top-3 duration-200"
             role="alert"
           >
-            <div className="flex items-start gap-2.5">
+            <div className="flex items-center gap-2.5 min-w-0">
               <span
-                className={`mt-0.5 w-2 h-2 rounded-full shrink-0 ${
+                className={`w-2 h-2 rounded-full shrink-0 ${
                   isError
-                    ? 'bg-red-600'
+                    ? 'bg-red-500'
                     : isSuccess
-                    ? 'bg-emerald-600'
-                    : 'bg-accent'
+                    ? 'bg-emerald-500'
+                    : 'bg-[#0071e3] dark:bg-[#2997ff]'
                 }`}
               />
-              <div className="space-y-0.5">
-                <div className="font-serif font-bold text-xs text-ink dark:text-dark-ink">
+              <div className="min-w-0">
+                <div className="font-semibold text-xs text-[#1d1d1f] dark:text-white tracking-tight truncate">
                   {toast.title}
                 </div>
                 {toast.description && (
-                  <div className="font-sans text-[11px] text-ink-mute dark:text-dark-mute leading-relaxed">
+                  <div className="text-[11px] text-[#1d1d1f]/60 dark:text-white/60 leading-tight truncate">
                     {toast.description}
                   </div>
                 )}
@@ -73,10 +67,10 @@ export default function AdminToast({ toasts, onDismiss }: AdminToastProps) {
             <button
               type="button"
               onClick={() => onDismiss(toast.id)}
-              className="text-ink-mute hover:text-ink p-1 transition cursor-pointer shrink-0"
+              className="w-5 h-5 rounded-full flex items-center justify-center text-[#1d1d1f]/40 hover:text-[#1d1d1f] dark:text-white/40 dark:hover:text-white hover:bg-black/[0.05] dark:hover:bg-white/[0.08] transition cursor-pointer shrink-0"
               aria-label="Dismiss toast"
             >
-              <IconClose className="w-3.5 h-3.5" />
+              <IconClose className="w-3 h-3" />
             </button>
           </div>
         )

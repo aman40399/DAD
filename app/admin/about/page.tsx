@@ -243,20 +243,20 @@ export default function AdminAboutPage() {
   ]
 
   return (
-    <div className="space-y-5 font-sans text-ink dark:text-dark-ink pb-16">
+    <div className="space-y-6 font-sans text-ink dark:text-dark-ink pb-16">
       {/* 1. TOP HEADER & TOOLBAR */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-rule/60 dark:border-white/[0.08]">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-black/[0.06] dark:border-white/[0.08]">
         {/* Desktop-only Page Title (Zero duplicate heading on mobile) */}
         <div className="hidden md:block">
-          <div className="flex items-center gap-2">
-            <h1 className="font-serif font-bold text-xl sm:text-2xl text-ink dark:text-dark-ink">
+          <div className="flex items-center gap-2.5">
+            <h1 className="font-serif font-black text-xl sm:text-2xl text-ink dark:text-dark-ink tracking-tight">
               About Us Editor
             </h1>
-            <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-paper-subtle dark:bg-white/10 border border-rule/60 dark:border-white/10 text-ink-mute dark:text-dark-mute">
+            <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-black/[0.04] dark:bg-white/10 border border-black/[0.06] dark:border-white/10 text-ink-mute dark:text-dark-mute font-medium">
               Institutional Charter
             </span>
             {isDirty && (
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 font-semibold animate-pulse">
+              <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 font-semibold animate-pulse">
                 Unsaved Edits
               </span>
             )}
@@ -269,13 +269,13 @@ export default function AdminAboutPage() {
         {/* Primary Controls (Responsive on Mobile) */}
         <div className="flex items-center justify-between md:justify-end gap-2 w-full md:w-auto">
           {/* View Mode Toggle: Form vs Live Preview */}
-          <div className="flex items-center p-0.5 bg-paper-subtle/80 dark:bg-white/[0.05] border border-rule/60 dark:border-white/10 rounded-full shadow-xs">
+          <div className="flex items-center p-0.5 bg-black/[0.04] dark:bg-white/[0.06] border border-black/[0.06] dark:border-white/10 rounded-full shadow-xs">
             <button
               type="button"
               onClick={() => setViewMode('editor')}
-              className={`px-3 py-1 text-xs rounded-full transition cursor-pointer font-medium ${
+              className={`px-3.5 py-1 text-xs rounded-full transition cursor-pointer font-medium active:scale-95 ${
                 viewMode === 'editor'
-                  ? 'bg-paper dark:bg-white/20 text-ink dark:text-white shadow-xs font-bold'
+                  ? 'bg-white dark:bg-[#2c2c2e] text-[#0071e3] shadow-xs font-semibold'
                   : 'text-ink-mute dark:text-dark-mute hover:text-ink'
               }`}
             >
@@ -284,9 +284,9 @@ export default function AdminAboutPage() {
             <button
               type="button"
               onClick={() => setViewMode('preview')}
-              className={`px-3 py-1 text-xs rounded-full transition cursor-pointer flex items-center gap-1 font-medium ${
+              className={`px-3.5 py-1 text-xs rounded-full transition cursor-pointer flex items-center gap-1 font-medium active:scale-95 ${
                 viewMode === 'preview'
-                  ? 'bg-paper dark:bg-white/20 text-ink dark:text-white shadow-xs font-bold'
+                  ? 'bg-white dark:bg-[#2c2c2e] text-[#0071e3] shadow-xs font-semibold'
                   : 'text-ink-mute dark:text-dark-mute hover:text-ink'
               }`}
             >
@@ -301,7 +301,7 @@ export default function AdminAboutPage() {
               type="button"
               onClick={handleReset}
               disabled={saving}
-              className="h-8 px-2.5 sm:px-3 border border-rule/60 dark:border-white/10 hover:border-red-400/60 rounded-full text-ink-mute hover:text-red-600 dark:hover:text-red-400 text-xs font-semibold transition cursor-pointer bg-paper dark:bg-white/[0.04] shadow-xs"
+              className="h-8 px-3.5 border border-black/[0.08] dark:border-white/10 hover:border-red-400/60 rounded-full text-ink-mute hover:text-red-600 dark:hover:text-red-400 text-xs font-semibold transition cursor-pointer bg-white/80 dark:bg-white/[0.04] shadow-xs active:scale-95"
               title="Reset to default broadsheet text"
             >
               Reset
@@ -312,7 +312,7 @@ export default function AdminAboutPage() {
               href="/about"
               target="_blank"
               rel="noreferrer"
-              className="h-8 px-2.5 sm:px-3 border border-rule/60 dark:border-white/10 hover:border-accent rounded-full text-ink-mute hover:text-ink dark:hover:text-white text-xs font-semibold transition inline-flex items-center gap-1 bg-paper dark:bg-white/[0.04] shadow-xs"
+              className="h-8 px-3.5 border border-black/[0.08] dark:border-white/10 hover:border-[#0071e3] rounded-full text-ink-mute hover:text-ink dark:hover:text-white text-xs font-semibold transition inline-flex items-center gap-1 bg-white/80 dark:bg-white/[0.04] shadow-xs active:scale-95"
               title="Open public About Us page in new tab"
             >
               <span>Live</span>
@@ -324,10 +324,10 @@ export default function AdminAboutPage() {
               type="button"
               onClick={handleSave}
               disabled={saving || !isDirty}
-              className={`h-8 px-3.5 sm:px-4 rounded-full text-xs font-bold uppercase tracking-wider transition cursor-pointer shadow-xs inline-flex items-center gap-1.5 shrink-0 ${
+              className={`h-8 px-4 rounded-full text-xs font-bold transition cursor-pointer shadow-xs inline-flex items-center gap-1.5 shrink-0 ${
                 isDirty
-                  ? 'bg-accent hover:bg-accent/90 text-white active:scale-95 shadow-md'
-                  : 'bg-paper-subtle dark:bg-white/10 text-ink-mute/60 dark:text-dark-mute/50 border border-rule/60 dark:border-white/10 cursor-not-allowed'
+                  ? 'bg-[#0071e3] hover:bg-[#0077ed] text-white active:scale-95 shadow-md'
+                  : 'bg-black/[0.04] dark:bg-white/10 text-ink-mute/50 dark:text-dark-mute/50 border border-black/[0.06] dark:border-white/10 cursor-not-allowed'
               }`}
             >
               {saving ? (
@@ -560,8 +560,8 @@ export default function AdminAboutPage() {
       ) : (
         /* 3. FORM EDITOR WITH SECTION TABS */
         <div className="space-y-6">
-          {/* Horizontal Scrollable Navigation Tabs (Mobile-ergonomic) */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none border-b border-rule/60 dark:border-white/[0.08] -mx-1 px-1">
+          {/* Horizontal Scrollable Navigation Tabs (Apple Segmented Bar) */}
+          <div className="flex items-center gap-1 overflow-x-auto p-1 bg-black/[0.04] dark:bg-white/[0.06] border border-black/[0.06] dark:border-white/10 rounded-full scrollbar-none">
             {tabs.map((tab) => {
               const active = activeTab === tab.key
               return (
@@ -569,10 +569,10 @@ export default function AdminAboutPage() {
                   key={tab.key}
                   type="button"
                   onClick={() => setActiveTab(tab.key)}
-                  className={`shrink-0 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer flex items-center gap-1.5 select-none ${
+                  className={`shrink-0 px-4 py-1.5 rounded-full text-xs transition cursor-pointer flex items-center gap-1.5 select-none active:scale-95 ${
                     active
-                      ? 'bg-ink text-paper dark:bg-white dark:text-black font-bold shadow-xs'
-                      : 'text-ink-mute dark:text-dark-mute hover:text-ink dark:hover:text-white hover:bg-paper-subtle dark:hover:bg-white/[0.05]'
+                      ? 'bg-white dark:bg-[#2c2c2e] text-[#0071e3] font-semibold shadow-xs'
+                      : 'text-ink-mute dark:text-dark-mute hover:text-ink dark:hover:text-white'
                   }`}
                 >
                   <span>{tab.label}</span>
@@ -580,8 +580,8 @@ export default function AdminAboutPage() {
                     <span
                       className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full ${
                         active
-                          ? 'bg-paper/20 dark:bg-black/20 text-paper dark:text-black'
-                          : 'bg-paper-subtle dark:bg-white/10 text-ink-mute'
+                          ? 'bg-[#0071e3]/15 text-[#0071e3]'
+                          : 'bg-black/5 dark:bg-white/10 text-ink-mute'
                       }`}
                     >
                       {tab.count}
@@ -594,9 +594,9 @@ export default function AdminAboutPage() {
 
           {/* TAB 1: HERO & MISSION */}
           {activeTab === 'hero' && (
-            <div className="space-y-5 bg-paper dark:bg-white/[0.02] border border-rule/60 dark:border-white/10 rounded-2xl p-4 sm:p-6 shadow-xs animate-in fade-in duration-150">
+            <div className="space-y-5 backdrop-blur-xl bg-white/70 dark:bg-[#1c1c1e]/75 border border-black/[0.06] dark:border-white/[0.08] rounded-3xl p-5 sm:p-7 shadow-[0_4px_24px_rgba(0,0,0,0.03)] animate-in fade-in duration-150">
               <div>
-                <h3 className="font-serif font-bold text-base text-ink dark:text-dark-ink">
+                <h3 className="font-serif font-black text-base sm:text-lg text-ink dark:text-dark-ink tracking-tight">
                   Institutional Charter & Hero Presentation
                 </h3>
                 <p className="text-xs text-ink-mute dark:text-dark-mute mt-0.5 font-serif italic">
