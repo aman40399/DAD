@@ -11,7 +11,6 @@ import BreakingTicker from '@/components/meridian/BreakingTicker'
 import StockTicker from '@/components/meridian/StockTicker'
 import ArticleAudioPlayer from '@/components/meridian/ArticleAudioPlayer'
 import ArticleShareBar from '@/components/meridian/ArticleShareBar'
-import DispatchDossier from '@/components/meridian/DispatchDossier'
 
 export const dynamic = 'force-dynamic'
 
@@ -345,16 +344,6 @@ export default async function ArticlePage({
             {/* Complete Working Share Bar */}
             <ArticleShareBar title={article.title} url={pageUrl} />
           </div>
-
-          {/* Interactive Dispatch Dossier */}
-          <DispatchDossier
-            title={article.title}
-            subtitle={article.subtitle || article.excerpt}
-            category={article.category}
-            content={article.content || ''}
-            publishedAt={article.published_at || article.publishedAt}
-            author={article.author}
-          />
 
           {/* Main Cropped Featured Hero Image */}
           {heroImage && (
