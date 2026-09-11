@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useDeferredValue } from 'react'
 import { Article } from '@/types'
 import AdminToast, { ToastMessage } from '@/components/admin/AdminToast'
 import { SLOTS } from '@/components/admin/slots/slotTypes'
@@ -273,12 +273,14 @@ export default function SlotManagerPage() {
     }
   }
 
+  const deferredSlotSearch = useDeferredValue(slotSearch)
+
   // Filter slots for search
   const filteredSlots = useMemo(() => {
     return SLOTS.filter((slot) => {
-      if (!slotSearch.trim()) return true
+      if (!deferredSlotSearch.trim()) return true
 
-      const query = slotSearch.toLowerCase()
+      const query = deferredSlotSearch.toLowerCase()
       const slotNumStr = String(slot.slot)
       const slotInfo = `${slot.name} ${slot.location} ${slot.description} slot ${slotNumStr}`.toLowerCase()
       const resolved = resolvedSlots.get(slot.slot)
@@ -287,7 +289,7 @@ export default function SlotManagerPage() {
 
       return slotInfo.includes(query) || articleTitle.includes(query) || articleCategory.includes(query)
     })
-  }, [slotSearch, resolvedSlots])
+  }, [deferredSlotSearch, resolvedSlots])
 
   // Pinned count
   const pinnedCount = useMemo(() => {
@@ -330,96 +332,50 @@ export default function SlotManagerPage() {
   const activeDrawerResolved = drawerSlot ? resolvedSlots.get(drawerSlot) : null
 
   return (
-    <div className="h-full flex-1 flex flex-col min-h-0 md:block font-sans antialiased text-ink dark:text-dark-ink">
-      {/* ========================================================================= */}
-      {/* MOBILE INTERFACE (md:hidden) — Stationary Header & Scrollable List Feed  */}
-      {/* ========================================================================= */}
-      <div className="md:hidden flex-1 min-h-0 flex flex-col overflow-hidden">
-        {/* Stationary Top Controls (Zero Duplicate Heading, Sticky Controls) */}
-        <div className="shrink-0 pb-2.5">
-          <SlotHeader
-            pinnedCount={pinnedCount}
-            onReleaseAllClick={() => setShowResetConfirm(true)}
-            slotSearch={slotSearch}
-            onSlotSearchChange={setSlotSearch}
-            viewMode="list"
-            activeSectionFilter={activeSectionFilter}
-            onSectionFilterChange={setActiveSectionFilter}
-          />
+    <div className="space-y-6 font-apple antialiased text-[#1d1d1f] dark:text-white">
+      {/* Sleek Minimal Apple Header with Stats & Filter Controls */}
+      <SlotHeader
+        pinnedCount={pinnedCount}
+        onReleaseAllClick={() => setShowResetConfirm(true)}
+        slotSearch={slotSearch}
+        onSlotSearchChange={setSlotSearch}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        activeSectionFilter={activeSectionFilter}
+        onSectionFilterChange={setActiveSectionFilter}
+      />
+
+      {loading ? (
+        <div className="py-24 text-center">
+          <div className="w-7 h-7 border-2 border-[#0071e3] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <p className="text-xs font-medium text-[#1d1d1f]/60 dark:text-white/60">
+            Loading broadsheet slots…
+          </p>
         </div>
-
-        {/* Dedicated Scrollable Slot Cards Feed */}
-        <div
-          id="mobile-slots-stream"
-          className="flex-1 min-h-0 overflow-y-auto overscroll-y-contain space-y-4 pb-24 apple-scrollbar"
-          style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
-        >
-          {loading ? (
-            <div className="py-20 text-center">
-              <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-              <p className="text-xs font-mono uppercase tracking-widest text-ink-mute">
-                Loading Slots…
-              </p>
-            </div>
-          ) : (
-            <SlotListView
-              resolvedSlots={resolvedSlots}
-              savingSlot={savingSlot}
-              onAssignSlot={handleAssignSlot}
-              onSwapSlots={handleSwapSlots}
-              onOpenDrawer={setDrawerSlot}
-              activeSectionFilter={activeSectionFilter}
-              slotSearch={slotSearch}
-            />
-          )}
-        </div>
-      </div>
-
-      {/* ========================================================================= */}
-      {/* DESKTOP INTERFACE (hidden md:block) — Grid (Homepage replica) & List View */}
-      {/* ========================================================================= */}
-      <div className="hidden md:block space-y-6">
-        <SlotHeader
-          pinnedCount={pinnedCount}
-          onReleaseAllClick={() => setShowResetConfirm(true)}
-          slotSearch={slotSearch}
-          onSlotSearchChange={setSlotSearch}
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-          activeSectionFilter={activeSectionFilter}
-          onSectionFilterChange={setActiveSectionFilter}
-        />
-
-        {loading ? (
-          <div className="py-24 text-center">
-            <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-            <p className="text-xs font-mono uppercase tracking-widest text-ink-mute">
-              Loading Slots…
-            </p>
-          </div>
-        ) : viewMode === 'grid' ? (
-          /* HOMEPAGE REPLICA BLUEPRINT VIEW */
+      ) : viewMode === 'grid' ? (
+        /* HOMEPAGE REPLICA BLUEPRINT VIEW */
+        <div className="overflow-x-auto pb-4">
           <SlotBlueprintView
             resolvedSlots={resolvedSlots}
             savingSlot={savingSlot}
             onAssignSlot={handleAssignSlot}
             onOpenDrawer={setDrawerSlot}
           />
-        ) : (
-          /* 4-SECTION REORDERABLE LIST VIEW */
-          <SlotListView
-            resolvedSlots={resolvedSlots}
-            savingSlot={savingSlot}
-            onAssignSlot={handleAssignSlot}
-            onSwapSlots={handleSwapSlots}
-            onOpenDrawer={setDrawerSlot}
-            activeSectionFilter={activeSectionFilter}
-            slotSearch={slotSearch}
-          />
-        )}
-      </div>
+        </div>
+      ) : (
+        /* RESPONSIVE APPLE LIST VIEW (Mobile & Desktop) */
+        <SlotListView
+          resolvedSlots={resolvedSlots}
+          savingSlot={savingSlot}
+          onAssignSlot={handleAssignSlot}
+          onSwapSlots={handleSwapSlots}
+          onOpenDrawer={setDrawerSlot}
+          activeSectionFilter={activeSectionFilter}
+          slotSearch={deferredSlotSearch}
+        />
+      )}
 
-      {/* SLIDE-OVER CURATOR DRAWER */}
+      {/* RESPONSIVE CURATOR MODAL (iOS Bottom Sheet on Mobile / Slide-Over Drawer on Desktop) */}
       <SlotCuratorDrawer
         activeDrawerSlotDef={activeDrawerSlotDef}
         activeDrawerResolved={activeDrawerResolved}

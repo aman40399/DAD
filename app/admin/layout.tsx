@@ -118,7 +118,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="h-dvh md:min-h-screen bg-[#f5f5f7] dark:bg-[#000000] text-[#1d1d1f] dark:text-white font-apple flex flex-col md:flex-row antialiased overflow-hidden md:overflow-visible">
+    <div className="h-dvh bg-[#f5f5f7] dark:bg-[#000000] text-[#1d1d1f] dark:text-white font-apple flex flex-col md:flex-row antialiased overflow-hidden">
       {/* MOBILE APP TOP BAR (Apple Frosted Glass) */}
       <header className="md:hidden shrink-0 z-40 backdrop-blur-2xl bg-white/80 dark:bg-[#161617]/80 border-b border-black/[0.05] dark:border-white/[0.06] px-4 py-3 flex items-center justify-between select-none">
         <div className="flex items-center gap-3">
