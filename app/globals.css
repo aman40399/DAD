@@ -638,3 +638,45 @@
   border-radius: 0.5rem;
 }
 
+/* Apple Design System & Fluid Glass Utilities */
+@keyframes appleFadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.apple-animate-in {
+  animation: appleFadeSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.apple-glass-card {
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  background-color: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dark .apple-glass-card {
+  background-color: rgba(28, 28, 30, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.apple-glass-sidebar {
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  background-color: rgba(255, 255, 255, 0.65);
+  border-right: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.dark .apple-glass-sidebar {
+  background-color: rgba(18, 18, 20, 0.65);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+
