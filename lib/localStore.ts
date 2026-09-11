@@ -156,9 +156,14 @@ function setStore(articles: Article[]): void {
 
 
 export const localStore = {
+  setAll(articles: Article[]): void {
+    setStore(articles)
+  },
+
   getAll(): Article[] {
     return [...getStore()]
   },
+
 
   getById(id: string): Article | null {
     const item = getStore().find((a) => a.id === id)

@@ -2,8 +2,10 @@ import { Article, ArticleStatus, CreateArticleInput, ListArticlesOptions, Pagina
 import { localStore } from './localStore'
 import { generateSlug, resolveSlugCollision } from './utils'
 import { isD1Configured, queryD1, executeD1 } from './d1'
+import { loadArticlesFromR2, saveArticlesToR2, isR2Configured, invalidateR2Cache } from './r2Storage'
 
-export { isD1Configured }
+export { isD1Configured, isR2Configured }
+
 
 // Transform raw database row / object to standard Article type with dual compatibility
 export function transformArticle(data: any): Article {
@@ -121,24 +123,43 @@ export function setCached<T>(key: string, data: T, ttlMs = CACHE_TTL_MS): void {
 
 export function invalidateArticleCache(): void {
   memoryCache.clear()
+  invalidateR2Cache()
 }
 
 // Get all articles (sorted by published_at desc) - Cached
 export async function getAllArticles(): Promise<Article[]> {
   const cacheKey = 'all_articles'
   const cached = getCached<Article[]>(cacheKey)
-  if (cached) return cached
+  if (cached && cached.length > 0) return cached
 
-  let result: Article[]
+  let result: Article[] = []
+
+  // 1. If D1 is configured and returns valid data, use D1
   if (isD1Configured()) {
     try {
       const rows = await queryD1('SELECT * FROM articles ORDER BY published_at DESC')
-      result = rows.map(transformArticle)
+      if (rows && rows.length > 0) {
+        result = rows.map(transformArticle)
+      }
     } catch (error) {
-      console.warn('⚠️ Cloudflare D1 error fetching all articles, falling back to local store:', error)
-      result = localStore.getAll()
+      // D1 auth expired or unavailable
     }
-  } else {
+  }
+
+  // 2. Persistent Cloudflare R2 store
+  if (result.length === 0 && isR2Configured()) {
+    try {
+      const r2Articles = await loadArticlesFromR2()
+      if (r2Articles && r2Articles.length > 0) {
+        result = r2Articles.map(transformArticle)
+      }
+    } catch (error) {
+      console.warn('⚠️ Cloudflare R2 read error, falling back to local store:', error)
+    }
+  }
+
+  // 3. Fallback to bundled local store
+  if (result.length === 0) {
     result = localStore.getAll()
   }
 
@@ -470,11 +491,23 @@ export async function listArticles(options?: ListArticlesOptions): Promise<Pagin
   return localStore.list(options)
 }
 
+async function syncMasterListToR2(): Promise<void> {
+  if (isR2Configured()) {
+    try {
+      const all = localStore.getAll()
+      await saveArticlesToR2(all)
+    } catch (err) {
+      console.error('Failed to sync master list to Cloudflare R2:', err)
+    }
+  }
+}
+
 // Create new article
 export async function createArticle(input: CreateArticleInput): Promise<Article | null> {
   invalidateArticleCache()
   // Always update local store so local state remains synchronized
   const localResult = localStore.create(input)
+  await syncMasterListToR2()
 
   if (isD1Configured()) {
     try {
@@ -523,6 +556,7 @@ export async function createArticle(input: CreateArticleInput): Promise<Article 
 export async function updateArticle(id: string, updates: UpdateArticleInput): Promise<Article | null> {
   invalidateArticleCache()
   const localResult = localStore.update(id, updates)
+  await syncMasterListToR2()
 
   if (isD1Configured()) {
     try {
@@ -573,6 +607,7 @@ export async function updateArticle(id: string, updates: UpdateArticleInput): Pr
 export async function deleteArticle(id: string): Promise<boolean> {
   invalidateArticleCache()
   const localSuccess = localStore.delete(id)
+  await syncMasterListToR2()
 
   if (isD1Configured()) {
     try {
@@ -595,6 +630,7 @@ export async function setArticleStatus(id: string, status: ArticleStatus): Promi
 export async function updateArticlePosition(id: string, position: number | null): Promise<boolean> {
   invalidateArticleCache()
   const localSuccess = localStore.updatePosition(id, position)
+  await syncMasterListToR2()
 
   if (isD1Configured()) {
     try {
@@ -615,6 +651,8 @@ export async function updateArticlePosition(id: string, position: number | null)
 export async function swapArticlePositions(id1: string, id2: string): Promise<boolean> {
   invalidateArticleCache()
   const localSuccess = localStore.swapPositions(id1, id2)
+  await syncMasterListToR2()
+
 
   if (isD1Configured()) {
     try {
