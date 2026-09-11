@@ -52,7 +52,7 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="min-h-dvh bg-[#f5f5f7] dark:bg-[#000000] text-[#1d1d1f] dark:text-white font-sans flex flex-col justify-between selection:bg-[#0071e3]/20 relative overflow-hidden">
+    <div className="min-h-dvh bg-[#f5f5f7] dark:bg-[#000000] text-[#1d1d1f] dark:text-white font-apple flex flex-col justify-between selection:bg-[#0071e3]/20 relative overflow-hidden">
       {/* Ambient background blur circles */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#0071e3]/10 dark:bg-[#0071e3]/15 rounded-full blur-3xl pointer-events-none" />
 

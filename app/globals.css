@@ -679,4 +679,13 @@
   border-right: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+/* Apple Preferred Font Typography */
+.font-apple {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "SF Pro", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  letter-spacing: -0.015em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+
 

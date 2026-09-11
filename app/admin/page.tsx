@@ -175,7 +175,7 @@ export default function AdminArticlesPage() {
   const draftCount = articles.filter((a) => a.status === 'draft').length
 
   return (
-    <div className="space-y-6 font-sans text-[#1d1d1f] dark:text-white apple-animate-in">
+    <div className="space-y-6 font-apple text-[#1d1d1f] dark:text-white apple-animate-in">
       {/* Dynamic Island Toast Notifications */}
       <AdminToast toasts={toasts} onDismiss={removeToast} />
 
