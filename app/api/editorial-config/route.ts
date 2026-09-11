@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server'
-import fs from 'fs'
-import path from 'path'
+import { cloudGet, cloudPut, CLOUD_KEYS } from '@/lib/backend/cloudStore'
 
-const configPath = path.join(process.cwd(), 'data', 'editorialConfig.json')
+export const dynamic = 'force-dynamic'
 
 const DEFAULT_CONFIG = {
   editorsNote: {
@@ -27,37 +26,36 @@ const DEFAULT_CONFIG = {
   ],
 }
 
-function readConfig() {
+async function readConfig() {
   try {
-    if (fs.existsSync(configPath)) {
-      const raw = fs.readFileSync(configPath, 'utf-8')
-      return JSON.parse(raw)
+    const data = await cloudGet<any>(CLOUD_KEYS.EDITORIAL_CONFIG)
+    if (data && typeof data === 'object') {
+      return data
     }
   } catch (e) {
-    console.error('Error reading editorialConfig.json:', e)
+    console.error('Error reading editorial config from cloud:', e)
   }
   return DEFAULT_CONFIG
 }
 
-function writeConfig(data: any) {
+async function writeConfig(data: any) {
   try {
-    fs.writeFileSync(configPath, JSON.stringify(data, null, 2), 'utf-8')
-    return true
+    return await cloudPut(CLOUD_KEYS.EDITORIAL_CONFIG, data)
   } catch (e) {
-    console.error('Error writing editorialConfig.json:', e)
+    console.error('Error writing editorial config to cloud:', e)
     return false
   }
 }
 
 export async function GET() {
-  const config = readConfig()
+  const config = await readConfig()
   return NextResponse.json(config)
 }
 
 export async function PATCH(req: Request) {
   try {
     const body = await req.json()
-    const current = readConfig()
+    const current = await readConfig()
 
     const updated = {
       ...current,
@@ -66,7 +64,7 @@ export async function PATCH(req: Request) {
       recommendedItems: body.recommendedItems ? body.recommendedItems : current.recommendedItems,
     }
 
-    const ok = writeConfig(updated)
+    const ok = await writeConfig(updated)
     if (!ok) {
       return NextResponse.json({ error: 'Failed to write config' }, { status: 500 })
     }

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAllArticles, invalidateArticleCache } from '@/lib/articles'
-import { saveArticlesToR2, loadArticlesFromR2 } from '@/lib/r2Storage'
-import { localStore } from '@/lib/localStore'
+import { saveArticlesToR2 } from '@/lib/r2Storage'
 
 export const dynamic = 'force-dynamic'
 
@@ -39,14 +38,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid backup format. Expected a non-empty array of articles.' }, { status: 400 })
     }
 
-    // Save directly to R2
+    // Save directly to cloud database
     await saveArticlesToR2(body)
-    localStore.setAll(body)
     invalidateArticleCache()
 
     return NextResponse.json({
       success: true,
-      message: `Successfully restored ${body.length} articles to Cloudflare R2 and memory store.`,
+      message: `Successfully restored ${body.length} articles to cloud database.`,
       count: body.length,
     })
   } catch (error: any) {

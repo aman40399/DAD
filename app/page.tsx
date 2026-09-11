@@ -5,11 +5,10 @@ import HomeHeroGrid from '@/components/meridian/HomeHeroGrid'
 import EditorsPicks from '@/components/meridian/EditorsPicks'
 import WorldSection from '@/components/meridian/WorldSection'
 import Footer from '@/components/meridian/Footer'
-import fs from 'fs'
-import path from 'path'
 import { getHomepageArticles, getRecentArticles } from '@/lib/articles'
 import { mapArticleToPostCard } from '@/lib/meridianData'
 import { Article } from '@/types'
+import { cloudGet, CLOUD_KEYS } from '@/lib/backend/cloudStore'
 
 export const revalidate = 0
 export const dynamic = 'force-dynamic'
@@ -20,10 +19,7 @@ export default async function HomePage() {
   let editorialConfig: any = null
 
   try {
-    const configPath = path.join(process.cwd(), 'data', 'editorialConfig.json')
-    if (fs.existsSync(configPath)) {
-      editorialConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'))
-    }
+    editorialConfig = await cloudGet(CLOUD_KEYS.EDITORIAL_CONFIG)
   } catch {}
 
   try {

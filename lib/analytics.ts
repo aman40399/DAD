@@ -1,7 +1,6 @@
-import fs from 'fs'
-import path from 'path'
 import crypto from 'crypto'
 import { queryD1, executeD1, isD1Configured } from '@/lib/d1'
+import { cloudGet, cloudPut, CLOUD_KEYS } from '@/lib/backend/cloudStore'
 import type {
   AnalyticsEvent,
   AnalyticsStats,
@@ -302,22 +301,6 @@ export function classifyReferrer(rawReferrer?: string, host?: string): string {
 // 5. Resilient Local File Store, Debounced Queue & Atomic Disk Flushing
 // ---------------------------------------------------------------------------
 
-function getDataDirectory(): string {
-  const dir = path.join(process.cwd(), 'data')
-  if (!fs.existsSync(dir)) {
-    try {
-      fs.mkdirSync(dir, { recursive: true })
-    } catch {
-      // Ignored if read-only filesystem
-    }
-  }
-  return dir
-}
-
-function getAnalyticsFilePath(): string {
-  return path.join(getDataDirectory(), 'analytics.json')
-}
-
 // Global process-level memory store & state
 declare global {
   var __meridian_analytics_store__: AnalyticsEvent[] | undefined
@@ -326,46 +309,21 @@ declare global {
   var __meridian_analytics_flush_timer__: NodeJS.Timeout | undefined
   var __meridian_analytics_is_flushing__: boolean | undefined
   var __meridian_analytics_pending_flush__: boolean | undefined
-  var __meridian_analytics_hooks_registered__: boolean | undefined
 }
 
-function writeToDiskAtomic(events: AnalyticsEvent[]): void {
-  const dir = getDataDirectory()
-  const filePath = getAnalyticsFilePath()
-  // Cap in-memory/file storage to last 15,000 events to prevent unbounded growth
+async function flushToCloud(events: AnalyticsEvent[]): Promise<void> {
   const trimmed = events.slice(-15000)
-  const tempPath = path.join(
-    dir,
-    `.analytics.json.${process.pid}.${Date.now()}.${Math.random().toString(36).slice(2)}.tmp`
-  )
-
   try {
-    fs.writeFileSync(tempPath, JSON.stringify(trimmed, null, 2), 'utf-8')
-    fs.renameSync(tempPath, filePath)
+    await cloudPut(CLOUD_KEYS.ANALYTICS, trimmed)
     globalThis.__meridian_analytics_dirty__ = false
     globalThis.__meridian_analytics_unwritten_count__ = 0
   } catch (err) {
-    console.warn('⚠️ Non-fatal: Error persisting analytics to disk:', err)
-    try {
-      if (fs.existsSync(tempPath)) {
-        fs.unlinkSync(tempPath)
-      }
-    } catch {
-      // Temp cleanup error ignored
-    }
+    console.warn('⚠️ Non-fatal: Error persisting analytics to cloud:', err)
   }
 }
 
 const DEBOUNCE_MS = 1000
 const MAX_UNWRITTEN_THRESHOLD = 25
-
-function flushToDiskSync(): void {
-  if (!globalThis.__meridian_analytics_dirty__) return
-  const store = globalThis.__meridian_analytics_store__
-  if (store && store.length > 0) {
-    writeToDiskAtomic(store)
-  }
-}
 
 function executeFlushQueue(): void {
   if (globalThis.__meridian_analytics_flush_timer__) {
@@ -381,17 +339,17 @@ function executeFlushQueue(): void {
   }
 
   globalThis.__meridian_analytics_is_flushing__ = true
-  try {
-    const store = globalThis.__meridian_analytics_store__
-    if (store) {
-      writeToDiskAtomic(store)
-    }
-  } finally {
+  const store = globalThis.__meridian_analytics_store__
+  if (store) {
+    flushToCloud(store).finally(() => {
+      globalThis.__meridian_analytics_is_flushing__ = false
+      if (globalThis.__meridian_analytics_pending_flush__) {
+        globalThis.__meridian_analytics_pending_flush__ = false
+        executeFlushQueue()
+      }
+    })
+  } else {
     globalThis.__meridian_analytics_is_flushing__ = false
-    if (globalThis.__meridian_analytics_pending_flush__) {
-      globalThis.__meridian_analytics_pending_flush__ = false
-      executeFlushQueue()
-    }
   }
 }
 
@@ -418,82 +376,29 @@ function scheduleDiskFlush(): void {
   }
 }
 
-function registerProcessExitHooks(): void {
-  if (globalThis.__meridian_analytics_hooks_registered__) return
-  if (typeof process === 'undefined' || typeof process.on !== 'function') return
-
-  globalThis.__meridian_analytics_hooks_registered__ = true
-
-  const handleExit = () => {
-    try {
-      flushToDiskSync()
-    } catch {
-      // Non-fatal exit flush
+async function loadAnalyticsFromCloud(): Promise<AnalyticsEvent[]> {
+  try {
+    const data = await cloudGet<AnalyticsEvent[]>(CLOUD_KEYS.ANALYTICS)
+    if (Array.isArray(data)) {
+      return data
     }
+  } catch (err) {
+    console.warn('⚠️ Could not load analytics from cloud:', err)
   }
-
-  process.on('beforeExit', handleExit)
-  process.on('SIGINT', () => {
-    handleExit()
-    process.exit(0)
-  })
-  process.on('SIGTERM', () => {
-    handleExit()
-    process.exit(0)
-  })
-}
-
-// ---------------------------------------------------------------------------
-// 6. Persistent Telemetry Store (Real Data Only - Zero Dummy Seeds)
-// ---------------------------------------------------------------------------
-
-function loadAnalytics(): AnalyticsEvent[] {
-  registerProcessExitHooks()
-  const filePath = getAnalyticsFilePath()
-
-  if (fs.existsSync(filePath)) {
-    try {
-      const data = fs.readFileSync(filePath, 'utf-8')
-      if (data.trim().length > 0) {
-        const parsed = JSON.parse(data)
-        if (Array.isArray(parsed)) {
-          return parsed
-        }
-      }
-    } catch (err) {
-      console.warn('⚠️ Could not parse analytics.json, initializing real store:', err)
-    }
-  }
-
-  // Pure real-world tracking: start fresh with zero mock records
-  writeToDiskAtomic([])
   return []
 }
 
-
-declare global {
-  var __meridian_analytics_mtime__: number | undefined
-}
-
 export function getStore(): AnalyticsEvent[] {
-  const filePath = getAnalyticsFilePath()
-  let currentMtime = 0
-  if (fs.existsSync(filePath)) {
-    try {
-      currentMtime = fs.statSync(filePath).mtimeMs
-    } catch {}
-  }
-
-  if (
-    !globalThis.__meridian_analytics_store__ ||
-    (currentMtime > 0 && currentMtime !== globalThis.__meridian_analytics_mtime__)
-  ) {
-    globalThis.__meridian_analytics_store__ = loadAnalytics()
-    globalThis.__meridian_analytics_mtime__ = currentMtime
+  if (!globalThis.__meridian_analytics_store__) {
+    globalThis.__meridian_analytics_store__ = []
+    loadAnalyticsFromCloud().then((events) => {
+      if (events && events.length > 0 && globalThis.__meridian_analytics_store__?.length === 0) {
+        globalThis.__meridian_analytics_store__ = events
+      }
+    })
   }
   return globalThis.__meridian_analytics_store__
 }
-
 
 // ---------------------------------------------------------------------------
 // 7. Public Telemetry Ingest API
@@ -508,7 +413,7 @@ export async function clearAnalyticsData(): Promise<void> {
     }
   }
   globalThis.__meridian_analytics_store__ = []
-  writeToDiskAtomic([])
+  await cloudPut(CLOUD_KEYS.ANALYTICS, [])
 }
 
 export async function recordAnalyticsEvent(event: Partial<AnalyticsEvent>): Promise<void> {
@@ -783,8 +688,7 @@ export async function getAnalyticsStats(
   let realPublishedCount = 0
   let realPinnedCount = 0
   try {
-    const { localStore } = require('./localStore')
-    const arts = localStore.getAll()
+    const arts: any[] = (globalThis as any).__meridian_articles_store__ || []
     realPublishedCount = arts.filter((a: any) => a.status === 'published').length
     realPinnedCount = arts.filter((a: any) => a.status === 'published' && typeof a.homepage_position === 'number').length
     for (const a of arts) {

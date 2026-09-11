@@ -1,6 +1,5 @@
-import fs from 'fs'
-import path from 'path'
 import { isD1Configured, queryD1, executeD1 } from './d1'
+import { cloudGet, cloudPut, CLOUD_KEYS } from './backend/cloudStore'
 
 export interface PushSubscriptionRecord {
   id: string
@@ -16,31 +15,26 @@ export interface PushSubscriptionRecord {
   lastNotifiedAt?: string
 }
 
-const DATA_DIR = path.join(process.cwd(), 'data')
-const SUBSCRIPTIONS_FILE = path.join(DATA_DIR, 'push_subscriptions.json')
-
-function ensureFile() {
-  try {
-    if (!fs.existsSync(DATA_DIR)) {
-      fs.mkdirSync(DATA_DIR, { recursive: true })
-    }
-    if (!fs.existsSync(SUBSCRIPTIONS_FILE)) {
-      fs.writeFileSync(SUBSCRIPTIONS_FILE, JSON.stringify([], null, 2), 'utf-8')
-    }
-  } catch {}
-}
-
-export function getAllPushSubscriptions(): PushSubscriptionRecord[] {
-  ensureFile()
-  try {
-    const raw = fs.readFileSync(SUBSCRIPTIONS_FILE, 'utf-8')
-    return JSON.parse(raw) as PushSubscriptionRecord[]
-  } catch (e) {
-    return []
-  }
-}
+// In-memory cache for fast access
+let memorySubscriptions: PushSubscriptionRecord[] | null = null
 
 export async function getAllPushSubscriptionsAsync(): Promise<PushSubscriptionRecord[]> {
+  if (memorySubscriptions) {
+    return memorySubscriptions
+  }
+
+  // 1. Try reading from Cloud Store (R2)
+  try {
+    const cloudSubs = await cloudGet<PushSubscriptionRecord[]>(CLOUD_KEYS.PUSH_SUBSCRIPTIONS)
+    if (Array.isArray(cloudSubs)) {
+      memorySubscriptions = cloudSubs
+      return cloudSubs
+    }
+  } catch (err) {
+    console.error('Error fetching subscriptions from CloudStore:', err)
+  }
+
+  // 2. Try reading from D1 if configured
   if (isD1Configured()) {
     try {
       const rows = await queryD1<{
@@ -54,7 +48,7 @@ export async function getAllPushSubscriptionsAsync(): Promise<PushSubscriptionRe
       }>('SELECT id, endpoint, p256dh, auth, user_agent, platform, created_at FROM push_subscriptions')
 
       if (Array.isArray(rows) && rows.length > 0) {
-        return rows.map((r) => ({
+        const subs = rows.map((r) => ({
           id: r.id,
           endpoint: r.endpoint,
           keys: {
@@ -65,12 +59,21 @@ export async function getAllPushSubscriptionsAsync(): Promise<PushSubscriptionRe
           platform: r.platform,
           subscribedAt: r.created_at || new Date().toISOString(),
         }))
+        memorySubscriptions = subs
+        await cloudPut(CLOUD_KEYS.PUSH_SUBSCRIPTIONS, subs)
+        return subs
       }
     } catch (e) {
       console.error('Error fetching subscriptions from D1:', e)
     }
   }
-  return getAllPushSubscriptions()
+
+  memorySubscriptions = []
+  return []
+}
+
+export function getAllPushSubscriptions(): PushSubscriptionRecord[] {
+  return memorySubscriptions || []
 }
 
 export async function savePushSubscription(sub: {
@@ -80,7 +83,35 @@ export async function savePushSubscription(sub: {
   userAgent?: string
   platform?: string
 }): Promise<{ success: boolean; isNew: boolean; count: number }> {
-  // 1. Save to D1 if configured
+  const subs = await getAllPushSubscriptionsAsync()
+  const existingIndex = subs.findIndex((s) => s.endpoint === sub.endpoint)
+  let isNew = false
+
+  if (existingIndex >= 0) {
+    subs[existingIndex] = {
+      ...subs[existingIndex],
+      keys: sub.keys,
+      userAgent: sub.userAgent || subs[existingIndex].userAgent,
+      platform: sub.platform || subs[existingIndex].platform,
+    }
+  } else {
+    isNew = true
+    const record: PushSubscriptionRecord = {
+      id: `sub_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+      endpoint: sub.endpoint,
+      expirationTime: sub.expirationTime,
+      keys: sub.keys,
+      userAgent: sub.userAgent,
+      platform: sub.platform,
+      subscribedAt: new Date().toISOString(),
+    }
+    subs.push(record)
+  }
+
+  memorySubscriptions = subs
+  await cloudPut(CLOUD_KEYS.PUSH_SUBSCRIPTIONS, subs)
+
+  // Also mirror to D1 if configured
   if (isD1Configured()) {
     try {
       const id = `sub_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`
@@ -96,63 +127,28 @@ export async function savePushSubscription(sub: {
         [id, sub.endpoint, sub.keys.p256dh, sub.keys.auth, sub.userAgent || '', sub.platform || '', now]
       )
     } catch (err) {
-      console.error('Non-fatal: Error persisting push subscription to D1:', err)
+      // Non-fatal
     }
   }
 
-  // 2. Also keep in local file/memory
-  ensureFile()
-  try {
-    const subs = getAllPushSubscriptions()
-    const existingIndex = subs.findIndex((s) => s.endpoint === sub.endpoint)
-
-    if (existingIndex >= 0) {
-      subs[existingIndex] = {
-        ...subs[existingIndex],
-        keys: sub.keys,
-        userAgent: sub.userAgent || subs[existingIndex].userAgent,
-        platform: sub.platform || subs[existingIndex].platform,
-      }
-      fs.writeFileSync(SUBSCRIPTIONS_FILE, JSON.stringify(subs, null, 2), 'utf-8')
-      return { success: true, isNew: false, count: subs.length }
-    } else {
-      const record: PushSubscriptionRecord = {
-        id: `sub_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-        endpoint: sub.endpoint,
-        expirationTime: sub.expirationTime,
-        keys: sub.keys,
-        userAgent: sub.userAgent,
-        platform: sub.platform,
-        subscribedAt: new Date().toISOString(),
-      }
-      subs.push(record)
-      fs.writeFileSync(SUBSCRIPTIONS_FILE, JSON.stringify(subs, null, 2), 'utf-8')
-      return { success: true, isNew: true, count: subs.length }
-    }
-  } catch (e) {
-    return { success: true, isNew: true, count: 1 }
-  }
+  return { success: true, isNew, count: subs.length }
 }
 
 export async function removePushSubscription(endpoint: string): Promise<boolean> {
-  if (isD1Configured()) {
-    try {
-      await executeD1('DELETE FROM push_subscriptions WHERE endpoint = ?', [endpoint])
-    } catch (e) {
-      console.error('Error removing from D1:', e)
-    }
-  }
+  const subs = await getAllPushSubscriptionsAsync()
+  const filtered = subs.filter((s) => s.endpoint !== endpoint)
+  if (filtered.length !== subs.length) {
+    memorySubscriptions = filtered
+    await cloudPut(CLOUD_KEYS.PUSH_SUBSCRIPTIONS, filtered)
 
-  ensureFile()
-  try {
-    const subs = getAllPushSubscriptions()
-    const filtered = subs.filter((s) => s.endpoint !== endpoint)
-    if (filtered.length !== subs.length) {
-      fs.writeFileSync(SUBSCRIPTIONS_FILE, JSON.stringify(filtered, null, 2), 'utf-8')
-      return true
+    if (isD1Configured()) {
+      try {
+        await executeD1('DELETE FROM push_subscriptions WHERE endpoint = ?', [endpoint])
+      } catch (e) {
+        // Non-fatal
+      }
     }
-    return false
-  } catch (e) {
-    return false
+    return true
   }
+  return false
 }
