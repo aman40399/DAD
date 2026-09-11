@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import fs from 'fs'
 import path from 'path'
 import { getAllArticles } from '@/lib/articles'
-import { listR2Objects } from '@/lib/r2'
+import { listR2Objects, deleteMedia } from '@/lib/r2'
 
 export const dynamic = 'force-dynamic'
 export const fetchCache = 'force-no-store'
@@ -130,5 +130,65 @@ export async function GET(req: NextRequest) {
   } catch (error: any) {
     console.error('Media fetch error:', error)
     return NextResponse.json({ error: 'Failed to list media' }, { status: 500 })
+  }
+}
+
+/**
+ * DELETE /api/media
+ * Securely deletes an image asset from Cloudflare R2 / local storage
+ */
+export async function DELETE(req: NextRequest) {
+  try {
+    const hasAuth = Boolean(
+      req.headers.get('authorization') ||
+      req.cookies.get('admin_session')?.value
+    )
+
+    if (!hasAuth) {
+      return NextResponse.json(
+        { error: 'Unauthorized', message: 'Admin authentication required to delete media assets.' },
+        { status: 401 }
+      )
+    }
+
+    let url = ''
+    let id = ''
+
+    try {
+      const body = await req.json()
+      url = body?.url || ''
+      id = body?.id || ''
+    } catch {
+      // Body might be empty, check searchParams
+      url = req.nextUrl.searchParams.get('url') || ''
+      id = req.nextUrl.searchParams.get('id') || ''
+    }
+
+    const targetKeyOrUrl = id || url
+    if (!targetKeyOrUrl) {
+      return NextResponse.json(
+        { error: 'Bad Request', message: 'Missing media asset URL or ID' },
+        { status: 400 }
+      )
+    }
+
+    const success = await deleteMedia(targetKeyOrUrl)
+    if (!success) {
+      return NextResponse.json(
+        { error: 'Delete Failed', message: 'Could not remove asset from storage.' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Media asset deleted permanently from storage.',
+    })
+  } catch (err: any) {
+    console.error('Media deletion error:', err)
+    return NextResponse.json(
+      { error: 'Internal Server Error', message: err?.message || 'Failed to delete asset' },
+      { status: 500 }
+    )
   }
 }

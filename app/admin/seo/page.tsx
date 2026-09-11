@@ -106,7 +106,7 @@ export default function AdminSeoPage() {
       {/* APPLE MINIMALIST TOP ROW */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3.5 flex-wrap">
-          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-[#1d1d1f] dark:text-white">
+          <h1 className="hidden md:block text-3xl sm:text-4xl font-semibold tracking-tight text-[#1d1d1f] dark:text-white">
             SEO
           </h1>
 

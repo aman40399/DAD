@@ -13,6 +13,8 @@ import {
   IconRefresh,
   IconLayoutGrid,
   IconListBullet,
+  IconTrash,
+  IconAlert,
 } from '@/components/admin/AdminIcons'
 
 export interface MediaItem {
@@ -64,12 +66,32 @@ export default function AdminMediaVaultPage() {
   const [isDragging, setIsDragging] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  // Story reference tracking & deletion modal state
+  const [articles, setArticles] = useState<any[]>([])
+  const [deleteTarget, setDeleteTarget] = useState<{
+    item: MediaItem
+    usedIn: any[]
+  } | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+
   const addToast = (type: 'success' | 'error' | 'info', title: string, description?: string) => {
     setToasts((prev) => [...prev, { id: `${Date.now()}-${Math.random()}`, type, title, description }])
   }
 
   const removeToast = (id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id))
+  }
+
+  const fetchArticles = async () => {
+    try {
+      const res = await fetch('/api/articles?status=all&limit=200')
+      if (res.ok) {
+        const data = await res.json()
+        setArticles(data.articles || [])
+      }
+    } catch {
+      // ignore
+    }
   }
 
   const fetchMedia = async () => {
@@ -94,7 +116,60 @@ export default function AdminMediaVaultPage() {
 
   useEffect(() => {
     fetchMedia()
+    fetchArticles()
   }, [])
+
+  // Check if an image is used in any published or draft articles
+  const getArticlesUsingMedia = (item: MediaItem) => {
+    const filename = getFilename(item.url, item.title)
+    const cleanUrl = item.url.trim()
+
+    return articles.filter((art) => {
+      const heroUrl = art.image_url || art.imageUrl || ''
+      if (heroUrl && (heroUrl === cleanUrl || heroUrl.includes(filename))) {
+        return true
+      }
+      const content = art.content || ''
+      if (content && (content.includes(cleanUrl) || content.includes(filename))) {
+        return true
+      }
+      return false
+    })
+  }
+
+  const promptDelete = (item: MediaItem, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation()
+    const usedIn = getArticlesUsingMedia(item)
+    setDeleteTarget({ item, usedIn })
+  }
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return
+    setIsDeleting(true)
+    try {
+      const res = await fetch('/api/media', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: deleteTarget.item.url, id: deleteTarget.item.id }),
+      })
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.message || 'Delete failed')
+      }
+
+      setMediaItems((prev) => prev.filter((m) => m.id !== deleteTarget.item.id && m.url !== deleteTarget.item.url))
+      if (selectedItem?.id === deleteTarget.item.id || selectedItem?.url === deleteTarget.item.url) {
+        setSelectedItem(null)
+      }
+      addToast('success', 'Asset Deleted', `"${getFilename(deleteTarget.item.url, deleteTarget.item.title)}" removed permanently from Cloudflare R2.`)
+      setDeleteTarget(null)
+    } catch (err: any) {
+      addToast('error', 'Deletion Error', err.message || 'Could not delete asset from storage.')
+    } finally {
+      setIsDeleting(false)
+    }
+  }
 
   const handleCopy = (url: string, id: string) => {
     const absoluteUrl = url.startsWith('http://') || url.startsWith('https://')
@@ -221,7 +296,7 @@ export default function AdminMediaVaultPage() {
       {/* APPLE MINIMALIST HEADER BAR */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3.5 flex-wrap">
-          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-[#1d1d1f] dark:text-white">
+          <h1 className="hidden md:block text-3xl sm:text-4xl font-semibold tracking-tight text-[#1d1d1f] dark:text-white">
             Media
           </h1>
 
@@ -397,27 +472,39 @@ export default function AdminMediaVaultPage() {
                     </p>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleCopy(item.url, item.id)
-                    }}
-                    className={`w-full py-1.5 text-[11px] font-semibold rounded-full border transition-all cursor-pointer flex items-center justify-center gap-1.5 active:scale-95 ${
-                      isCopied
-                        ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
-                        : 'border-black/[0.08] dark:border-white/[0.1] hover:border-[#0071e3] text-[#1d1d1f] dark:text-white bg-white/80 dark:bg-white/[0.05]'
-                    }`}
-                  >
-                    {isCopied ? (
-                      <>
-                        <IconCheck className="w-3 h-3 text-emerald-500" />
-                        <span>Copied!</span>
-                      </>
-                    ) : (
-                      <span>Copy Link</span>
-                    )}
-                  </button>
+                  <div className="flex items-center gap-1.5 w-full">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleCopy(item.url, item.id)
+                      }}
+                      className={`flex-1 py-1.5 text-[11px] font-semibold rounded-full border transition-all cursor-pointer flex items-center justify-center gap-1.5 active:scale-95 ${
+                        isCopied
+                          ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
+                          : 'border-black/[0.08] dark:border-white/[0.1] hover:border-[#0071e3] text-[#1d1d1f] dark:text-white bg-white/80 dark:bg-white/[0.05]'
+                      }`}
+                    >
+                      {isCopied ? (
+                        <>
+                          <IconCheck className="w-3 h-3 text-emerald-500" />
+                          <span>Copied!</span>
+                        </>
+                      ) : (
+                        <span>Copy Link</span>
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={(e) => promptDelete(item, e)}
+                      className="p-1.5 rounded-full border border-black/[0.08] dark:border-white/[0.1] hover:border-red-500/30 hover:bg-red-500/10 text-[#1d1d1f]/50 hover:text-red-600 dark:text-white/50 dark:hover:text-red-400 transition cursor-pointer active:scale-95 shrink-0"
+                      title="Delete asset"
+                      aria-label="Delete asset"
+                    >
+                      <IconTrash className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
               )
             })}
@@ -490,15 +577,15 @@ export default function AdminMediaVaultPage() {
                               <span>Copy Link</span>
                             )}
                           </button>
-                          <a
-                            href={item.url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="p-1.5 text-[#1d1d1f]/50 hover:text-[#1d1d1f] dark:text-white/50 dark:hover:text-white rounded-full transition"
-                            title="Open file"
+                          <button
+                            type="button"
+                            onClick={(e) => promptDelete(item, e)}
+                            className="p-1.5 text-[#1d1d1f]/50 hover:text-red-600 dark:text-white/50 dark:hover:text-red-400 rounded-full hover:bg-red-500/10 transition cursor-pointer active:scale-95"
+                            title="Delete asset"
+                            aria-label="Delete asset"
                           >
-                            <IconExternalLink className="w-3.5 h-3.5" />
-                          </a>
+                            <IconTrash className="w-3.5 h-3.5" />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -569,7 +656,17 @@ export default function AdminMediaVaultPage() {
               </div>
             </div>
 
-            <div className="pt-2 flex items-center gap-2.5">
+            <div className="pt-2 flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => promptDelete(selectedItem)}
+                className="h-11 px-4 rounded-full border border-red-500/30 text-red-600 dark:text-red-400 hover:bg-red-500/10 transition active:scale-95 flex items-center justify-center gap-1.5 text-xs font-semibold cursor-pointer shrink-0"
+                title="Delete asset"
+              >
+                <IconTrash className="w-4 h-4" />
+                <span className="hidden sm:inline">Delete</span>
+              </button>
+
               <button
                 type="button"
                 onClick={() => handleCopy(selectedItem.url, selectedItem.id)}
@@ -582,7 +679,7 @@ export default function AdminMediaVaultPage() {
                 {copiedId === selectedItem.id ? (
                   <>
                     <IconCheck className="w-4 h-4" />
-                    <span>Copied to Clipboard!</span>
+                    <span>Copied!</span>
                   </>
                 ) : (
                   <>
@@ -596,10 +693,104 @@ export default function AdminMediaVaultPage() {
                 href={selectedItem.url}
                 target="_blank"
                 rel="noreferrer"
-                className="h-11 px-5 border border-black/[0.08] dark:border-white/[0.1] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] rounded-full text-xs font-semibold flex items-center justify-center text-[#1d1d1f] dark:text-white transition cursor-pointer active:scale-95"
+                className="h-11 px-4 border border-black/[0.08] dark:border-white/[0.1] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] rounded-full text-xs font-semibold flex items-center justify-center text-[#1d1d1f] dark:text-white transition cursor-pointer active:scale-95 shrink-0"
               >
                 Open ↗
               </a>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CENTERED DELETE WARNING / CONFIRMATION MODAL */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="relative w-full max-w-md backdrop-blur-2xl bg-white/95 dark:bg-[#1c1c1e]/95 border border-black/[0.08] dark:border-white/[0.1] rounded-3xl shadow-2xl p-6 space-y-4 animate-in zoom-in-95 duration-200 select-none text-center">
+            {/* Top Icon Badge */}
+            <div className={`mx-auto w-14 h-14 rounded-full flex items-center justify-center border ${
+              deleteTarget.usedIn.length > 0
+                ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                : 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20'
+            }`}>
+              {deleteTarget.usedIn.length > 0 ? (
+                <IconAlert className="w-6 h-6 stroke-[2.2]" />
+              ) : (
+                <IconTrash className="w-6 h-6 stroke-[2]" />
+              )}
+            </div>
+
+            {/* Title & Warning Message */}
+            <div className="space-y-1.5">
+              <h3 className="text-lg font-semibold tracking-tight text-[#1d1d1f] dark:text-white">
+                {deleteTarget.usedIn.length > 0 ? 'Asset In Active Stories' : 'Delete Media Asset?'}
+              </h3>
+              <p className="text-xs text-[#1d1d1f]/60 dark:text-white/60 max-w-xs mx-auto">
+                {deleteTarget.usedIn.length > 0
+                  ? `Warning: This image is currently used in ${deleteTarget.usedIn.length} story ${deleteTarget.usedIn.length === 1 ? '' : 'ies'}. Deleting it will permanently remove it from Cloudflare R2 and break the story display.`
+                  : `"${getFilename(deleteTarget.item.url, deleteTarget.item.title)}" will be permanently deleted from Cloudflare R2 storage. This action cannot be undone.`}
+              </p>
+            </div>
+
+            {/* Thumbnail Preview */}
+            <div className="w-24 h-16 mx-auto rounded-xl overflow-hidden border border-black/[0.06] dark:border-white/[0.1] bg-black/5 shadow-2xs">
+              <img
+                src={deleteTarget.item.url}
+                alt=""
+                className="w-full h-full object-cover"
+              />
+            </div>
+
+            {/* List of Affected Stories if in use */}
+            {deleteTarget.usedIn.length > 0 && (
+              <div className="text-left bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] rounded-2xl p-3 max-h-36 overflow-y-auto space-y-2">
+                <p className="text-[10.5px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                  Currently Used In:
+                </p>
+                {deleteTarget.usedIn.map((art) => (
+                  <div key={art.id} className="flex items-center justify-between gap-2 text-xs py-1 border-b border-black/[0.04] dark:border-white/[0.05] last:border-0">
+                    <span className="truncate font-medium text-[#1d1d1f] dark:text-white flex-1" title={art.title}>
+                      {art.title}
+                    </span>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold shrink-0 ${
+                      art.status === 'published'
+                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                        : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
+                    }`}>
+                      {art.status === 'published' ? 'Live' : 'Draft'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Centered Actions */}
+            <div className="flex items-center justify-center gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                disabled={isDeleting}
+                className="flex-1 h-10 text-xs font-semibold rounded-full border border-black/[0.08] dark:border-white/[0.1] text-[#1d1d1f] dark:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition active:scale-95 disabled:opacity-50 cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmDelete}
+                disabled={isDeleting}
+                className="flex-1 h-10 text-xs font-semibold rounded-full bg-red-600 hover:bg-red-700 text-white transition active:scale-95 shadow-[0_2px_8px_rgba(220,38,38,0.3)] disabled:opacity-50 cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                {isDeleting ? (
+                  <>
+                    <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Deleting…</span>
+                  </>
+                ) : (
+                  <>
+                    <IconTrash className="w-3.5 h-3.5" />
+                    <span>{deleteTarget.usedIn.length > 0 ? 'Delete Anyway' : 'Delete Asset'}</span>
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>

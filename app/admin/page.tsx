@@ -186,8 +186,8 @@ export default function AdminArticlesPage() {
       {/* ========================================================================= */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4 flex-wrap">
-          {/* JUST A CLEAN HEADING: "Stories" */}
-          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-[#1d1d1f] dark:text-white">
+          {/* JUST A CLEAN HEADING: "Stories" (Hidden on mobile as it is displayed in mobile header) */}
+          <h1 className="hidden md:block text-3xl sm:text-4xl font-semibold tracking-tight text-[#1d1d1f] dark:text-white">
             Stories
           </h1>
 

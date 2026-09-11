@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3'
+import { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectCommand } from '@aws-sdk/client-s3'
 import fs from 'fs'
 import path from 'path'
 import { refreshCloudflareToken } from './d1'
@@ -211,4 +211,107 @@ export async function uploadMedia(
     contentType,
     storage: 'local',
   }
+}
+
+/**
+ * Permanently delete a media asset from Cloudflare R2 or local storage
+ */
+export async function deleteMedia(keyOrUrl: string): Promise<boolean> {
+  if (!keyOrUrl) return false
+
+  let key = keyOrUrl.trim()
+
+  // If passed an id like "r2-news/..." or "upload-...", extract key
+  if (key.startsWith('r2-')) {
+    key = key.replace(/^r2-/, '')
+  }
+
+  // If passed a CDN URL or relative URL, extract the path key
+  const publicUrl = process.env.CLOUDFLARE_R2_PUBLIC_URL || 'https://pub-f105b5c2551040e1b44a90da84ffa541.r2.dev'
+  if (key.startsWith(publicUrl)) {
+    key = key.slice(publicUrl.length).replace(/^\/+/, '')
+  } else if (key.startsWith('http://') || key.startsWith('https://')) {
+    try {
+      const parsed = new URL(key)
+      key = parsed.pathname.replace(/^\/+/, '')
+    } catch {
+      // ignore
+    }
+  }
+
+  // 1. If it's a local upload
+  if (key.startsWith('/uploads/') || key.startsWith('uploads/') || key.startsWith('upload-')) {
+    const filename = key.replace(/^(upload-|\/uploads\/|uploads\/)/, '')
+    const localPath = path.join(process.cwd(), 'public', 'uploads', filename)
+    try {
+      if (fs.existsSync(localPath)) {
+        fs.unlinkSync(localPath)
+        return true
+      }
+    } catch (err) {
+      console.error('[deleteMedia local error]:', err)
+    }
+    return false
+  }
+
+  // 2. Cloudflare R2 via native S3 Client
+  const s3 = getR2S3Client()
+  if (s3) {
+    try {
+      await s3.client.send(
+        new DeleteObjectCommand({
+          Bucket: s3.bucketName,
+          Key: key,
+        })
+      )
+      return true
+    } catch (err) {
+      console.error('[deleteMedia S3 error]:', err)
+    }
+  }
+
+  // 3. Cloudflare REST API fallback
+  const accountId = process.env.CLOUDFLARE_ACCOUNT_ID
+  const bucketName = process.env.CLOUDFLARE_R2_BUCKET_NAME || 'singhmonster-media'
+
+  if (accountId && bucketName) {
+    try {
+      const r2ApiUrl = `https://api.cloudflare.com/client/v4/accounts/${accountId}/r2/buckets/${bucketName}/objects/${encodeURIComponent(key)}`
+      let token = await refreshCloudflareToken()
+      let res = await fetch(r2ApiUrl, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      })
+
+      if (res.status === 401 || res.status === 403) {
+        token = await refreshCloudflareToken()
+        res = await fetch(r2ApiUrl, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        })
+      }
+
+      if (res.ok) {
+        return true
+      }
+    } catch (err) {
+      console.error('[deleteMedia REST error]:', err)
+    }
+  }
+
+  // Also check if a local copy exists and clean it up
+  const localName = key.replace(/^news\//, '')
+  const fallbackLocalPath = path.join(process.cwd(), 'public', 'uploads', localName)
+  if (fs.existsSync(fallbackLocalPath)) {
+    try {
+      fs.unlinkSync(fallbackLocalPath)
+      return true
+    } catch {}
+  }
+
+  return true
 }

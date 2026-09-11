@@ -85,11 +85,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const getPageTitle = () => {
     if (pathname === '/admin') return 'Stories'
-    if (pathname.startsWith('/admin/slots')) return 'Slot Curator'
-    if (pathname.startsWith('/admin/media')) return 'Media Vault'
-    if (pathname.startsWith('/admin/about')) return 'About Editor'
+    if (pathname.startsWith('/admin/slots')) return 'Slots'
+    if (pathname.startsWith('/admin/media')) return 'Media'
+    if (pathname.startsWith('/admin/about')) return 'About'
     if (pathname.startsWith('/admin/analytics')) return 'Analytics'
-    if (pathname.startsWith('/admin/seo')) return 'SEO Indexing'
+    if (pathname.startsWith('/admin/seo')) return 'SEO'
     if (pathname.startsWith('/admin/articles/new')) return 'New Story'
     if (pathname.includes('/edit')) return 'Edit Story'
     return 'Newsroom'
@@ -97,22 +97,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (checkingAuth) {
     return (
-      <div className="min-h-screen bg-[#f5f5f7] dark:bg-[#000000] flex items-center justify-center p-4">
-        <div className="backdrop-blur-2xl bg-white/80 dark:bg-[#1c1c1e]/80 border border-black/[0.06] dark:border-white/[0.08] p-8 rounded-3xl shadow-xl flex flex-col items-center gap-4">
-          <img
-            src="/logo.png"
-            alt="Singh Monster"
-            className="w-16 h-16 object-contain animate-pulse"
-          />
-          <div className="text-center">
-            <h3 className="text-sm font-semibold tracking-tight text-[#1d1d1f] dark:text-white">
-              Singh Monster
-            </h3>
-            <p className="text-xs text-[#1d1d1f]/60 dark:text-white/60 mt-1">
-              Verifying Apple Security Session...
-            </p>
-          </div>
-        </div>
+      <div className="min-h-screen bg-[#f5f5f7] dark:bg-[#000000] flex items-center justify-center select-none">
+        <img
+          src="/logo.png"
+          alt="Singh Monster"
+          className="w-24 h-24 sm:w-28 sm:h-28 object-contain animate-pulse"
+        />
       </div>
     )
   }
@@ -121,7 +111,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="relative h-dvh bg-[#f5f5f7] dark:bg-[#000000] text-[#1d1d1f] dark:text-white font-apple flex flex-col md:flex-row antialiased overflow-hidden">
       {/* MOBILE APP TOP BAR (Apple Frosted Glass) */}
       <header className="md:hidden shrink-0 z-40 backdrop-blur-2xl bg-white/80 dark:bg-[#161617]/80 border-b border-black/[0.05] dark:border-white/[0.06] px-4 py-3 flex items-center justify-between select-none">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           <button
             type="button"
             onClick={() => setMobileOpen(true)}
@@ -130,14 +120,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           >
             <Menu className="w-4 h-4" />
           </button>
-          <Link href="/admin" className="flex items-center gap-2 no-underline" title="Singh Monster">
+          <Link href="/admin" className="flex items-center gap-2 no-underline" title={getPageTitle()}>
             <img
               src="/logo.png"
               alt="Singh Monster"
-              className="w-8 h-8 object-contain shrink-0"
+              className="w-7 h-7 object-contain shrink-0"
             />
-            <span className="font-semibold text-sm tracking-tight text-[#1d1d1f] dark:text-white">
-              Singh Monster
+            <span className="font-bold text-base tracking-tight text-[#1d1d1f] dark:text-white">
+              {getPageTitle()}
             </span>
           </Link>
         </div>
