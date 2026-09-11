@@ -68,7 +68,7 @@ export default function EditorsPicks({ articles }: EditorsPicksProps) {
       <div className="flex items-end justify-between mb-4">
         <div>
           <h2 id="editors-picks-title" className="font-serif font-black text-2xl sm:text-3xl text-ink dark:text-dark-ink leading-tight">
-            Editor's Picks
+            Editor&apos;s Picks
           </h2>
           <p className="font-serif italic text-xs sm:text-[13px] text-ink-mute dark:text-dark-mute mt-0.5">
             Hand-picked stories from the newsroom

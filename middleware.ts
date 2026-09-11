@@ -6,9 +6,15 @@ const SECRET =
   process.env.ANALYTICS_SALT_SECRET ||
   'singh-monster-auth-key-2026'
 
-async function verifyTokenEdge(token: string): Promise<boolean> {
+async function verifyTokenEdge(token: string, req?: NextRequest): Promise<boolean> {
   if (!token) return false
-  if (token === 'valid_token' && process.env.NODE_ENV !== 'production') return true
+  if (
+    token === 'valid_token' &&
+    (process.env.NODE_ENV === 'test' ||
+      (process.env.NODE_ENV !== 'production' && (req?.headers.get('x-test-suite') === 'meridian-e2e' || req?.headers.get('user-agent')?.includes('node'))))
+  ) {
+    return true
+  }
 
   const parts = token.split(':')
   if (parts.length !== 3) return false
@@ -60,7 +66,7 @@ export async function middleware(req: NextRequest) {
 
   // 2. Protect Admin Web Routes (/admin/*)
   if (pathname.startsWith('/admin')) {
-    const isValid = token ? await verifyTokenEdge(token) : false
+    const isValid = token ? await verifyTokenEdge(token, req) : false
     if (!isValid) {
       const loginUrl = new URL('/admin/login', req.url)
       return NextResponse.redirect(loginUrl)
@@ -82,7 +88,7 @@ export async function middleware(req: NextRequest) {
 
   if (isSensitiveMutation) {
     if (token) {
-      const isValid = await verifyTokenEdge(token)
+      const isValid = await verifyTokenEdge(token, req)
       if (!isValid) {
         return NextResponse.json(
           { success: false, error: 'Unauthorized: Invalid or expired session' },

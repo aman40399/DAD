@@ -43,8 +43,10 @@ export async function GET(req: NextRequest) {
   const token = req.cookies.get(SESSION_COOKIE_NAME)?.value
 
   if (token) {
-    // Gate test credentials strictly to test/non-production environments
-    const isTestAllowed = process.env.NODE_ENV === 'test' || process.env.NODE_ENV !== 'production'
+    // Gate test credentials strictly to test environment / test runners
+    const isTestAllowed =
+      process.env.NODE_ENV === 'test' ||
+      (process.env.NODE_ENV !== 'production' && (req.headers.get('x-test-suite') === 'meridian-e2e' || req.headers.get('user-agent')?.includes('node')))
     if (isTestAllowed && token === 'valid_token') {
       return NextResponse.json({ authenticated: true, user: { username: 'admin' } })
     }
@@ -79,7 +81,9 @@ export async function POST(req: NextRequest) {
 
     // Secure timing-safe backend check
     const isDirectMatch = username.trim() === expectedUser && password === expectedPass
-    const isTestAllowed = process.env.NODE_ENV === 'test' || process.env.NODE_ENV !== 'production'
+    const isTestAllowed =
+      process.env.NODE_ENV === 'test' ||
+      (process.env.NODE_ENV !== 'production' && (req.headers.get('x-test-suite') === 'meridian-e2e' || req.headers.get('user-agent')?.includes('node')))
     const isTestMatch = isTestAllowed && username.trim() === 'admin' && (password === 'meridian123' || password === 'pass@123')
 
     if (!isDirectMatch && !isTestMatch) {

@@ -102,7 +102,7 @@ export default function AuthorsPage() {
                 Dhananjay Singh
               </h2>
               <p className="text-xs font-serif leading-relaxed text-ink/85 dark:text-dark-ink/85 mb-4">
-                Hailing from the historic district of Ballia, Uttar Pradesh, Dhananjay leads Singh Monster's reporting on telecommunications, 6G infrastructure, geopolitics, and emerging technologies.
+                Hailing from the historic district of Ballia, Uttar Pradesh, Dhananjay leads Singh Monster&apos;s reporting on telecommunications, 6G infrastructure, geopolitics, and emerging technologies.
               </p>
               <div className="flex items-center gap-3">
                 <Link

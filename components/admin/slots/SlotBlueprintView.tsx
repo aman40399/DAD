@@ -612,7 +612,7 @@ export default function SlotBlueprintView({
         <header className="flex justify-between items-center pb-2.5 border-b-2 border-ink dark:border-dark-ink mb-6">
           <div className="flex items-center gap-3">
             <h3 className="font-sans font-bold text-[13px] tracking-[0.18em] uppercase text-ink dark:text-dark-ink">
-              Editor's Picks
+              Editor&apos;s Picks
             </h3>
             <span className="text-[10px] font-mono text-ink-mute">Slots 12–15</span>
           </div>
@@ -661,7 +661,7 @@ export default function SlotBlueprintView({
             <div className="p-4 rounded-2xl bg-paper-subtle/50 dark:bg-white/[0.02] border border-rule/60 dark:border-white/10 text-xs font-mono text-ink-mute space-y-2">
               <p className="font-bold uppercase tracking-wider text-ink dark:text-white">Dynamic Category Feed</p>
               <p className="leading-relaxed">
-                The World Section on the homepage automatically populates directly from published dispatches tagged under "World" or "International". Secondary stories populate chronologically.
+                The World Section on the homepage automatically populates directly from published dispatches tagged under &ldquo;World&rdquo; or &ldquo;International&rdquo;. Secondary stories populate chronologically.
               </p>
             </div>
           </div>
@@ -676,7 +676,7 @@ export default function SlotBlueprintView({
           <div className="w-full max-w-lg bg-paper dark:bg-[#141416] border border-rule/70 dark:border-white/15 rounded-3xl p-6 shadow-2xl space-y-5">
             <div className="flex items-center justify-between pb-3 border-b border-rule/60 dark:border-white/10">
               <h3 className="font-serif font-bold text-lg text-ink dark:text-white">
-                Edit Broadsheet Editor's Note
+                Edit Broadsheet Editor&apos;s Note
               </h3>
               <button
                 type="button"

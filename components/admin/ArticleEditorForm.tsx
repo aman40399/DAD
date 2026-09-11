@@ -586,7 +586,7 @@ export default function ArticleEditorForm({
                       </p>
                       <div className="p-3.5 rounded-xl bg-white/60 dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] space-y-2.5">
                         <p className="text-xs font-serif italic text-ink dark:text-dark-ink leading-relaxed">
-                          "{generatedAutoDeck}"
+                          &ldquo;{generatedAutoDeck}&rdquo;
                         </p>
                         <button
                           type="button"

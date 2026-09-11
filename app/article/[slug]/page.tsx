@@ -425,7 +425,7 @@ export default async function ArticlePage({
                     return <h4 key={index}>{trimmed.replace(/^####\s+/, '')}</h4>
                   }
                   if (trimmed.startsWith('> ')) {
-                    return <blockquote key={index}>"{trimmed.replace(/^>\s*/, '')}"</blockquote>
+                    return <blockquote key={index}>&ldquo;{trimmed.replace(/^>\s*/, '')}&rdquo;</blockquote>
                   }
 
                   const imgMatch = trimmed.match(/!\[(.*?)\]\((.*?)\)/)

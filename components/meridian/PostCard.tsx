@@ -98,6 +98,7 @@ export default function PostCard({
   showDeck = true,
   priority = false,
 }: PostCardProps) {
+  const { isBookmarked, toggleBookmark } = useBookmarks()
   const article = propArticle || propPost
 
   // Defensive null guard
@@ -105,7 +106,6 @@ export default function PostCard({
     return null
   }
 
-  const { isBookmarked, toggleBookmark } = useBookmarks()
   const bookmarked = article.id ? isBookmarked(article.id) : false
   const articleUrl = article.slug ? `/article/${article.slug}` : '#'
   const formattedDate = safeFormatDate(article.date)

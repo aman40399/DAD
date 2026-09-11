@@ -134,7 +134,7 @@ export default function EditorialGuidelinesPage() {
                 and when the information provided is vital to the public interest and unobtainable through other means.
               </p>
               <p>
-                When anonymous sources are cited, our readers are informed of the source's general role and rationale for
+                When anonymous sources are cited, our readers are informed of the source&apos;s general role and rationale for
                 anonymity (e.g., &ldquo;a senior telecom ministry official not authorized to speak publicly&rdquo;).
               </p>
             </div>

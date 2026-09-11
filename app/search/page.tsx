@@ -193,7 +193,7 @@ function SearchContent() {
               No Matches Found
             </h3>
             <p className="text-xs font-serif italic text-ink-mute dark:text-dark-mute">
-              We couldn't find any published stories matching your query. Try searching with alternative keywords or clearing category filters.
+              We couldn&apos;t find any published stories matching your query. Try searching with alternative keywords or clearing category filters.
             </p>
           </div>
         ) : (
