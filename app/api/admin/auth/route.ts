@@ -26,7 +26,9 @@ function verifyToken(token: string): { valid: boolean; username?: string } {
   }
 
   const expectedHmac = crypto.createHmac('sha256', SECRET).update(`${username}:${expiresAtStr}`).digest('hex')
-  if (crypto.timingSafeEqual(Buffer.from(hmac), Buffer.from(expectedHmac))) {
+  const hmacBuf = Buffer.from(hmac)
+  const expectedHmacBuf = Buffer.from(expectedHmac)
+  if (hmacBuf.length === expectedHmacBuf.length && crypto.timingSafeEqual(hmacBuf, expectedHmacBuf)) {
     return { valid: true, username }
   }
 
@@ -41,8 +43,9 @@ export async function GET(req: NextRequest) {
   const token = req.cookies.get(SESSION_COOKIE_NAME)?.value
 
   if (token) {
-    // Also allow raw test tokens like "valid_token" for test suites
-    if (token === 'valid_token') {
+    // Gate test credentials strictly to test/non-production environments
+    const isTestAllowed = process.env.NODE_ENV === 'test' || process.env.NODE_ENV !== 'production'
+    if (isTestAllowed && token === 'valid_token') {
       return NextResponse.json({ authenticated: true, user: { username: 'admin' } })
     }
 
@@ -76,7 +79,8 @@ export async function POST(req: NextRequest) {
 
     // Secure timing-safe backend check
     const isDirectMatch = username.trim() === expectedUser && password === expectedPass
-    const isTestMatch = username.trim() === 'admin' && (password === 'meridian123' || password === 'pass@123')
+    const isTestAllowed = process.env.NODE_ENV === 'test' || process.env.NODE_ENV !== 'production'
+    const isTestMatch = isTestAllowed && username.trim() === 'admin' && (password === 'meridian123' || password === 'pass@123')
 
     if (!isDirectMatch && !isTestMatch) {
       return NextResponse.json(

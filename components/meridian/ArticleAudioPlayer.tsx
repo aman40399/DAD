@@ -12,16 +12,28 @@ export default function ArticleAudioPlayer({ title, content }: ArticleAudioPlaye
   const [isPaused, setIsPaused] = useState(false)
   const [supported, setSupported] = useState(false)
   const [rate, setRate] = useState<1 | 1.25 | 1.5>(1)
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([])
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null)
 
   useEffect(() => {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       setSupported(true)
+
+      const loadVoices = () => {
+        const available = window.speechSynthesis.getVoices()
+        if (available && available.length > 0) {
+          setVoices(available)
+        }
+      }
+
+      loadVoices()
+      window.speechSynthesis.onvoiceschanged = loadVoices
     }
 
     return () => {
       if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
         window.speechSynthesis.cancel()
+        window.speechSynthesis.onvoiceschanged = null
       }
     }
   }, [])
@@ -61,12 +73,12 @@ export default function ArticleAudioPlayer({ title, content }: ArticleAudioPlaye
 
     // Detect if text is Devanagari / Hindi to select appropriate speech voice if available
     const isHindi = /[\u0900-\u097F]/.test(textToSpeak)
-    const voices = window.speechSynthesis.getVoices()
+    const availableVoices = voices.length > 0 ? voices : window.speechSynthesis.getVoices()
     if (isHindi) {
-      const hiVoice = voices.find((v) => v.lang.startsWith('hi') || v.lang.includes('IN'))
+      const hiVoice = availableVoices.find((v) => v.lang.startsWith('hi') || v.lang.includes('IN'))
       if (hiVoice) utterance.voice = hiVoice
     } else {
-      const enVoice = voices.find((v) => v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Samantha') || v.lang.includes('US') || v.lang.includes('GB')))
+      const enVoice = availableVoices.find((v) => v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Samantha') || v.lang.includes('US') || v.lang.includes('GB')))
       if (enVoice) utterance.voice = enVoice
     }
 

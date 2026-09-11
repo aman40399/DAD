@@ -152,48 +152,8 @@ export default async function HomePage() {
 
   const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000').replace(/\/$/, '')
 
-  const organizationSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'NewsMediaOrganization',
-    'name': 'Singh Monster',
-    'url': baseUrl,
-    'logo': `${baseUrl}/authr.png`,
-    'publishingPrinciples': `${baseUrl}/about`,
-    'founder': {
-      '@type': 'Person',
-      'name': 'Dhananjay Singh',
-      'jobTitle': 'Admin & Editor-in-Chief',
-    },
-    'sameAs': [
-      'https://twitter.com/SinghMonster',
-      'https://www.linkedin.com/company/singhmonster',
-    ],
-  }
-
-  const websiteSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'WebSite',
-    'name': 'Singh Monster',
-    'url': baseUrl,
-    'potentialAction': {
-      '@type': 'SearchAction',
-      'target': `${baseUrl}/?search={search_term_string}`,
-      'query-input': 'required name=search_term_string',
-    },
-  }
-
   return (
     <div className="min-h-screen bg-paper dark:bg-dark-paper text-ink dark:text-dark-ink transition-colors duration-200">
-      {/* Search Engine Organization & WebSite Schemas */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
-      />
-
       {/* 1. Live Breaking News Ticker & Live Indian Stock Ticker */}
       <BreakingTicker items={tickerItems} />
       <StockTicker />

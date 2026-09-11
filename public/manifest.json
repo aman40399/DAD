@@ -1,11 +1,11 @@
 {
-  "name": "Chhkwa - तरक्की को चाहिए नया नज़रिया",
-  "short_name": "Chhkwa",
-  "description": "Progress Needs a New Perspective - Thoughtful analysis, fresh perspectives, and meaningful conversations",
+  "name": "Singh Monster — Sharp reporting. Deep analysis. No agenda but the truth.",
+  "short_name": "Singh Monster",
+  "description": "Sharp reporting. Deep analysis. No agenda but the truth. Investigative journalism and real-time dispatches.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "theme_color": "#8a5e1f",
   "orientation": "portrait-primary",
   "icons": [
     {

@@ -11,6 +11,7 @@ import BreakingTicker from '@/components/meridian/BreakingTicker'
 import StockTicker from '@/components/meridian/StockTicker'
 import ArticleAudioPlayer from '@/components/meridian/ArticleAudioPlayer'
 import ArticleShareBar from '@/components/meridian/ArticleShareBar'
+import DispatchDossier from '@/components/meridian/DispatchDossier'
 
 export const dynamic = 'force-dynamic'
 
@@ -235,7 +236,7 @@ export default async function ArticlePage({
   }
 
   return (
-    <div className="min-h-screen bg-paper dark:bg-dark-paper text-ink dark:text-dark-ink transition-colors duration-200 flex flex-col font-sans">
+    <div className="min-h-screen bg-paper dark:bg-dark-paper text-ink dark:text-dark-ink transition-colors duration-200 flex flex-col font-sans pb-24 md:pb-0">
       {/* Schema.org NewsArticle & BreadcrumbList structured data */}
       <script
         type="application/ld+json"
@@ -345,6 +346,16 @@ export default async function ArticlePage({
             <ArticleShareBar title={article.title} url={pageUrl} />
           </div>
 
+          {/* Interactive Dispatch Dossier */}
+          <DispatchDossier
+            title={article.title}
+            subtitle={article.subtitle || article.excerpt}
+            category={article.category}
+            content={article.content || ''}
+            publishedAt={article.published_at || article.publishedAt}
+            author={article.author}
+          />
+
           {/* Main Cropped Featured Hero Image */}
           {heroImage && (
             <ArticleHeroImage
@@ -357,11 +368,23 @@ export default async function ArticlePage({
           {/* Article Long-form Body with Full Word/HTML/Markdown Support */}
           {(() => {
             const rawContent = article.content || ''
-            // Sanitize raw scripts and executable handlers for security
+            const sanitizeLink = (url: string) => {
+              const trimmed = (url || '').trim()
+              if (/^\s*(javascript|vbscript|data):/i.test(trimmed)) {
+                return '#'
+              }
+              return trimmed.replace(/"/g, '&quot;')
+            }
+
+            // Sanitize scripts, active plugins, unquoted and quoted handlers, and javascript: URIs
             const sanitized = rawContent
               .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-              .replace(/\son\w+="[^"]*"/gi, '')
-              .replace(/\son\w+='[^']*'/gi, '')
+              .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
+              .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, '')
+              .replace(/<embed\b[^>]*>/gi, '')
+              .replace(/\son\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '')
+              .replace(/\bhref\s*=\s*(?:"\s*javascript:[^"]*"|'\s*javascript:[^']*'|\s*javascript:[^\s>]+)/gi, 'href="#"')
+              .replace(/\bsrc\s*=\s*(?:"\s*javascript:[^"]*"|'\s*javascript:[^']*'|\s*javascript:[^\s>]+)/gi, 'src=""')
 
             const isHtml = /<[a-z][\s\S]*>/i.test(sanitized)
 
@@ -420,7 +443,9 @@ export default async function ArticlePage({
                   const formattedHtml = trimmed
                     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                     .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                    .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+                    .replace(/\[(.*?)\]\((.*?)\)/g, (match, linkText, linkHref) => {
+                      return `<a href="${sanitizeLink(linkHref)}" target="_blank" rel="noopener noreferrer">${linkText}</a>`
+                    })
 
                   const isLead = !leadRendered
                   leadRendered = true

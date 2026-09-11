@@ -4,16 +4,40 @@ import { useState } from 'react'
 
 export default function NewsletterBox() {
   const [email, setEmail] = useState('')
+  const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email) return
-    setSubmitted(true)
-    setTimeout(() => {
-      setSubmitted(false)
-      setEmail('')
-    }, 4000)
+    if (!email || submitting) return
+
+    setSubmitting(true)
+    setErrorMessage('')
+
+    try {
+      const res = await fetch('/api/newsletter/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, source: 'sidebar_box' }),
+      })
+
+      const data = await res.json().catch(() => ({}))
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Subscription failed. Please try again.')
+      }
+
+      setSubmitted(true)
+      setTimeout(() => {
+        setSubmitted(false)
+        setEmail('')
+      }, 5000)
+    } catch (err: any) {
+      setErrorMessage(err?.message || 'Failed to subscribe')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -44,13 +68,18 @@ export default function NewsletterBox() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="your@email.com"
-            className="w-full text-xs px-3 py-2.5 bg-paper dark:bg-dark-paper border border-rule dark:border-dark-rule text-ink dark:text-dark-ink placeholder:text-ink-mute focus:outline-none focus:border-accent"
+            disabled={submitting}
+            className="w-full text-xs px-3 py-2.5 bg-paper dark:bg-dark-paper border border-rule dark:border-dark-rule text-ink dark:text-dark-ink placeholder:text-ink-mute focus:outline-none focus:border-accent disabled:opacity-60"
           />
+          {errorMessage && (
+            <p className="text-[11px] text-red-600 font-medium">{errorMessage}</p>
+          )}
           <button
             type="submit"
-            className="w-full bg-ink dark:bg-dark-ink text-paper dark:text-dark-paper py-2.5 text-xs font-bold uppercase tracking-wider hover:opacity-90 transition cursor-pointer"
+            disabled={submitting}
+            className="w-full bg-ink dark:bg-dark-ink text-paper dark:text-dark-paper py-2.5 text-xs font-bold uppercase tracking-wider hover:opacity-90 transition cursor-pointer disabled:opacity-60"
           >
-            Subscribe
+            {submitting ? 'Subscribing…' : 'Subscribe'}
           </button>
         </form>
       )}

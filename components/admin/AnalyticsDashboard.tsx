@@ -1,8 +1,28 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
-import * as Flags from 'country-flag-icons/react/3x2'
+import US from 'country-flag-icons/react/3x2/US'
+import IN from 'country-flag-icons/react/3x2/IN'
+import GB from 'country-flag-icons/react/3x2/GB'
+import DE from 'country-flag-icons/react/3x2/DE'
+import FR from 'country-flag-icons/react/3x2/FR'
+import CA from 'country-flag-icons/react/3x2/CA'
+import JP from 'country-flag-icons/react/3x2/JP'
+import AU from 'country-flag-icons/react/3x2/AU'
+import SG from 'country-flag-icons/react/3x2/SG'
+import NL from 'country-flag-icons/react/3x2/NL'
+import CH from 'country-flag-icons/react/3x2/CH'
+import BR from 'country-flag-icons/react/3x2/BR'
+import IT from 'country-flag-icons/react/3x2/IT'
+import ES from 'country-flag-icons/react/3x2/ES'
+import AE from 'country-flag-icons/react/3x2/AE'
+import CN from 'country-flag-icons/react/3x2/CN'
+import RU from 'country-flag-icons/react/3x2/RU'
 import { AnalyticsStats } from '@/lib/analytics'
+
+const TOP_FLAGS: Record<string, React.ComponentType<{ className?: string; title?: string }>> = {
+  US, IN, GB, DE, FR, CA, JP, AU, SG, NL, CH, BR, IT, ES, AE, CN, RU,
+}
 
 interface ChartPoint {
   x: number
@@ -41,7 +61,7 @@ function generateSmoothPath(pts: { x: number; y: number }[]): string {
 
 function CountryFlag({ code, className = 'w-5 h-3.5' }: { code: string; className?: string }) {
   const c = code.toUpperCase()
-  const FlagComp = (Flags as Record<string, React.ComponentType<{ className?: string; title?: string }>>)[c]
+  const FlagComp = TOP_FLAGS[c]
 
   if (FlagComp) {
     return <FlagComp className={`${className} rounded-xs object-cover inline-block`} title={c} />

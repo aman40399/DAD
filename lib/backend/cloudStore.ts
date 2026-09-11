@@ -6,6 +6,7 @@ export const CLOUD_KEYS = {
   ABOUT_CONFIG: 'database/aboutConfig.json',
   EDITORIAL_CONFIG: 'database/editorialConfig.json',
   PUSH_SUBSCRIPTIONS: 'database/push_subscriptions.json',
+  NEWSLETTER_SUBSCRIPTIONS: 'database/newsletter_subscriptions.json',
   ANALYTICS: 'database/analytics.json',
 } as const
 

@@ -41,7 +41,13 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const resolvedParams = await Promise.resolve(params)
   const slug = (resolvedParams?.slug || '').toLowerCase().trim()
-  const author = AUTHORS[slug] || AUTHORS['dhananjay-singh']
+  const author = AUTHORS[slug]
+  if (!author) {
+    return {
+      title: 'Author Not Found | Singh Monster',
+      description: 'The requested author profile does not exist.',
+    }
+  }
 
   const pageUrl = `${baseUrl}/author/${slug}`
 
@@ -81,9 +87,9 @@ export default async function AuthorProfilePage({
 }) {
   const resolvedParams = await Promise.resolve(params)
   const slug = (resolvedParams?.slug || '').toLowerCase().trim()
-  const author = AUTHORS[slug] || AUTHORS['dhananjay-singh']
+  const author = AUTHORS[slug]
 
-  if (!author && slug !== 'dhananjay-singh') {
+  if (!author) {
     notFound()
   }
 

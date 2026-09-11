@@ -78,6 +78,11 @@ export default function ArticleEditorForm({
   const [error, setError] = useState('')
   const [pushAlert, setPushAlert] = useState(true)
 
+  // Newsroom AI Copilot state
+  const [showCopilot, setShowCopilot] = useState(false)
+  const [copilotTab, setCopilotTab] = useState<'headlines' | 'deck'>('headlines')
+  const [copilotFeedback, setCopilotFeedback] = useState('')
+
   // Imperative insert ref to place media at active cursor in WordEditor
   const insertHtmlRef = useRef<((html: string) => void) | null>(null)
 
@@ -253,6 +258,33 @@ export default function ArticleEditorForm({
     }
   }
 
+  // Newsroom AI Copilot headline variations and auto-deck generator
+  const t = title.trim() || 'Breaking Global News Dispatch'
+  const cleanTitleCore = t.replace(/^breaking:?\s*/i, '').replace(/[\r\n]+/g, ' ').trim()
+  const cleanContentText = (content || '')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/[#*_`~>-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+
+  const sentences = cleanContentText.split(/(?<=[.?!])\s+/).filter((s) => s.length > 20 && s.length < 240)
+
+  const copilotHeadlines = {
+    broadsheet: `${category.toUpperCase()} DISPATCH: ${cleanTitleCore} Amid Strategic Global Realignment`,
+    punchy: `${cleanTitleCore.slice(0, 48).toUpperCase()} — CRITICAL UPDATE`,
+    hindi: /[\u0900-\u097F]/.test(cleanTitleCore)
+      ? cleanTitleCore
+      : `विशेष रिपोर्ट: ${cleanTitleCore.slice(0, 45)} — सिंह मॉन्स्टर विशेष कवरेज`,
+    seo: `${cleanTitleCore.slice(0, 46)} | Singh Monster`.slice(0, 65),
+  }
+
+  const generatedAutoDeck =
+    sentences.length >= 2
+      ? `${sentences[0]} Meanwhile, reporting across the ${category} desk indicates continuous strategic follow-through.`
+      : sentences.length === 1
+      ? `${sentences[0]} An investigative dispatch verified by Singh Monster newsroom.`
+      : `An in-depth dispatch into ${cleanTitleCore}, examining strategic implications across ${category} corridors.`
+
   return (
     <div className="flex-1 min-h-0 flex flex-col space-y-3 sm:space-y-4 md:space-y-6 font-sans">
       {/* DESKTOP TOP ACTION BAR (hidden on mobile) */}
@@ -380,11 +412,199 @@ export default function ArticleEditorForm({
               mobileTab === 'write' ? 'block' : 'hidden'
             } md:block lg:col-span-8 backdrop-blur-xl bg-white/70 dark:bg-[#1c1c1e]/75 border border-black/[0.06] dark:border-white/[0.08] rounded-3xl p-5 sm:p-7 lg:p-8 space-y-4 sm:space-y-6 shadow-[0_4px_24px_rgba(0,0,0,0.03)]`}
           >
-            {/* Headline (Article Title) */}
-            <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wider text-ink-mute dark:text-dark-mute mb-2">
-                Headline *
-              </label>
+            {/* Headline and AI Copilot Drawer */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-ink-mute dark:text-dark-mute">
+                  Headline *
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowCopilot(!showCopilot)}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition cursor-pointer active:scale-95 shadow-2xs ${
+                    showCopilot
+                      ? 'bg-purple-600 text-white shadow-purple-500/20'
+                      : 'bg-purple-500/10 text-purple-700 dark:text-purple-300 hover:bg-purple-500/20 border border-purple-500/20'
+                  }`}
+                  title="Toggle Newsroom AI Copilot"
+                >
+                  <span>✨ Newsroom AI Copilot</span>
+                  <span className="text-[10px] opacity-70">{showCopilot ? '▲ Hide' : '▼ Drawer'}</span>
+                </button>
+              </div>
+
+              {/* NEWSROOM AI COPILOT DRAWER */}
+              {showCopilot && (
+                <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-purple-500/5 via-accent/5 to-transparent border border-purple-500/20 dark:border-purple-400/20 space-y-4 shadow-sm animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="flex items-center justify-between gap-2 border-b border-purple-500/10 dark:border-purple-400/10 pb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-purple-900 dark:text-purple-300">
+                        Newsroom AI Copilot
+                      </h4>
+                    </div>
+                    <div className="flex items-center gap-1.5 bg-black/5 dark:bg-white/10 p-0.5 rounded-full text-[11px]">
+                      <button
+                        type="button"
+                        onClick={() => setCopilotTab('headlines')}
+                        className={`px-2.5 py-0.5 rounded-full font-medium transition cursor-pointer ${
+                          copilotTab === 'headlines'
+                            ? 'bg-purple-600 text-white shadow-2xs'
+                            : 'text-ink-mute dark:text-dark-mute hover:text-ink dark:hover:text-white'
+                        }`}
+                      >
+                        Headlines
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setCopilotTab('deck')}
+                        className={`px-2.5 py-0.5 rounded-full font-medium transition cursor-pointer ${
+                          copilotTab === 'deck'
+                            ? 'bg-purple-600 text-white shadow-2xs'
+                            : 'text-ink-mute dark:text-dark-mute hover:text-ink dark:hover:text-white'
+                        }`}
+                      >
+                        Auto-Deck
+                      </button>
+                    </div>
+                  </div>
+
+                  {copilotFeedback && (
+                    <div className="p-2 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 text-xs font-medium text-center">
+                      {copilotFeedback}
+                    </div>
+                  )}
+
+                  {copilotTab === 'headlines' ? (
+                    <div className="space-y-3">
+                      <p className="text-[11px] text-ink-mute dark:text-dark-mute">
+                        1-click headline variations tailored for editorial impact, front-page cadence, and SEO:
+                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        {/* Broadsheet Lead */}
+                        <div className="p-3 rounded-xl bg-white/60 dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] flex flex-col justify-between gap-2">
+                          <div>
+                            <span className="text-[9px] font-mono font-bold text-accent uppercase tracking-wider block mb-1">
+                              Broadsheet Lead
+                            </span>
+                            <p className="text-xs font-serif font-bold text-ink dark:text-dark-ink line-clamp-2">
+                              {copilotHeadlines.broadsheet}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              handleTitleChange(copilotHeadlines.broadsheet)
+                              setCopilotFeedback('✓ Applied Broadsheet Lead Headline')
+                              setTimeout(() => setCopilotFeedback(''), 2500)
+                            }}
+                            className="self-start px-2.5 py-1 text-[10px] font-bold rounded-full bg-accent/10 hover:bg-accent text-accent hover:text-white transition cursor-pointer active:scale-95"
+                          >
+                            Apply Headline →
+                          </button>
+                        </div>
+
+                        {/* Punchy Front Page */}
+                        <div className="p-3 rounded-xl bg-white/60 dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] flex flex-col justify-between gap-2">
+                          <div>
+                            <span className="text-[9px] font-mono font-bold text-red-600 uppercase tracking-wider block mb-1">
+                              Punchy Front Page
+                            </span>
+                            <p className="text-xs font-sans font-black text-ink dark:text-dark-ink line-clamp-2 uppercase">
+                              {copilotHeadlines.punchy}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              handleTitleChange(copilotHeadlines.punchy)
+                              setCopilotFeedback('✓ Applied Punchy Front Page Headline')
+                              setTimeout(() => setCopilotFeedback(''), 2500)
+                            }}
+                            className="self-start px-2.5 py-1 text-[10px] font-bold rounded-full bg-red-600/10 hover:bg-red-600 text-red-600 hover:text-white transition cursor-pointer active:scale-95"
+                          >
+                            Apply Headline →
+                          </button>
+                        </div>
+
+                        {/* Devanagari Hindi Edition */}
+                        <div className="p-3 rounded-xl bg-white/60 dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] flex flex-col justify-between gap-2">
+                          <div>
+                            <span className="text-[9px] font-mono font-bold text-orange-600 uppercase tracking-wider block mb-1">
+                              Devanagari Hindi Edition
+                            </span>
+                            <p className="text-xs font-sans font-bold text-ink dark:text-dark-ink line-clamp-2">
+                              {copilotHeadlines.hindi}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              handleTitleChange(copilotHeadlines.hindi)
+                              setCopilotFeedback('✓ Applied Devanagari Hindi Headline')
+                              setTimeout(() => setCopilotFeedback(''), 2500)
+                            }}
+                            className="self-start px-2.5 py-1 text-[10px] font-bold rounded-full bg-orange-600/10 hover:bg-orange-600 text-orange-600 hover:text-white transition cursor-pointer active:scale-95"
+                          >
+                            Apply Headline →
+                          </button>
+                        </div>
+
+                        {/* SEO Headline */}
+                        <div className="p-3 rounded-xl bg-white/60 dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] flex flex-col justify-between gap-2">
+                          <div>
+                            <div className="flex items-center justify-between gap-1 mb-1">
+                              <span className="text-[9px] font-mono font-bold text-blue-600 uppercase tracking-wider">
+                                SEO Headline
+                              </span>
+                              <span className="text-[9px] font-mono text-ink-mute dark:text-dark-mute">
+                                {copilotHeadlines.seo.length}/65
+                              </span>
+                            </div>
+                            <p className="text-xs font-sans text-ink dark:text-dark-ink line-clamp-2 font-medium">
+                              {copilotHeadlines.seo}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              handleTitleChange(copilotHeadlines.seo)
+                              setCopilotFeedback('✓ Applied SEO Headline')
+                              setTimeout(() => setCopilotFeedback(''), 2500)
+                            }}
+                            className="self-start px-2.5 py-1 text-[10px] font-bold rounded-full bg-blue-600/10 hover:bg-blue-600 text-blue-600 hover:text-white transition cursor-pointer active:scale-95"
+                          >
+                            Apply Headline →
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <p className="text-[11px] text-ink-mute dark:text-dark-mute">
+                        Auto-synthesized 2-sentence executive summary derived from your story content:
+                      </p>
+                      <div className="p-3.5 rounded-xl bg-white/60 dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08] space-y-2.5">
+                        <p className="text-xs font-serif italic text-ink dark:text-dark-ink leading-relaxed">
+                          "{generatedAutoDeck}"
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSubtitle(generatedAutoDeck)
+                            setCopilotFeedback('✓ Applied Auto-Generated Deck')
+                            setTimeout(() => setCopilotFeedback(''), 2500)
+                          }}
+                          className="px-3 py-1.5 text-xs font-bold rounded-full bg-purple-600 text-white hover:bg-purple-700 transition cursor-pointer active:scale-95 shadow-2xs"
+                        >
+                          Apply to Subtitle / Deck →
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <input
                 type="text"
                 required

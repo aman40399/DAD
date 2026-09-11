@@ -12,9 +12,11 @@ import {
 
 export const dynamic = 'force-dynamic'
 
-// Configure web-push with VAPID details
+// Configure web-push with VAPID details if configured
 try {
-  webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY)
+  if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
+    webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY)
+  }
 } catch (e) {
   console.error('Failed to configure web-push VAPID details:', e)
 }

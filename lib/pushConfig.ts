@@ -4,8 +4,7 @@ export const VAPID_PUBLIC_KEY =
   'BIE8TmvlBTfDVKgEbX5CCuG9KIOslcEf6ydnzJFQS2I3VAh8wqPYTUGqDlbsI6TVZSYl49DR1lycKRDQxIv6vTg'
 
 export const VAPID_PRIVATE_KEY =
-  process.env.VAPID_PRIVATE_KEY ||
-  'Pjq4_ilvpZScwH6qSuwV1w1GWTSe6aqOeooGlVj7Jkc'
+  process.env.VAPID_PRIVATE_KEY || ''
 
 export const VAPID_SUBJECT =
   process.env.VAPID_SUBJECT || 'mailto:admin@singhmonster.com'

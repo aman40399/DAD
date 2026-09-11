@@ -1,3 +1,5 @@
+import fs from 'fs'
+import path from 'path'
 import crypto from 'crypto'
 import { queryD1, executeD1, isD1Configured } from '@/lib/d1'
 import { cloudGet, cloudPut, CLOUD_KEYS } from '@/lib/backend/cloudStore'
@@ -301,6 +303,22 @@ export function classifyReferrer(rawReferrer?: string, host?: string): string {
 // 5. Resilient Local File Store, Debounced Queue & Atomic Disk Flushing
 // ---------------------------------------------------------------------------
 
+function getDataDirectory(): string {
+  const dir = path.join(process.cwd(), 'data')
+  if (!fs.existsSync(dir)) {
+    try {
+      fs.mkdirSync(dir, { recursive: true })
+    } catch {
+      // Ignored if read-only filesystem
+    }
+  }
+  return dir
+}
+
+function getAnalyticsFilePath(): string {
+  return path.join(getDataDirectory(), 'analytics.json')
+}
+
 // Global process-level memory store & state
 declare global {
   var __meridian_analytics_store__: AnalyticsEvent[] | undefined
@@ -311,12 +329,37 @@ declare global {
   var __meridian_analytics_pending_flush__: boolean | undefined
 }
 
+function writeToDiskAtomic(events: AnalyticsEvent[]): void {
+  const dir = getDataDirectory()
+  const filePath = getAnalyticsFilePath()
+  // Cap in-memory/file storage to last 15,000 events to prevent unbounded growth
+  const trimmed = events.slice(-15000)
+  const tempPath = path.join(
+    dir,
+    `.analytics.json.${process.pid}.${Date.now()}.${Math.random().toString(36).slice(2)}.tmp`
+  )
+
+  try {
+    fs.writeFileSync(tempPath, JSON.stringify(trimmed, null, 2), 'utf-8')
+    fs.renameSync(tempPath, filePath)
+    globalThis.__meridian_analytics_dirty__ = false
+    globalThis.__meridian_analytics_unwritten_count__ = 0
+  } catch (err) {
+    console.warn('⚠️ Non-fatal: Error persisting analytics to disk:', err)
+    try {
+      if (fs.existsSync(tempPath)) {
+        fs.unlinkSync(tempPath)
+      }
+    } catch {
+      // Temp cleanup error ignored
+    }
+  }
+}
+
 async function flushToCloud(events: AnalyticsEvent[]): Promise<void> {
   const trimmed = events.slice(-15000)
   try {
     await cloudPut(CLOUD_KEYS.ANALYTICS, trimmed)
-    globalThis.__meridian_analytics_dirty__ = false
-    globalThis.__meridian_analytics_unwritten_count__ = 0
   } catch (err) {
     console.warn('⚠️ Non-fatal: Error persisting analytics to cloud:', err)
   }
@@ -341,6 +384,8 @@ function executeFlushQueue(): void {
   globalThis.__meridian_analytics_is_flushing__ = true
   const store = globalThis.__meridian_analytics_store__
   if (store) {
+    // Synchronize local disk write with cloud flushing
+    writeToDiskAtomic(store)
     flushToCloud(store).finally(() => {
       globalThis.__meridian_analytics_is_flushing__ = false
       if (globalThis.__meridian_analytics_pending_flush__) {
@@ -376,6 +421,24 @@ function scheduleDiskFlush(): void {
   }
 }
 
+function loadAnalyticsFromDisk(): AnalyticsEvent[] {
+  const filePath = getAnalyticsFilePath()
+  if (fs.existsSync(filePath)) {
+    try {
+      const data = fs.readFileSync(filePath, 'utf-8')
+      if (data.trim().length > 0) {
+        const parsed = JSON.parse(data)
+        if (Array.isArray(parsed)) {
+          return parsed
+        }
+      }
+    } catch (err) {
+      console.warn('⚠️ Could not parse analytics.json, initializing real store:', err)
+    }
+  }
+  return []
+}
+
 async function loadAnalyticsFromCloud(): Promise<AnalyticsEvent[]> {
   try {
     const data = await cloudGet<AnalyticsEvent[]>(CLOUD_KEYS.ANALYTICS)
@@ -390,12 +453,17 @@ async function loadAnalyticsFromCloud(): Promise<AnalyticsEvent[]> {
 
 export function getStore(): AnalyticsEvent[] {
   if (!globalThis.__meridian_analytics_store__) {
-    globalThis.__meridian_analytics_store__ = []
-    loadAnalyticsFromCloud().then((events) => {
-      if (events && events.length > 0 && globalThis.__meridian_analytics_store__?.length === 0) {
-        globalThis.__meridian_analytics_store__ = events
-      }
-    })
+    const fromDisk = loadAnalyticsFromDisk()
+    if (fromDisk.length > 0) {
+      globalThis.__meridian_analytics_store__ = fromDisk
+    } else {
+      globalThis.__meridian_analytics_store__ = []
+      loadAnalyticsFromCloud().then((events) => {
+        if (events && events.length > 0 && globalThis.__meridian_analytics_store__?.length === 0) {
+          globalThis.__meridian_analytics_store__ = events
+        }
+      })
+    }
   }
   return globalThis.__meridian_analytics_store__
 }
@@ -413,6 +481,7 @@ export async function clearAnalyticsData(): Promise<void> {
     }
   }
   globalThis.__meridian_analytics_store__ = []
+  writeToDiskAtomic([])
   await cloudPut(CLOUD_KEYS.ANALYTICS, [])
 }
 
@@ -592,7 +661,7 @@ export async function getAnalyticsStats(
 
   // Average Reading Time Calculation from recorded durations
   const durations = events.filter(
-    (e) => typeof e.durationSeconds === 'number' && e.durationSeconds >= 5 && e.durationSeconds <= 1800
+    (e) => typeof e.durationSeconds === 'number' && e.durationSeconds >= 3 && e.durationSeconds <= 1800
   )
   const avgSeconds = durations.length > 0
     ? durations.reduce((sum, e) => sum + (e.durationSeconds || 0), 0) / durations.length
@@ -600,7 +669,7 @@ export async function getAnalyticsStats(
   const avgReadingTimeMinutes = Number((avgSeconds / 60).toFixed(1))
 
   const priorDurations = priorEvents.filter(
-    (e) => typeof e.durationSeconds === 'number' && e.durationSeconds >= 5 && e.durationSeconds <= 1800
+    (e) => typeof e.durationSeconds === 'number' && e.durationSeconds >= 3 && e.durationSeconds <= 1800
   )
   const priorAvgSeconds = priorDurations.length > 0
     ? priorDurations.reduce((sum, e) => sum + (e.durationSeconds || 0), 0) / priorDurations.length
