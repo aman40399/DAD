@@ -1,4 +1,5 @@
 import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3'
+import { refreshCloudflareToken } from '../d1'
 
 export const CLOUD_KEYS = {
   ARTICLES: 'database/articles.json',
@@ -15,11 +16,9 @@ declare global {
   var __cloud_store_cache__: Map<string, { data: any; timestamp: number }> | undefined
 }
 
-if (!globalThis.__cloud_store_cache__) {
-  globalThis.__cloud_store_cache__ = new Map()
-}
-
-const memoryCache = globalThis.__cloud_store_cache__
+const memoryCache: Map<string, { data: any; timestamp: number }> =
+  globalThis.__cloud_store_cache__ ||
+  (globalThis.__cloud_store_cache__ = new Map<string, { data: any; timestamp: number }>())
 
 function getS3Client() {
   const accountId = process.env.CLOUDFLARE_ACCOUNT_ID || ''
@@ -42,11 +41,10 @@ function getS3Client() {
 }
 
 export function isCloudConfigured(): boolean {
-  return Boolean(
-    process.env.CLOUDFLARE_ACCOUNT_ID &&
-    process.env.CLOUDFLARE_R2_ACCESS_KEY_ID &&
-    process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY
-  )
+  const accountId = process.env.CLOUDFLARE_ACCOUNT_ID
+  const hasS3 = Boolean(process.env.CLOUDFLARE_R2_ACCESS_KEY_ID && process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY)
+  const hasToken = Boolean(process.env.CLOUDFLARE_API_TOKEN || process.env.CLOUDFLARE_D1_TOKEN)
+  return Boolean(accountId && (hasS3 || hasToken))
 }
 
 export function invalidateCloudCache(key?: string): void {
@@ -68,34 +66,62 @@ export async function cloudGet<T>(key: CloudKey, ttlMs: number = 30000): Promise
   }
 
   const s3 = getS3Client()
-  if (!s3) {
-    console.warn(`[CloudStore] S3/R2 credentials not configured for cloudGet(${key})`)
-    return null
-  }
+  if (s3) {
+    try {
+      const res = await s3.client.send(
+        new GetObjectCommand({
+          Bucket: s3.bucketName,
+          Key: key,
+        })
+      )
 
-  try {
-    const res = await s3.client.send(
-      new GetObjectCommand({
-        Bucket: s3.bucketName,
-        Key: key,
-      })
-    )
-
-    const raw = await res.Body?.transformToString()
-    if (!raw) return null
-
-    const parsed = JSON.parse(raw) as T
-    memoryCache.set(key, { data: parsed, timestamp: now })
-    return parsed
-  } catch (err: any) {
-    if (err.name === 'NoSuchKey' || err.Code === 'NoSuchKey' || err.$metadata?.httpStatusCode === 404) {
-      return null
+      const raw = await res.Body?.transformToString()
+      if (raw) {
+        const parsed = JSON.parse(raw) as T
+        memoryCache.set(key, { data: parsed, timestamp: now })
+        return parsed
+      }
+    } catch (err: any) {
+      if (err.name === 'NoSuchKey' || err.Code === 'NoSuchKey' || err.$metadata?.httpStatusCode === 404) {
+        return null
+      }
+      console.warn(`[CloudStore] S3 get error for "${key}", attempting REST fallback...`)
     }
-    console.error(`[CloudStore] Error fetching key "${key}":`, err)
-    // Return stale cache if available during network hiccup
-    if (cached) return cached.data as T
-    return null
   }
+
+  // REST API fallback via Cloudflare token
+  const accountId = process.env.CLOUDFLARE_ACCOUNT_ID
+  const bucketName = process.env.CLOUDFLARE_R2_BUCKET_NAME || 'singhmonster-media'
+  if (accountId && bucketName) {
+    try {
+      let token = await refreshCloudflareToken()
+      if (token) {
+        const r2Url = `https://api.cloudflare.com/client/v4/accounts/${accountId}/r2/buckets/${bucketName}/objects/${key}`
+        let res = await fetch(r2Url, {
+          headers: { Authorization: `Bearer ${token}` },
+          cache: 'no-store',
+        })
+        if (res.status === 401 || res.status === 403) {
+          token = await refreshCloudflareToken()
+          res = await fetch(r2Url, {
+            headers: { Authorization: `Bearer ${token}` },
+            cache: 'no-store',
+          })
+        }
+        if (res.status === 404) return null
+        if (res.ok) {
+          const parsed = (await res.json()) as T
+          memoryCache.set(key, { data: parsed, timestamp: now })
+          return parsed
+        }
+      }
+    } catch (err) {
+      console.error(`[CloudStore REST get error for "${key}"]:`, err)
+    }
+  }
+
+  if (cached) return cached.data as T
+  return null
 }
 
 /**
@@ -106,27 +132,59 @@ export async function cloudPut<T>(key: CloudKey, data: T): Promise<boolean> {
   // Immediate write-through cache update
   memoryCache.set(key, { data, timestamp: now })
 
+  const jsonStr = typeof data === 'string' ? data : JSON.stringify(data, null, 2)
   const s3 = getS3Client()
-  if (!s3) {
-    console.error(`[CloudStore] S3/R2 credentials missing, unable to persist cloudPut(${key})`)
-    return false
+  if (s3) {
+    try {
+      await s3.client.send(
+        new PutObjectCommand({
+          Bucket: s3.bucketName,
+          Key: key,
+          Body: jsonStr,
+          ContentType: 'application/json',
+        })
+      )
+      return true
+    } catch (err) {
+      console.warn(`[CloudStore] S3 put failed for "${key}", attempting REST fallback...`)
+    }
   }
 
-  try {
-    const jsonStr = typeof data === 'string' ? data : JSON.stringify(data, null, 2)
-    await s3.client.send(
-      new PutObjectCommand({
-        Bucket: s3.bucketName,
-        Key: key,
-        Body: jsonStr,
-        ContentType: 'application/json',
-      })
-    )
-    return true
-  } catch (err) {
-    console.error(`[CloudStore] Error writing key "${key}":`, err)
-    return false
+  // REST API fallback via Cloudflare token
+  const accountId = process.env.CLOUDFLARE_ACCOUNT_ID
+  const bucketName = process.env.CLOUDFLARE_R2_BUCKET_NAME || 'singhmonster-media'
+  if (accountId && bucketName) {
+    try {
+      let token = await refreshCloudflareToken()
+      if (token) {
+        const r2Url = `https://api.cloudflare.com/client/v4/accounts/${accountId}/r2/buckets/${bucketName}/objects/${key}`
+        let res = await fetch(r2Url, {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: jsonStr,
+        })
+        if (res.status === 401 || res.status === 403) {
+          token = await refreshCloudflareToken()
+          res = await fetch(r2Url, {
+            method: 'PUT',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: jsonStr,
+          })
+        }
+        if (res.ok) return true
+      }
+    } catch (err) {
+      console.error(`[CloudStore REST put error for "${key}"]:`, err)
+    }
   }
+
+  return false
 }
 
 /**
@@ -135,18 +193,38 @@ export async function cloudPut<T>(key: CloudKey, data: T): Promise<boolean> {
 export async function cloudDelete(key: CloudKey): Promise<boolean> {
   memoryCache.delete(key)
   const s3 = getS3Client()
-  if (!s3) return false
-
-  try {
-    await s3.client.send(
-      new DeleteObjectCommand({
-        Bucket: s3.bucketName,
-        Key: key,
-      })
-    )
-    return true
-  } catch (err) {
-    console.error(`[CloudStore] Error deleting key "${key}":`, err)
-    return false
+  if (s3) {
+    try {
+      await s3.client.send(
+        new DeleteObjectCommand({
+          Bucket: s3.bucketName,
+          Key: key,
+        })
+      )
+      return true
+    } catch (err) {
+      console.warn(`[CloudStore] S3 delete failed for "${key}", attempting REST fallback...`)
+    }
   }
+
+  // REST API fallback via Cloudflare token
+  const accountId = process.env.CLOUDFLARE_ACCOUNT_ID
+  const bucketName = process.env.CLOUDFLARE_R2_BUCKET_NAME || 'singhmonster-media'
+  if (accountId && bucketName) {
+    try {
+      let token = await refreshCloudflareToken()
+      if (token) {
+        const r2Url = `https://api.cloudflare.com/client/v4/accounts/${accountId}/r2/buckets/${bucketName}/objects/${key}`
+        let res = await fetch(r2Url, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        if (res.ok) return true
+      }
+    } catch (err) {
+      console.error(`[CloudStore REST delete error for "${key}"]:`, err)
+    }
+  }
+
+  return false
 }

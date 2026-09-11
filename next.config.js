@@ -65,6 +65,7 @@ const nextConfig = {
   // Enable experimental features for better performance
   experimental: {
     optimizePackageImports: ['@/components', '@/lib', 'lucide-react'],
+    serverComponentsExternalPackages: ['web-push'],
   },
   // Compiler options
   compiler: {
