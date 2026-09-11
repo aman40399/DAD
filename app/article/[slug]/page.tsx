@@ -370,9 +370,18 @@ export default async function ArticlePage({
             }
 
             // Sanitize scripts, active plugins, unquoted and quoted handlers, and javascript: URIs
+            // Safely preserves legitimate embedded video iframes (YouTube, Vimeo) while blocking untrusted or script iframes
             const sanitized = rawContent
               .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-              .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
+              .replace(/<iframe\b([^>]*)>([\s\S]*?)<\/iframe>/gi, (_match, attrs) => {
+                const srcMatch = attrs.match(/\bsrc=(?:["']([^"']+)["']|([^\s>]+))/i)
+                if (!srcMatch) return ''
+                const src = (srcMatch[1] || srcMatch[2] || '').trim()
+                const isTrustedVideo = /^https?:\/\/(www\.)?(youtube\.com\/embed\/|youtube-nocookie\.com\/embed\/|player\.vimeo\.com\/video\/)/i.test(src)
+                if (!isTrustedVideo) return ''
+                const cleanAttrs = attrs.replace(/\son\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '')
+                return `<iframe ${cleanAttrs} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`
+              })
               .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, '')
               .replace(/<embed\b[^>]*>/gi, '')
               .replace(/\son\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '')

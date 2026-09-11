@@ -61,7 +61,7 @@ function getCleanSpeechChunks(title: string, content: string): string[] {
 export default function ArticleAudioPlayer({ title, content, language }: ArticleAudioPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
-  const [rate, setRate] = useState<1 | 1.25 | 1.5>(1)
+  const [rate, setRate] = useState<1 | 1.25 | 1.5>(1.25)
   const [activeChunk, setActiveChunk] = useState<number>(0)
   const [totalChunks, setTotalChunks] = useState<number>(0)
 
@@ -75,7 +75,7 @@ export default function ArticleAudioPlayer({ title, content, language }: Article
   const chunkIndexRef = useRef<number>(0)
   const isPlayingRef = useRef<boolean>(false)
   const isPausedRef = useRef<boolean>(false)
-  const rateRef = useRef<number>(1)
+  const rateRef = useRef<number>(1.25)
 
   useEffect(() => {
     rateRef.current = rate
@@ -236,8 +236,8 @@ export default function ArticleAudioPlayer({ title, content, language }: Article
   }
 
   const cycleRate = () => {
-    const nextRate: Record<number, 1 | 1.25 | 1.5> = { 1: 1.25, 1.25: 1.5, 1.5: 1 }
-    const newRate = nextRate[rate]
+    const nextRate: Record<number, 1 | 1.25 | 1.5> = { 1.25: 1.5, 1.5: 1, 1: 1.25 }
+    const newRate = nextRate[rate] || 1.25
     setRate(newRate)
     rateRef.current = newRate
     if (audioRef.current) {
