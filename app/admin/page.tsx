@@ -481,13 +481,26 @@ export default function AdminArticlesPage() {
             </p>
           </div>
 
-          <Link
-            href="/admin/articles/new"
-            className="inline-flex items-center gap-2 h-9 px-4 bg-accent hover:bg-accent/90 border border-accent rounded-full text-xs font-bold uppercase tracking-wider text-white transition-all shadow-xs hover:shadow hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-          >
-            <IconPlus className="w-3.5 h-3.5" />
-            <span>Write Story</span>
-          </Link>
+          <div className="flex items-center gap-2.5">
+            <a
+              href="/api/admin/backup"
+              download
+              className="inline-flex items-center gap-1.5 h-9 px-3.5 bg-paper dark:bg-white/[0.04] hover:bg-black/5 dark:hover:bg-white/10 border border-rule dark:border-white/10 rounded-full text-xs font-semibold text-ink dark:text-dark-ink transition shadow-2xs"
+              title="Download full JSON backup of all published articles and drafts"
+            >
+              <svg className="w-3.5 h-3.5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              <span>Backup JSON</span>
+            </a>
+            <Link
+              href="/admin/articles/new"
+              className="inline-flex items-center gap-2 h-9 px-4 bg-accent hover:bg-accent/90 border border-accent rounded-full text-xs font-bold uppercase tracking-wider text-white transition-all shadow-xs hover:shadow hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+            >
+              <IconPlus className="w-3.5 h-3.5" />
+              <span>Write Story</span>
+            </Link>
+          </div>
         </div>
 
         {/* DESKTOP EXECUTIVE OVERVIEW METRIC TILES */}
