@@ -5,7 +5,7 @@ import Footer from '@/components/meridian/Footer'
 import Link from 'next/link'
 import { getAllArticles } from '@/lib/articles'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 60
 
 const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || 'https://www.singh.monster').replace(/\/$/, '')
 

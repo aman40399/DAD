@@ -10,8 +10,7 @@ import { mapArticleToPostCard } from '@/lib/meridianData'
 import { Article } from '@/types'
 import { cloudGet, CLOUD_KEYS } from '@/lib/backend/cloudStore'
 
-export const revalidate = 0
-export const dynamic = 'force-dynamic'
+export const revalidate = 60
 
 export default async function HomePage() {
   let homepageArticles: Article[] = []

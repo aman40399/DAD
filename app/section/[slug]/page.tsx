@@ -9,7 +9,7 @@ import StockTicker from '@/components/meridian/StockTicker'
 import { getArticlesByCategory, getRecentArticles } from '@/lib/articles'
 import { mapArticleToPostCard } from '@/lib/meridianData'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 60
 
 const KNOWN_SECTIONS: Record<string, string> = {
   world: 'World',
