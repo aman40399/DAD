@@ -371,7 +371,7 @@ export default async function ArticlePage({
 
             // Sanitize scripts, active plugins, unquoted and quoted handlers, and javascript: URIs
             // Safely preserves legitimate embedded video iframes (YouTube, Vimeo) while blocking untrusted or script iframes
-            const sanitized = rawContent
+            let sanitized = rawContent
               .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
               .replace(/<iframe\b([^>]*)>([\s\S]*?)<\/iframe>/gi, (_match, attrs) => {
                 const srcMatch = attrs.match(/\bsrc=(?:["']([^"']+)["']|([^\s>]+))/i)
@@ -387,6 +387,17 @@ export default async function ArticlePage({
               .replace(/\son\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '')
               .replace(/\bhref\s*=\s*(?:"\s*javascript:[^"]*"|'\s*javascript:[^']*'|\s*javascript:[^\s>]+)/gi, 'href="#"')
               .replace(/\bsrc\s*=\s*(?:"\s*javascript:[^"]*"|'\s*javascript:[^']*'|\s*javascript:[^\s>]+)/gi, 'src=""')
+
+            // Defensive deduplication: if heroImage is already rendered at the top of the article,
+            // strip any trailing figure(s) from the end of the body content that duplicate the heroImage
+            if (heroImage) {
+              const escapedHero = heroImage.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+              const trailingHeroPattern = new RegExp(
+                `(?:\\s*<figure[^>]*>[\\s\\S]*?<img[^>]*${escapedHero}[^>]*>[\\s\\S]*?<\\/figure>(?:\\s*<p><br><\\/p>)*\\s*)+$`,
+                'gi'
+              )
+              sanitized = sanitized.replace(trailingHeroPattern, '').trim()
+            }
 
             const isHtml = /<[a-z][\s\S]*>/i.test(sanitized)
 

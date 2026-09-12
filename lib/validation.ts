@@ -161,7 +161,10 @@ export function validateCreateArticle(payload: any): ValidationResult<ValidatedA
     tags = payload.tags.split(',').map((t: string) => t.trim()).filter(Boolean)
   }
 
-  const language = typeof payload.language === 'string' && payload.language ? payload.language : 'english'
+  let language = typeof payload.language === 'string' && payload.language ? payload.language : undefined
+  if (!language) {
+    language = /[\u0900-\u097F]/.test((title || '') + ' ' + (content || '')) ? 'hindi' : 'english'
+  }
   const slug = typeof payload.slug === 'string' ? payload.slug.trim() : undefined
 
   // Published at
@@ -331,6 +334,11 @@ export function validateUpdateArticle(payload: any): ValidationResult<ValidatedA
 
   if (payload.language !== undefined) {
     data.language = String(payload.language)
+  } else if (payload.title !== undefined || payload.content !== undefined) {
+    const textToCheck = `${payload.title || ''} ${payload.content || ''}`
+    if (/[\u0900-\u097F]/.test(textToCheck)) {
+      data.language = 'hindi'
+    }
   }
 
   if (payload.slug !== undefined) {

@@ -82,18 +82,29 @@ export default function ArticleEditorForm({
   // Imperative insert ref to place media at active cursor in WordEditor
   const insertHtmlRef = useRef<((html: string) => void) | null>(null)
 
-  // Auto-generate slug when title changes (if not editing or slug is empty)
+  // Track if user explicitly edited the slug manually
+  const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(Boolean(isEditing && initialArticle?.slug))
+
+  // Auto-generate slug live as user types the headline (unless manually customized)
   const handleTitleChange = (newTitle: string) => {
     setTitle(newTitle)
-    if (!isEditing || !slug) {
+    if (!isSlugManuallyEdited) {
       setSlug(generateSlug(newTitle, { maxLength: 70 }))
     }
   }
 
-  // Interactive manual slug generation / refresh from current title
+  // Handle explicit editing of slug
+  const handleSlugChange = (newSlug: string) => {
+    setSlug(newSlug)
+    setIsSlugManuallyEdited(true)
+  }
+
+  // Interactive manual slug generation / refresh from current title (resets manual lock)
   const handleRegenerateSlug = () => {
     if (title.trim()) {
-      setSlug(generateSlug(title, { maxLength: 70 }))
+      const generated = generateSlug(title, { maxLength: 70 })
+      setSlug(generated)
+      setIsSlugManuallyEdited(false)
     }
   }
 
@@ -154,6 +165,11 @@ export default function ArticleEditorForm({
   }
 
   const insertImageIntoContent = (url: string, caption?: string) => {
+    if (content.includes(url)) {
+      setError('Notice: This image is already inserted into the story body.')
+      return
+    }
+
     const captionHtml = caption
       ? `<figcaption class="text-xs font-sans text-ink-mute dark:text-dark-mute mt-2 italic text-center">${caption}</figcaption>`
       : ''
@@ -179,21 +195,38 @@ export default function ArticleEditorForm({
     setError('')
 
     const selectedImgObj = images.find((i) => i.url === selectedMainImageUrl)
+    const primaryImg = selectedMainImageUrl || (images[0]?.url ?? '')
+
+    // Deduplicate trailing hero image figures from content if present
+    let cleanContent = content.trim()
+    if (primaryImg) {
+      const escapedImg = primaryImg.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      const trailingHeroFigRegex = new RegExp(
+        `(?:\\s*<figure[^>]*>[\\s\\S]*?<img[^>]*${escapedImg}[^>]*>[\\s\\S]*?<\\/figure>(?:\\s*<p><br><\\/p>)*\\s*)+$`,
+        'gi'
+      )
+      cleanContent = cleanContent.replace(trailingHeroFigRegex, '').trim()
+    }
+
+    // Auto-detect Hindi if Devanagari text is present
+    const isDevanagari = /[\u0900-\u097F]/.test(title + ' ' + cleanContent)
+    const articleLanguage = isDevanagari ? 'hindi' : 'english'
 
     const payload = {
       title: title.trim(),
       slug: slug.trim() || undefined,
       subtitle: subtitle.trim(),
       excerpt: subtitle.trim(),
-      content: content.trim(),
+      content: cleanContent,
       category,
       author: author.trim(),
       tags: tags.split(',').map((t) => t.trim()).filter(Boolean),
       status: statusToSave,
-      image_url: selectedMainImageUrl || (images[0]?.url ?? ''),
+      image_url: primaryImg,
       image_caption: selectedImgObj?.caption || '',
       is_breaking: isBreaking,
       homepage_position: slotPosition ? parseInt(slotPosition, 10) : null,
+      language: articleLanguage,
     }
 
     try {
@@ -381,11 +414,18 @@ export default function ArticleEditorForm({
               mobileTab === 'write' ? 'block' : 'hidden'
             } md:block lg:col-span-8 backdrop-blur-xl bg-white/70 dark:bg-[#1c1c1e]/75 border border-black/[0.06] dark:border-white/[0.08] rounded-3xl p-5 sm:p-7 lg:p-8 space-y-4 sm:space-y-6 shadow-[0_4px_24px_rgba(0,0,0,0.03)]`}
           >
-            {/* Headline */}
-            <div className="space-y-2">
-              <label className="block text-[11px] font-bold uppercase tracking-wider text-ink-mute dark:text-dark-mute">
-                Headline *
-              </label>
+            {/* Headline & Live URL Slug */}
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between">
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-ink-mute dark:text-dark-mute">
+                  Headline *
+                </label>
+                {title.length > 0 && (
+                  <span className="text-[10px] font-mono text-ink-mute dark:text-dark-mute">
+                    {title.length} characters
+                  </span>
+                )}
+              </div>
 
               <input
                 type="text"
@@ -395,6 +435,41 @@ export default function ArticleEditorForm({
                 placeholder="Story headline"
                 className="w-full text-xl sm:text-2xl lg:text-3xl font-serif font-black px-4 py-3 bg-black/[0.02] dark:bg-white/[0.04] border border-black/[0.08] dark:border-white/10 text-ink dark:text-dark-ink focus:outline-none focus:ring-2 focus:ring-[#0071e3]/20 focus:border-[#0071e3] rounded-2xl placeholder:text-ink-mute/40 transition tracking-tight"
               />
+
+              {/* LIVE URL SLUG BAR DIRECTLY UNDER HEADLINE */}
+              <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 sm:p-3 bg-black/[0.02] dark:bg-white/[0.03] border border-black/[0.08] dark:border-white/10 rounded-2xl">
+                <div className="flex items-center gap-1.5 flex-1 min-w-[220px] text-xs font-mono">
+                  <span className="shrink-0 text-ink-mute/70 dark:text-dark-mute/70 select-none text-[11px] sm:text-xs">
+                    singh.monster/article/
+                  </span>
+                  <input
+                    type="text"
+                    value={slug}
+                    onChange={(e) => handleSlugChange(e.target.value)}
+                    placeholder="story-url-slug"
+                    className="flex-1 min-w-0 bg-transparent text-[#0071e3] dark:text-[#2997ff] font-mono text-[11px] sm:text-xs font-semibold focus:outline-none placeholder:text-ink-mute/40"
+                  />
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  {!isSlugManuallyEdited && slug.trim().length > 0 && (
+                    <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      Live typing sync
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleRegenerateSlug}
+                    disabled={!title.trim()}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 bg-white dark:bg-white/10 hover:bg-black/5 dark:hover:bg-white/15 border border-black/[0.08] dark:border-white/10 rounded-full text-[11px] font-semibold text-[#0071e3] transition cursor-pointer disabled:opacity-40 disabled:hover:bg-white shadow-2xs active:scale-95"
+                    title="Auto-generate URL slug from headline (supports Hindi transliteration)"
+                  >
+                    <IconRefresh className="w-3.5 h-3.5" />
+                    <span>Auto-generate</span>
+                  </button>
+                </div>
+              </div>
             </div>
 
             {/* Subtitle / Deck */}
@@ -450,6 +525,17 @@ export default function ArticleEditorForm({
                     {images.length} asset{images.length > 1 ? 's' : ''}
                   </span>
                 )}
+              </div>
+
+              {/* Automatic Hero Notice */}
+              <div className="p-3 rounded-2xl bg-[#0071e3]/[0.06] dark:bg-[#0071e3]/10 border border-[#0071e3]/15 text-[11px] text-ink-mute dark:text-dark-mute leading-relaxed space-y-1">
+                <div className="flex items-center gap-1.5 font-semibold text-ink dark:text-dark-ink">
+                  <span className="w-2 h-2 rounded-full bg-[#0071e3]" />
+                  <span>Featured Hero Banner</span>
+                </div>
+                <p>
+                  The Primary Image selected below is automatically displayed at the top of the published story. You do <strong className="text-ink dark:text-dark-ink">not</strong> need to manually insert it into the story text.
+                </p>
               </div>
 
               {/* Direct Media Upload Button */}
@@ -533,20 +619,39 @@ export default function ArticleEditorForm({
                           </div>
 
                           <div className="flex items-center justify-between pt-1.5 border-t border-black/[0.05] dark:border-white/10 text-[11px]">
-                            <button
-                              type="button"
-                              onClick={() => insertImageIntoContent(img.url, img.caption)}
-                              className="text-[#0071e3] hover:underline font-medium cursor-pointer"
-                            >
-                              Insert in story
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveImage(img.url)}
-                              className="text-red-600 hover:underline cursor-pointer font-medium"
-                            >
-                              Remove
-                            </button>
+                            {isMain ? (
+                              <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                                </svg>
+                                Primary Hero
+                              </span>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => setSelectedMainImageUrl(img.url)}
+                                className="text-[#0071e3] hover:underline font-semibold cursor-pointer text-[11px]"
+                              >
+                                Set as Primary
+                              </button>
+                            )}
+                            <div className="flex items-center gap-2.5">
+                              <button
+                                type="button"
+                                onClick={() => insertImageIntoContent(img.url, img.caption)}
+                                className="text-ink-mute hover:text-[#0071e3] hover:underline font-medium cursor-pointer"
+                                title="Insert copy as an inline figure inside body paragraphs"
+                              >
+                                Insert in body
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveImage(img.url)}
+                                className="text-red-600 hover:underline cursor-pointer font-medium"
+                              >
+                                Remove
+                              </button>
+                            </div>
                           </div>
                         </div>
                       )
@@ -627,7 +732,7 @@ export default function ArticleEditorForm({
                   <input
                     type="text"
                     value={slug}
-                    onChange={(e) => setSlug(e.target.value)}
+                    onChange={(e) => handleSlugChange(e.target.value)}
                     placeholder="story-url-slug"
                     className="w-full bg-transparent text-ink dark:text-dark-ink focus:outline-none placeholder:text-ink-mute/40 font-mono text-xs"
                   />
