@@ -107,7 +107,7 @@ export const metadata: Metadata = {
       : {}),
     ...(process.env.YANDEX_VERIFICATION ? { yandex: process.env.YANDEX_VERIFICATION } : {}),
     other: {
-      ...(process.env.BING_SITE_VERIFICATION ? { 'msvalidate.01': process.env.BING_SITE_VERIFICATION } : {}),
+      'msvalidate.01': process.env.BING_SITE_VERIFICATION || 'c7f5399d8b314959a9041a996efefd39',
     },
   },
 }

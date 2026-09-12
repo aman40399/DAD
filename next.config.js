@@ -144,6 +144,14 @@ const nextConfig = {
       },
     ]
   },
+  async rewrites() {
+    return [
+      {
+        source: '/google:id.html',
+        destination: '/api/verify-gsc/:id',
+      },
+    ]
+  },
 }
 
 

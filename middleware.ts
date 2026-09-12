@@ -150,5 +150,7 @@ export const config = {
     '/api/editorial-config/:path*',
     '/api/media/:path*',
     '/api/notifications/broadcast',
+    '/google:id.html',
+    '/BingSiteAuth.xml',
   ],
 }
