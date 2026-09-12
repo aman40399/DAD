@@ -102,8 +102,10 @@ export const metadata: Metadata = {
     images: [`${baseUrl}/logo.png`],
   },
   verification: {
-    google: process.env.GOOGLE_SITE_VERIFICATION || 'YOUR_GOOGLE_VERIFICATION_CODE',
-    yandex: process.env.YANDEX_VERIFICATION,
+    ...(process.env.GOOGLE_SITE_VERIFICATION && process.env.GOOGLE_SITE_VERIFICATION !== 'YOUR_GOOGLE_VERIFICATION_CODE'
+      ? { google: process.env.GOOGLE_SITE_VERIFICATION }
+      : {}),
+    ...(process.env.YANDEX_VERIFICATION ? { yandex: process.env.YANDEX_VERIFICATION } : {}),
     other: {
       ...(process.env.BING_SITE_VERIFICATION ? { 'msvalidate.01': process.env.BING_SITE_VERIFICATION } : {}),
     },

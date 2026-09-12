@@ -13,6 +13,7 @@ import ArticleAudioPlayer from '@/components/meridian/ArticleAudioPlayer'
 import ArticleShareBar from '@/components/meridian/ArticleShareBar'
 
 export const dynamic = 'force-dynamic'
+export const revalidate = 60
 
 export async function generateMetadata({
   params,

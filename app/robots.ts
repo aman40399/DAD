@@ -30,7 +30,7 @@ export default function robots(): MetadataRoute.Robots {
       `${baseUrl}/sitemap.xml`,
       `${baseUrl}/sitemap-news.xml`,
     ],
-    host: baseUrl,
+    host: new URL(baseUrl).host,
   }
 }
 

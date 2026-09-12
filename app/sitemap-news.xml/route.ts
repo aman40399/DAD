@@ -30,14 +30,14 @@ export async function GET() {
       return dateB - dateA
     })
 
-    // Google News sitemaps prioritize articles from the last 48 hours to 7 days
+    // Google News sitemaps strictly require articles published within the last 48 hours.
+    // Articles older than 48 hours will trigger validation errors in Google Search Console.
     const now = Date.now()
-    const recentNews = published.filter((a) => {
+    const fortyEightHoursAgo = now - 48 * 60 * 60 * 1000
+    const targetArticles = published.filter((a) => {
       const d = new Date(a.published_at || a.created_at || '').getTime()
-      return !isNaN(d) && now - d < 7 * 24 * 60 * 60 * 1000 // Last 7 days
+      return !isNaN(d) && d >= fortyEightHoursAgo
     })
-
-    const targetArticles = recentNews.length > 0 ? recentNews : published.slice(0, 50)
 
     const xmlItems = targetArticles.map((article) => {
       const pubDate = new Date(article.published_at || article.created_at || new Date()).toISOString()

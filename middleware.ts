@@ -46,6 +46,33 @@ export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
   const method = req.method
 
+  // Google Search Console dynamic HTML file verification handler
+  if (/^\/google[a-zA-Z0-9_-]+\.html$/.test(pathname)) {
+    const filename = pathname.replace(/^\//, '')
+    return new NextResponse(`google-site-verification: ${filename}`, {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Cache-Control': 'public, max-age=86400',
+      },
+    })
+  }
+
+  // Bing Webmaster Tools XML verification handler
+  if (pathname === '/BingSiteAuth.xml') {
+    const bingCode = process.env.BING_SITE_VERIFICATION || 'c7f5399d8b314959a9041a996efefd39'
+    return new NextResponse(
+      `<?xml version="1.0"?><users><user>${bingCode}</user></users>`,
+      {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/xml; charset=utf-8',
+          'Cache-Control': 'public, max-age=86400',
+        },
+      }
+    )
+  }
+
   // 1. Skip Next.js internals, static files, and public auth/login endpoints
   if (
     pathname.startsWith('/_next') ||
@@ -55,6 +82,8 @@ export async function middleware(req: NextRequest) {
     pathname === '/robots.txt' ||
     pathname === '/sitemap.xml' ||
     pathname === '/sitemap-news.xml' ||
+    pathname === '/feed.xml' ||
+    pathname === '/rss.xml' ||
     pathname === '/admin/login'
   ) {
     return NextResponse.next()

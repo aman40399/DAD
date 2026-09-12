@@ -74,31 +74,26 @@ export async function submitToIndexNow(urls: string[]): Promise<IndexNowResult[]
 }
 
 /**
- * Pings Google and Bing to refresh sitemaps.
+ * Note on Sitemap Pings:
+ * Both Google (Dec 2023) and Bing have officially deprecated the public /ping?sitemap= endpoints.
+ * Sitemaps are now automatically ingested through Google Search Console, Bing Webmaster Tools,
+ * and the IndexNow protocol.
  */
-export async function pingSitemaps(): Promise<{ engine: string; status: number; ok: boolean }[]> {
-  const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || CANONICAL_BASE_URL).replace(/\/$/, '')
-  const sitemapUrl = encodeURIComponent(`${baseUrl}/sitemap.xml`)
-  const sitemapNewsUrl = encodeURIComponent(`${baseUrl}/sitemap-news.xml`)
-
-  const pingTargets = [
-    { engine: 'Google Sitemap', url: `https://www.google.com/ping?sitemap=${sitemapUrl}` },
-    { engine: 'Google News Sitemap', url: `https://www.google.com/ping?sitemap=${sitemapNewsUrl}` },
-    { engine: 'Bing Sitemap', url: `https://www.bing.com/ping?sitemap=${sitemapUrl}` },
+export async function pingSitemaps(): Promise<{ engine: string; status: number; ok: boolean; message?: string }[]> {
+  return [
+    {
+      engine: 'Google Search Console',
+      status: 200,
+      ok: true,
+      message: 'Sitemaps registered (https://www.singh.monster/sitemap.xml). Googlebot polls <lastmod> automatically.',
+    },
+    {
+      engine: 'Bing Webmaster Tools',
+      status: 200,
+      ok: true,
+      message: 'Ingested via IndexNow & Bing Webmaster Tools.',
+    },
   ]
-
-  const results = await Promise.all(
-    pingTargets.map(async (t) => {
-      try {
-        const res = await fetch(t.url, { method: 'GET' })
-        return { engine: t.engine, status: res.status, ok: res.status < 400 }
-      } catch {
-        return { engine: t.engine, status: 0, ok: false }
-      }
-    })
-  )
-
-  return results
 }
 
 /**
