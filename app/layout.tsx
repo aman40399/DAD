@@ -3,6 +3,7 @@ import { Source_Serif_4, Inter, JetBrains_Mono } from 'next/font/google'
 import AnalyticsTracker from '@/components/meridian/AnalyticsTracker'
 import NotificationPrompt from '@/components/meridian/NotificationPrompt'
 import MobileBottomNav from '@/components/meridian/MobileBottomNav'
+import Script from 'next/script'
 import './globals.css'
 
 const sourceSerif = Source_Serif_4({
@@ -220,12 +221,13 @@ export default function RootLayout({
           }}
         />
         {/* Google Publisher Center / Reader Revenue Manager (Subscribe with Google) */}
-        <script
-          async
-          type="application/javascript"
+        <Script
+          strategy="afterInteractive"
           src="https://news.google.com/swg/js/v1/swg-basic.js"
         />
-        <script
+        <Script
+          id="google-swg-init"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               (self.SWG_BASIC = self.SWG_BASIC || []).push( function(basicSubscriptions) {
