@@ -220,27 +220,7 @@ export default function RootLayout({
             `,
           }}
         />
-        {/* Google Publisher Center / Reader Revenue Manager (Subscribe with Google) */}
-        <Script
-          strategy="afterInteractive"
-          src="https://news.google.com/swg/js/v1/swg-basic.js"
-        />
-        <Script
-          id="google-swg-init"
-          strategy="afterInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              (self.SWG_BASIC = self.SWG_BASIC || []).push( function(basicSubscriptions) {
-                basicSubscriptions.init({
-                  type: "NewsArticle",
-                  isPartOfType: ["Product"],
-                  isPartOfProductId: "CAowyeLHDA:openaccess",
-                  clientOptions: { theme: "light", lang: "en-GB" },
-                });
-              });
-            `,
-          }}
-        />
+
       </head>
       <body
         suppressHydrationWarning
