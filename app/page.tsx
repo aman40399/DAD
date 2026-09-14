@@ -149,7 +149,7 @@ export default async function HomePage() {
   const indiaArticles = getBeatArticles(/india|national|delhi|bharat/i)
   const envArticles = getBeatArticles(/environment|climate|planet|earth|weather|wildfire/i)
 
-  const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000').replace(/\/$/, '')
+  const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || 'https://www.singh.monster').replace(/\/$/, '')
 
   return (
     <div className="min-h-screen bg-paper dark:bg-dark-paper text-ink dark:text-dark-ink transition-colors duration-200">

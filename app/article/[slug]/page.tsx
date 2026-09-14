@@ -33,7 +33,7 @@ export async function generateMetadata({
     return { title: 'Story Not Found — Singh Monster' }
   }
 
-  const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000').replace(/\/$/, '')
+  const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || 'https://www.singh.monster').replace(/\/$/, '')
   const pageUrl = `${baseUrl}/article/${article.slug}`
   const heroImage = article.image_url || article.imageUrl || `${baseUrl}/authr.png`
   const rawPub = article.published_at || article.created_at || (article as any).publishedAt || (article as any).createdAt
@@ -148,7 +148,7 @@ export default async function ArticlePage({
   const heroImage = article.image_url || article.imageUrl
   const heroCaption = article.image_caption || article.imageCaption
 
-  const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000').replace(/\/$/, '')
+  const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || 'https://www.singh.monster').replace(/\/$/, '')
   const pageUrl = `${baseUrl}/article/${article.slug}`
   const rawPub = article.published_at || article.created_at || (article as any).publishedAt || (article as any).createdAt
   const rawMod = article.updated_at || article.updatedAt || rawPub

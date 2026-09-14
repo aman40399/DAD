@@ -7,13 +7,20 @@ const SECTIONS = [
   'world',
   'india',
   'politics',
+  'economy',
   'business',
   'technology',
   'tech',
-  'sports',
-  'opinion',
-  'economy',
+  'environment',
+  'health',
   'science',
+  'opinion',
+  'us',
+  'sports',
+  'arts',
+  'culture',
+  'lifestyle',
+  'video',
 ]
 
 const TRUST_PAGES = [
