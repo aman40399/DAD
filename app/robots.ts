@@ -28,6 +28,7 @@ export default function robots(): MetadataRoute.Robots {
     ],
     sitemap: [
       `${baseUrl}/sitemap.xml`,
+      `${baseUrl}/sitemap_index.xml`,
       `${baseUrl}/sitemap-news.xml`,
     ],
     host: new URL(baseUrl).host,

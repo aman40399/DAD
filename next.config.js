@@ -150,6 +150,10 @@ const nextConfig = {
         source: '/google:id.html',
         destination: '/api/verify-gsc/:id',
       },
+      {
+        source: '/sitemap_index.xml',
+        destination: '/sitemap.xml',
+      },
     ]
   },
 }
