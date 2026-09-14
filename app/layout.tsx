@@ -109,6 +109,7 @@ export const metadata: Metadata = {
     ...(process.env.YANDEX_VERIFICATION ? { yandex: process.env.YANDEX_VERIFICATION } : {}),
     other: {
       'msvalidate.01': process.env.BING_SITE_VERIFICATION || 'c7f5399d8b314959a9041a996efefd39',
+      'google-adsense-account': 'ca-pub-7763678114241724',
     },
   },
 }
@@ -220,7 +221,8 @@ export default function RootLayout({
             `,
           }}
         />
-        {/* Google AdSense */}
+        {/* Google AdSense Site Verification & Ad Script */}
+        <meta name="google-adsense-account" content="ca-pub-7763678114241724" />
         <script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7763678114241724"

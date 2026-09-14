@@ -196,8 +196,8 @@ export default function PrivacyPage() {
               <p className="font-bold text-ink dark:text-dark-ink mb-2">DESIGNATED GRIEVANCE OFFICER:</p>
               <p>Name: Dhananjay Singh</p>
               <p>Title: Publisher & Grievance Officer</p>
-              <p>Email: <a href="mailto:legal@singhmonster.com" className="text-accent underline">legal@singhmonster.com</a></p>
-              <p>Direct Editorial Inquiries: <a href="mailto:editorial@singhmonster.com" className="text-accent underline">editorial@singhmonster.com</a></p>
+              <p>Email: <a href="mailto:grievance@singh.monster" className="text-accent underline">grievance@singh.monster</a></p>
+              <p>Direct Editorial Inquiries: <a href="mailto:contact@singh.monster" className="text-accent underline">contact@singh.monster</a></p>
               <p className="mt-2 text-ink-mute dark:text-dark-mute">
                 Format Subject: [LEGAL GRIEVANCE / NOTICE / CORRECTION REQUEST]
               </p>
@@ -227,12 +227,12 @@ export default function PrivacyPage() {
           {/* Section 8 */}
           <section className="pb-4">
             <h3 className="font-serif font-bold text-xl sm:text-2xl text-ink dark:text-dark-ink mb-3">
-              8. Privacy, Cookies, LocalStorage & Advertising Disclosures
+              8. Privacy, Cookies, LocalStorage & Google AdSense Policy Disclosures
             </h3>
             <p className="mb-3">
-              Singh Monster respects your privacy and operates on minimal data collection principles:
+              Singh Monster respects your privacy and adheres strictly to Google AdSense program policies and international privacy standards:
             </p>
-            <ul className="list-disc list-inside space-y-2 pl-2 text-ink/80 dark:text-dark-ink/80 text-sm">
+            <ul className="list-disc list-inside space-y-3 pl-2 text-ink/80 dark:text-dark-ink/80 text-sm">
               <li>
                 <strong className="font-sans text-ink dark:text-dark-ink">Browser LocalStorage:</strong> We store your
                 theme selection (<code className="font-mono text-xs">dark</code> / <code className="font-mono text-xs">light</code>)
@@ -246,10 +246,46 @@ export default function PrivacyPage() {
                 or shared.
               </li>
               <li>
-                <strong className="font-sans text-ink dark:text-dark-ink">Advertising & Google AdSense:</strong> The
-                website reserves slots for third-party advertisements (such as Google AdSense). Third-party vendors use
-                cookies to serve ads based on prior visits to this or other websites. Users may opt out of personalized
-                advertising by visiting Google&apos;s Ads Settings (www.aboutads.info).
+                <strong className="font-sans text-ink dark:text-dark-ink">Google AdSense & Third-Party Advertising Cookies:</strong>
+                <div className="mt-1 pl-4 space-y-2">
+                  <p>
+                    Third-party vendors, including Google, use cookies to serve ads based on a user&apos;s prior visits to this website or other websites across the Internet.
+                  </p>
+                  <p>
+                    Google&apos;s use of advertising cookies (such as the DoubleClick cookie) enables it and its partners to serve ads to our visitors based on their visit to Singh Monster and/or other sites on the Internet.
+                  </p>
+                  <p>
+                    Users may opt out of personalized advertising at any time by visiting{' '}
+                    <a
+                      href="https://www.google.com/settings/ads"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-accent underline hover:opacity-80"
+                    >
+                      Google Ads Settings
+                    </a>.
+                  </p>
+                  <p>
+                    Alternatively, users can opt out of a third-party vendor&apos;s use of cookies for personalized advertising by visiting{' '}
+                    <a
+                      href="https://www.aboutads.info/choices/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-accent underline hover:opacity-80"
+                    >
+                      www.aboutads.info
+                    </a>{' '}
+                    or the{' '}
+                    <a
+                      href="https://optout.networkadvertising.org/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-accent underline hover:opacity-80"
+                    >
+                      Network Advertising Initiative (NAI) Consumer Opt-Out
+                    </a>.
+                  </p>
+                </div>
               </li>
             </ul>
           </section>
