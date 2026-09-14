@@ -93,11 +93,34 @@ export default async function AboutPage() {
     },
   }
 
+  const breadcrumbsSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    'itemListElement': [
+      {
+        '@type': 'ListItem',
+        'position': 1,
+        'name': 'Singh Monster',
+        'item': baseUrl,
+      },
+      {
+        '@type': 'ListItem',
+        'position': 2,
+        'name': 'About Us',
+        'item': `${baseUrl}/about`,
+      },
+    ],
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-paper dark:bg-dark-paper text-ink dark:text-dark-ink transition-colors">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdAbout) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsSchema) }}
       />
       <Masthead />
 

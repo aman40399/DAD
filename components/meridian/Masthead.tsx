@@ -21,7 +21,7 @@ export default function Masthead({
   return (
     <>
       {/* 1. Mobile Apple-Style App Bar */}
-      <header className="md:hidden sticky top-0 z-40 bg-paper dark:bg-[#0c0c0e] border-b border-rule/70 dark:border-white/10 px-3.5 h-[60px] flex items-center justify-between select-none shadow-xs">
+      <header data-nosnippet className="md:hidden sticky top-0 z-40 bg-paper dark:bg-[#0c0c0e] border-b border-rule/70 dark:border-white/10 px-3.5 h-[60px] flex items-center justify-between select-none shadow-xs">
         <Link href="/" prefetch={true} className="flex items-center gap-2.5 no-underline">
           <img
             src="/logo.png"
@@ -73,7 +73,7 @@ export default function Masthead({
       {/* 2. Desktop Broadsheet Masthead */}
       <header className="hidden md:block w-full bg-paper dark:bg-dark-paper transition-colors select-none" role="banner">
         {/* Top Utility Bar */}
-        <div className="max-w-[1360px] mx-auto px-4 sm:px-6">
+        <div data-nosnippet className="max-w-[1360px] mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between py-2.5 font-sans text-[11px] text-ink-mute dark:text-dark-mute border-b border-rule dark:border-dark-rule">
             {/* Left: Hamburger + Date */}
             <div className="flex items-center gap-2.5 sm:gap-4">
@@ -152,8 +152,9 @@ export default function Masthead({
           </div>
 
           {/* Double Rule & Category Navigation */}
-          <div className="border-t-2 border-b border-ink dark:border-dark-ink py-2.5 my-1">
+          <div data-nosnippet className="border-t-2 border-b border-ink dark:border-dark-ink py-2.5 my-1">
             <nav
+              data-nosnippet
               className="flex items-center justify-center gap-5 sm:gap-7 md:gap-8 overflow-x-auto text-[11.5px] sm:text-[12.5px] font-sans font-semibold tracking-wider uppercase whitespace-nowrap scrollbar-none"
               aria-label="Sections"
             >

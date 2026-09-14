@@ -9,9 +9,34 @@ export const metadata: Metadata = {
     'Legal disclosures, personal blog disclaimers, safe harbor protections under Section 79 IT Act, fair dealing, and grievance redressal for Singh Monster.',
 }
 
+const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || 'https://www.singh.monster').replace(/\/$/, '')
+
 export default function PrivacyPage() {
+  const breadcrumbsSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    'itemListElement': [
+      {
+        '@type': 'ListItem',
+        'position': 1,
+        'name': 'Singh Monster',
+        'item': baseUrl,
+      },
+      {
+        '@type': 'ListItem',
+        'position': 2,
+        'name': 'Privacy Policy',
+        'item': `${baseUrl}/privacy`,
+      },
+    ],
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-paper dark:bg-dark-paper text-ink dark:text-dark-ink transition-colors">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsSchema) }}
+      />
       <Masthead />
 
       <main className="flex-1 max-w-[960px] w-full mx-auto px-4 sm:px-6 py-10 sm:py-14">

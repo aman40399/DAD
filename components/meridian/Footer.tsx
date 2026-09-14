@@ -12,7 +12,7 @@ export default function Footer({ brandName = 'Singh Monster' }: FooterProps) {
   }
 
   return (
-    <footer className="w-full bg-paper-subtle dark:bg-dark-subtle border-t-2 border-ink dark:border-dark-ink mt-12 pt-12 pb-24 md:pb-12 font-sans transition-colors select-none">
+    <footer data-nosnippet className="w-full bg-paper-subtle dark:bg-dark-subtle border-t-2 border-ink dark:border-dark-ink mt-12 pt-12 pb-24 md:pb-12 font-sans transition-colors select-none">
       <div className="max-w-[1360px] mx-auto px-4 sm:px-6">
         {/* Top Footer: Brand & Back to Top */}
         <div className="flex flex-col sm:flex-row items-center justify-between pb-8 border-b border-rule dark:border-dark-rule gap-4">

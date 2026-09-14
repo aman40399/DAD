@@ -85,6 +85,7 @@ export default function StockTicker() {
 
   return (
     <section
+      data-nosnippet
       className="w-full bg-[#ebe7de] dark:bg-[#0a0a09] text-ink/90 dark:text-white/90 border-b border-rule dark:border-white/10 hidden md:flex items-stretch select-none text-[11px] font-sans z-30 transition-colors duration-200"
       aria-label="Live Indian Stock Market Watch"
     >

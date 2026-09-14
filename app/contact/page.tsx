@@ -51,11 +51,34 @@ export default function ContactPage() {
     },
   }
 
+  const breadcrumbsSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    'itemListElement': [
+      {
+        '@type': 'ListItem',
+        'position': 1,
+        'name': 'Singh Monster',
+        'item': baseUrl,
+      },
+      {
+        '@type': 'ListItem',
+        'position': 2,
+        'name': 'Contact',
+        'item': `${baseUrl}/contact`,
+      },
+    ],
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-paper dark:bg-dark-paper text-ink dark:text-dark-ink transition-colors font-sans">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdContact) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsSchema) }}
       />
       <Masthead brandName="Singh Monster" tagline="Sharp reporting. Deep analysis. No agenda but the truth." />
 

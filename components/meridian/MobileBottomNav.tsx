@@ -124,6 +124,7 @@ export default function MobileBottomNav() {
 
   return (
     <nav
+      data-nosnippet
       aria-label="Mobile Bottom Navigation"
       className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-paper dark:bg-[#0c0c0e] border-t border-rule/70 dark:border-white/10 pb-[max(0.4rem,env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(0,0,0,0.08)] select-none"
     >

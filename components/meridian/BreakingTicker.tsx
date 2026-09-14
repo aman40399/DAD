@@ -51,6 +51,7 @@ export default function BreakingTicker({ items = DEFAULT_ITEMS }: BreakingTicker
 
   return (
     <section
+      data-nosnippet
       className={`breaking-ticker w-full bg-[#f5f3ec] dark:bg-[#0c0c0b] text-ink dark:text-white hidden md:flex items-stretch select-none border-b border-rule dark:border-white/10 z-40 transition-colors duration-200 ${
         isPinned ? 'sticky top-0 shadow-md' : 'relative'
       }`}

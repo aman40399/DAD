@@ -74,8 +74,15 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: '/logo.png',
-    apple: '/logo.png',
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/icon-192.png', type: 'image/png', sizes: '192x192' },
+      { url: '/icon.png', type: 'image/png', sizes: '512x512' },
+    ],
+    shortcut: '/favicon.ico',
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
   },
   openGraph: {
     type: 'website',
@@ -185,11 +192,81 @@ export default function RootLayout({
     },
   }
 
+  const siteNavigationSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    'name': 'Singh Monster Main Navigation',
+    'itemListElement': [
+      {
+        '@type': 'SiteNavigationElement',
+        'position': 1,
+        'name': 'World News',
+        'description': 'Global geopolitical developments, diplomatic summits, and breaking international headlines.',
+        'url': `${baseUrl}/section/world`,
+      },
+      {
+        '@type': 'SiteNavigationElement',
+        'position': 2,
+        'name': 'India & Domestic Affairs',
+        'description': 'National policy, Supreme Court verdicts, elections, and investigative state reporting.',
+        'url': `${baseUrl}/section/india`,
+      },
+      {
+        '@type': 'SiteNavigationElement',
+        'position': 3,
+        'name': 'Economy & Markets',
+        'description': 'Fiscal policy, RBI directives, capital markets, and corporate governance investigations.',
+        'url': `${baseUrl}/section/economy`,
+      },
+      {
+        '@type': 'SiteNavigationElement',
+        'position': 4,
+        'name': 'Technology & AI',
+        'description': 'Deep coverage of artificial intelligence, semiconductors, telecom infrastructure, and cybersecurity.',
+        'url': `${baseUrl}/section/technology`,
+      },
+      {
+        '@type': 'SiteNavigationElement',
+        'position': 5,
+        'name': 'Politics & Governance',
+        'description': 'Political strategy, cabinet decisions, legislative debates, and constitutional analysis.',
+        'url': `${baseUrl}/section/politics`,
+      },
+      {
+        '@type': 'SiteNavigationElement',
+        'position': 6,
+        'name': 'Environment & Climate',
+        'description': 'Ecological research, renewable energy, climate policy, and environmental conservation.',
+        'url': `${baseUrl}/section/environment`,
+      },
+      {
+        '@type': 'SiteNavigationElement',
+        'position': 7,
+        'name': 'About Us',
+        'description': 'The editorial mission, standards, and founding background of Singh Monster.',
+        'url': `${baseUrl}/about`,
+      },
+      {
+        '@type': 'SiteNavigationElement',
+        'position': 8,
+        'name': 'Contact Newsroom',
+        'description': 'Get in touch with the editorial desk, submit investigative tips, or contact our grievance officer.',
+        'url': `${baseUrl}/contact`,
+      },
+    ],
+  }
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
         <meta name="theme-color" content="#8a5e1f" />
+        {/* Favicon & Web App Icons */}
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+        <link rel="icon" type="image/png" sizes="512x512" href="/icon.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <link rel="manifest" href="/manifest.json" />
         <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://images.unsplash.com" />
         <link rel="preconnect" href="https://pub-f105b5c2551040e1b44a90da84ffa541.r2.dev" crossOrigin="anonymous" />
@@ -202,6 +279,10 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(siteNavigationSchema) }}
         />
         <script
           id="theme-init"

@@ -33,6 +33,25 @@ const KNOWN_SECTIONS: Record<string, string> = {
   video: 'Video Dispatches',
 }
 
+const SECTION_DESCRIPTIONS: Record<string, string> = {
+  world: 'Breaking international reporting, geopolitical analyses, diplomatic summits, and frontline global affairs curated by Singh Monster.',
+  india: 'Authoritative reporting on Indian governance, Supreme Court jurisprudence, federal politics, state elections, and public policy.',
+  economy: 'Rigorous coverage of Indian and global capital markets, macroeconomic indicators, RBI policy directives, trade, and corporate governance.',
+  business: 'Deep investigative reporting into corporate strategy, enterprise technology, mergers & acquisitions, venture finance, and fiscal balance sheets.',
+  technology: 'Frontline reporting on artificial intelligence, semiconductors, cybersecurity, 6G telecommunications infrastructure, and enterprise computing.',
+  tech: 'Frontline reporting on artificial intelligence, semiconductors, cybersecurity, 6G telecommunications infrastructure, and enterprise computing.',
+  politics: 'Sharp, non-partisan political analysis, parliamentary proceedings, legislative affairs, and democratic governance in India and worldwide.',
+  environment: 'Investigative dispatches on climate crisis resilience, ecological conservation, renewable energy transitions, and environmental policy.',
+  health: 'Public health epidemiology, medical innovations, clinical pharmacology, and healthcare policy reporting.',
+  opinion: 'Fearless editorial commentary, independent analysis, and signed columns offering diverse intellectual perspectives without institutional bias.',
+  us: 'In-depth coverage of United States federal policy, geopolitical strategy, presidential decisions, and transatlantic relations.',
+  sports: 'Analytical dispatches, tournament coverage, cricket analytics, and athletic achievements from around the globe.',
+  arts: 'Cultural commentary, literature reviews, architectural history, and broadsheet arts criticism.',
+  culture: 'Societal shifts, heritage preservation, cultural phenomena, and philosophical explorations.',
+  style: 'Design sensibilities, craftsmanship, sartorial history, and intentional living.',
+  video: 'Investigative video documentaries, field dispatches, and exclusive newsroom interviews by Singh Monster.',
+}
+
 const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || 'https://www.singh.monster').replace(/\/$/, '')
 
 export async function generateMetadata({
@@ -44,16 +63,17 @@ export async function generateMetadata({
   const rawSlug = (Array.isArray(resolvedParams?.slug) ? resolvedParams.slug[0] : resolvedParams?.slug || '').toLowerCase().trim()
   const sectionTitle = KNOWN_SECTIONS[rawSlug] || rawSlug.charAt(0).toUpperCase() + rawSlug.slice(1)
   const pageUrl = `${baseUrl}/section/${rawSlug}`
+  const description = SECTION_DESCRIPTIONS[rawSlug] || `Authoritative reporting, investigative journalism, and deep analysis in ${sectionTitle} from Singh Monster.`
 
   return {
     title: `${sectionTitle} News & Reporting — Singh Monster`,
-    description: `Comprehensive reporting, investigative journalism, and deep analysis in ${sectionTitle}.`,
+    description,
     alternates: {
       canonical: pageUrl,
     },
     openGraph: {
       title: `${sectionTitle} — Singh Monster`,
-      description: `Comprehensive reporting, investigative journalism, and deep analysis in ${sectionTitle}.`,
+      description,
       url: pageUrl,
       type: 'website',
       siteName: 'Singh Monster',
@@ -69,7 +89,7 @@ export async function generateMetadata({
     twitter: {
       card: 'summary_large_image',
       title: `${sectionTitle} — Singh Monster`,
-      description: `Comprehensive reporting, investigative journalism, and deep analysis in ${sectionTitle}.`,
+      description,
       images: [`${baseUrl}/logo.png`],
     },
     robots: {
@@ -95,6 +115,7 @@ export default async function SectionPage({
   const resolvedParams = await Promise.resolve(params)
   const rawSlug = (Array.isArray(resolvedParams?.slug) ? resolvedParams.slug[0] : resolvedParams?.slug || '').toLowerCase().trim()
   const sectionName = KNOWN_SECTIONS[rawSlug] || rawSlug.charAt(0).toUpperCase() + rawSlug.slice(1)
+  const sectionDesc = SECTION_DESCRIPTIONS[rawSlug] || `Comprehensive reporting, investigative journalism, and deep analysis in ${sectionName}.`
 
   // Fetch articles matching category
   let articles = await getArticlesByCategory(rawSlug)
@@ -151,7 +172,7 @@ export default async function SectionPage({
     '@type': 'CollectionPage',
     'name': `${sectionName} News & Reporting — Singh Monster`,
     'url': `${baseUrl}/section/${rawSlug}`,
-    'description': `Comprehensive reporting, investigative journalism, and deep analysis in ${sectionName}.`,
+    'description': sectionDesc,
     'publisher': {
       '@type': 'NewsMediaOrganization',
       'name': 'Singh Monster',
@@ -168,11 +189,40 @@ export default async function SectionPage({
     },
   }
 
+  const breadcrumbsSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    'itemListElement': [
+      {
+        '@type': 'ListItem',
+        'position': 1,
+        'name': 'Singh Monster',
+        'item': baseUrl,
+      },
+      {
+        '@type': 'ListItem',
+        'position': 2,
+        'name': 'Sections',
+        'item': `${baseUrl}/#sections`,
+      },
+      {
+        '@type': 'ListItem',
+        'position': 3,
+        'name': sectionName,
+        'item': `${baseUrl}/section/${rawSlug}`,
+      },
+    ],
+  }
+
   return (
     <div className="min-h-screen bg-paper dark:bg-dark-paper text-ink dark:text-dark-ink transition-colors duration-200 flex flex-col font-sans">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdCollection) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbsSchema) }}
       />
       <BreakingTicker items={tickerItems} />
       <StockTicker />
@@ -181,6 +231,12 @@ export default async function SectionPage({
       <main className="flex-1 max-w-[1360px] mx-auto px-4 sm:px-6 py-6 w-full">
         {/* Section Header Banner */}
         <header className="pb-5 mb-8 border-b-2 border-ink dark:border-dark-ink">
+          {/* Semantic Breadcrumbs */}
+          <nav aria-label="Breadcrumb" className="mb-2 text-xs font-mono text-ink-mute dark:text-dark-mute flex items-center gap-1.5">
+            <a href="/" className="hover:text-accent transition">Home</a>
+            <span className="opacity-40">/</span>
+            <span className="text-ink dark:text-dark-ink font-semibold">{sectionName}</span>
+          </nav>
           <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
             <div>
               <h1 className="font-serif font-black text-3xl sm:text-5xl uppercase tracking-tight text-ink dark:text-dark-ink">

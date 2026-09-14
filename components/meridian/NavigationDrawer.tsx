@@ -99,7 +99,7 @@ export default function NavigationDrawer({
   const isSearching = searchTerm.trim().length > 0
 
   return (
-    <div className="fixed inset-0 z-50 flex" role="dialog" aria-modal="true">
+    <div data-nosnippet className="fixed inset-0 z-50 flex" role="dialog" aria-modal="true">
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/65 backdrop-blur-xs transition-opacity duration-300"
