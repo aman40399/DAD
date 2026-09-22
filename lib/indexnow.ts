@@ -97,13 +97,39 @@ export async function pingSitemaps(): Promise<{ engine: string; status: number; 
 }
 
 /**
+ * Pings Google WebSub / PubSubHubbub hubs to notify Googlebot of newly published RSS items in real-time.
+ */
+export async function pingWebSubHubs(baseUrl: string): Promise<void> {
+  const feedUrl = `${baseUrl}/feed.xml`
+  const hubs = [
+    'https://pubsubhubbub.appspot.com/',
+    'https://pubsubhubbub.superfeedr.com/',
+  ]
+
+  for (const hub of hubs) {
+    try {
+      await fetch(hub, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          'hub.mode': 'publish',
+          'hub.url': feedUrl,
+        }).toString(),
+      })
+    } catch {}
+  }
+}
+
+/**
  * Asynchronous trigger to ping all engines when content is published or updated without blocking caller.
  */
 export function triggerSearchEngineSync(urls: string[]) {
+  const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || CANONICAL_BASE_URL).replace(/\/$/, '')
   // Fire and forget
   Promise.allSettled([
     submitToIndexNow(urls),
     pingSitemaps(),
+    pingWebSubHubs(baseUrl),
   ]).catch((err) => {
     console.warn('⚠️ Background search engine sync notice:', err)
   })

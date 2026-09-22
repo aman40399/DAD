@@ -74,6 +74,8 @@ export async function GET() {
     <language>en-US</language>
     <lastBuildDate>${buildDate}</lastBuildDate>
     <atom:link href="${baseUrl}/feed.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://pubsubhubbub.appspot.com/" rel="hub" />
+    <atom:link href="https://pubsubhubbub.superfeedr.com/" rel="hub" />
     <image>
       <url>${baseUrl}/logo.png</url>
       <title>Singh Monster</title>

@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
 import { getAllArticles } from '@/lib/articles'
 
-export const revalidate = 1800 // Revalidate every 30 minutes
+export const revalidate = 60 // Revalidate every 60 seconds for near real-time news indexing
 
 const SECTIONS = [
   'world',
