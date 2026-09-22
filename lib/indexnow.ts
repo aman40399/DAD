@@ -1,3 +1,5 @@
+import { submitToGoogleIndexing } from './googleIndexing'
+
 export const INDEXNOW_KEY = 'c7f5399d8b314959a9041a996efefd39'
 export const DEFAULT_HOST = 'www.singh.monster'
 export const CANONICAL_BASE_URL = 'https://www.singh.monster'
@@ -125,11 +127,18 @@ export async function pingWebSubHubs(baseUrl: string): Promise<void> {
  */
 export function triggerSearchEngineSync(urls: string[]) {
   const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || CANONICAL_BASE_URL).replace(/\/$/, '')
-  // Fire and forget
+  
+  const absoluteUrls = urls.map((u) => {
+    if (u.startsWith('http://') || u.startsWith('https://')) return u
+    return `${baseUrl}${u.startsWith('/') ? '' : '/'}${u}`
+  })
+
+  // Fire and forget across all indexing channels (IndexNow, Google Indexing API, WebSub, Sitemaps)
   Promise.allSettled([
     submitToIndexNow(urls),
     pingSitemaps(),
     pingWebSubHubs(baseUrl),
+    ...absoluteUrls.filter((u) => u.includes('/article/')).map((u) => submitToGoogleIndexing(u)),
   ]).catch((err) => {
     console.warn('⚠️ Background search engine sync notice:', err)
   })

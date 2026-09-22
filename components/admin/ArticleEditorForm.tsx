@@ -87,9 +87,11 @@ export default function ArticleEditorForm({
 
   // Auto-generate slug live as user types the headline (unless manually customized)
   const handleTitleChange = (newTitle: string) => {
-    setTitle(newTitle)
+    // Automatically strip invisible Unicode zero-width space characters (\u200B-\u200D, \uFEFF)
+    const clean = newTitle.replace(/[\u200B\u200C\u200D\uFEFF]/g, '')
+    setTitle(clean)
     if (!isSlugManuallyEdited) {
-      setSlug(generateSlug(newTitle, { maxLength: 70 }))
+      setSlug(generateSlug(clean, { maxLength: 70 }))
     }
   }
 
@@ -421,8 +423,16 @@ export default function ArticleEditorForm({
                   Headline *
                 </label>
                 {title.length > 0 && (
-                  <span className="text-[10px] font-mono text-ink-mute dark:text-dark-mute">
-                    {title.length} characters
+                  <span
+                    className={`text-[10px] font-mono px-2 py-0.5 rounded-full transition-colors ${
+                      title.length <= 65
+                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                        : title.length <= 80
+                        ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
+                        : 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20'
+                    }`}
+                  >
+                    {title.length}/60 chars {title.length <= 65 ? '• Optimal for Google' : title.length <= 80 ? '• May truncate on mobile' : '• Too long: Google will truncate'}
                   </span>
                 )}
               </div>
@@ -799,6 +809,80 @@ export default function ArticleEditorForm({
                     Send push notification to subscribers
                   </span>
                 </label>
+              </div>
+            </div>
+
+            {/* GOOGLE SERP & RAPID INDEXING RADAR */}
+            <div className="p-5 sm:p-6 backdrop-blur-xl bg-white/70 dark:bg-[#1c1c1e]/75 border border-black/[0.06] dark:border-white/[0.08] rounded-3xl space-y-4 shadow-[0_4px_24px_rgba(0,0,0,0.03)] min-w-0">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-xs tracking-wide text-ink dark:text-dark-ink flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[#34a853] animate-pulse" />
+                  Google SERP &amp; Indexing Radar
+                </h3>
+                <span className="text-[9px] font-mono uppercase tracking-wider text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full font-bold">
+                  Fast Index Active
+                </span>
+              </div>
+
+              {/* LIVE GOOGLE SERP PREVIEW BOX */}
+              <div className="p-3.5 bg-white dark:bg-[#121212] border border-black/[0.08] dark:border-white/10 rounded-2xl space-y-1.5 shadow-2xs font-sans">
+                <div className="flex items-center gap-2 text-[11px] text-[#4d5156] dark:text-[#bdc1c6] truncate">
+                  <div className="w-4 h-4 rounded-full bg-[#0071e3] text-white flex items-center justify-center text-[9px] font-bold shrink-0">
+                    S
+                  </div>
+                  <div className="truncate">
+                    <span className="font-semibold text-ink dark:text-white">Singh Monster</span>
+                    <span className="text-ink-mute dark:text-white/50 text-[10px] ml-1">
+                      https://www.singh.monster &gt; article &gt; {slug || 'story-slug'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="text-sm sm:text-base font-medium text-[#1a0dab] dark:text-[#8ab4f8] hover:underline line-clamp-2 leading-snug cursor-pointer">
+                  {title.trim() ? (title.length > 65 ? `${title.slice(0, 65)}...` : title) : 'Story Headline Here'} | Singh Monster
+                </div>
+
+                <div className="text-xs text-[#4d5156] dark:text-[#bdc1c6] line-clamp-2 leading-relaxed">
+                  {subtitle.trim() || 'Story deck and lead excerpt will be indexed by Googlebot here...'}
+                </div>
+              </div>
+
+              {/* REAL-TIME INDEXING PIPELINE STATUS */}
+              <div className="space-y-2 text-[11px] pt-1">
+                <div className="flex items-center justify-between py-1 border-b border-black/[0.04] dark:border-white/[0.06]">
+                  <span className="text-ink-mute dark:text-dark-mute flex items-center gap-1.5">
+                    <span className="text-emerald-500 font-bold">✓</span> IndexNow API
+                  </span>
+                  <span className="font-mono text-[10px] text-emerald-600 dark:text-emerald-400">Bing &amp; Yandex instant push</span>
+                </div>
+                <div className="flex items-center justify-between py-1 border-b border-black/[0.04] dark:border-white/[0.06]">
+                  <span className="text-ink-mute dark:text-dark-mute flex items-center gap-1.5">
+                    <span className="text-emerald-500 font-bold">✓</span> WebSub Hub
+                  </span>
+                  <span className="font-mono text-[10px] text-emerald-600 dark:text-emerald-400">Googlebot-News real-time</span>
+                </div>
+                <div className="flex items-center justify-between py-1 border-b border-black/[0.04] dark:border-white/[0.06]">
+                  <span className="text-ink-mute dark:text-dark-mute flex items-center gap-1.5">
+                    <span className="text-emerald-500 font-bold">✓</span> Google News Sitemap
+                  </span>
+                  <span className="font-mono text-[10px] text-[#0071e3]">/sitemap-news.xml</span>
+                </div>
+                <div className="flex items-center justify-between py-1">
+                  <span className="text-ink-mute dark:text-dark-mute flex items-center gap-1.5">
+                    <span className="text-emerald-500 font-bold">✓</span> NewsArticle Schema
+                  </span>
+                  <span className="font-mono text-[10px] text-emerald-600 dark:text-emerald-400">Top Stories &amp; Speakable</span>
+                </div>
+              </div>
+
+              {/* QUICK RANKING STRATEGY TIP */}
+              <div className="p-2.5 bg-[#0071e3]/5 dark:bg-[#0071e3]/10 border border-[#0071e3]/20 rounded-xl text-[10px] text-ink/80 dark:text-white/80 space-y-1">
+                <div className="font-semibold text-[#0071e3] flex items-center gap-1">
+                  💡 High-Rank Strategy
+                </div>
+                <p className="leading-relaxed">
+                  To rank on top within hours, place your main search keyword (brand/price/topic) within the <strong>first 5 words</strong> of the headline and pin the article to <strong>Slot 1 or Slot 2</strong>.
+                </p>
               </div>
             </div>
           </div>
