@@ -43,8 +43,10 @@ export async function generateMetadata({
   const description = article.excerpt || article.subtitle || article.content.replace(/<[^>]*>/g, '').slice(0, 160)
   const tags = article.tags && article.tags.length > 0 ? article.tags : [article.category, 'India', 'World News', 'Singh Monster']
 
+  const cleanTitle = (article.title || '').replace(/^[\u200B\u200C\u200D\uFEFF\s]+/, '').replace(/[\u200B\u200C\u200D\uFEFF\s]+$/, '')
+
   return {
-    title: `${article.title} | Singh Monster`,
+    title: cleanTitle,
     description,
     keywords: [...tags, 'Singh Monster', 'Dhananjay Singh', article.category, 'Breaking News', 'Investigative Journalism'],
     authors: [{ name: article.author || 'Dhananjay Singh', url: baseUrl }],
@@ -67,7 +69,7 @@ export async function generateMetadata({
     openGraph: {
       type: 'article',
       url: pageUrl,
-      title: article.title,
+      title: cleanTitle,
       description,
       siteName: 'Singh Monster',
       publishedTime: pubDate,
@@ -80,13 +82,13 @@ export async function generateMetadata({
           url: heroImage,
           width: 1200,
           height: 630,
-          alt: article.title,
+          alt: cleanTitle,
         },
       ],
     },
     twitter: {
       card: 'summary_large_image',
-      title: article.title,
+      title: cleanTitle,
       description,
       creator: '@SinghMonster',
       site: '@SinghMonster',

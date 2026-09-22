@@ -10,7 +10,8 @@ export const isR2Configured = isCloudConfigured
 // Transform raw database row / object to standard Article type with dual compatibility
 export function transformArticle(data: any): Article {
   const id = String(data.id || (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : 'art-' + Date.now()))
-  const title = data.title || ''
+  const rawTitle = data.title || ''
+  const title = rawTitle.replace(/^[\u200B\u200C\u200D\uFEFF\s]+/, '').replace(/[\u200B\u200C\u200D\uFEFF\s]+$/, '')
   const slug = data.slug || ''
   const subtitle = data.subtitle || undefined
   const excerpt = data.excerpt || ''
