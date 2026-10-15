@@ -46,3 +46,8 @@ next-env.d.ts
 !/public/uploads/.gitkeep
 /scratch
 .env*
+
+# local tools & scripts
+focus-cockpit/
+scripts/*.mjs
+
